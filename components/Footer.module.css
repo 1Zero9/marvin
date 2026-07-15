@@ -1,0 +1,31 @@
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: 20px 16px calc(20px + env(safe-area-inset-bottom));
+  border-top: 1px solid var(--border);
+  font-size: 0.75rem;
+  color: var(--plum-300);
+}
+
+.version {
+  font-weight: 600;
+}
+
+.credit {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 700;
+  color: var(--plum-500);
+}
+
+.credit:hover {
+  color: var(--marvin-plum);
+}
+
+.logo {
+  border-radius: 50%;
+  opacity: 0.8;
+}
