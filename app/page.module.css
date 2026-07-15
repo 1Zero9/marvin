@@ -53,6 +53,81 @@
   max-width: 420px;
 }
 
+.results {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.count {
+  font-weight: 700;
+  color: var(--marvin-plum);
+}
+
+.result {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  padding: 16px;
+}
+
+.resultCover {
+  width: 56px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.resultCoverFallback {
+  width: 56px;
+  height: 80px;
+  border-radius: var(--radius-sm);
+  background: var(--marvin-peach);
+  color: var(--marvin-plum);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading), Georgia, serif;
+  font-size: 1.6rem;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+.resultInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.resultDish {
+  font-size: 1.1rem;
+}
+
+.resultMeta {
+  font-size: 0.9rem;
+  color: var(--plum-500);
+}
+
+.bookLink {
+  text-decoration: underline;
+  text-decoration-color: var(--marvin-peach);
+  text-underline-offset: 3px;
+}
+
+.resultTags {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.recipeLink {
+  color: var(--marvin-orange);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
 @media (max-width: 480px) {
   .searchForm {
     flex-direction: column;

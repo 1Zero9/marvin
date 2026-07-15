@@ -1,0 +1,65 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.header {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+}
+
+.cover {
+  width: 96px;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-card);
+  flex-shrink: 0;
+}
+
+.title {
+  font-size: 1.8rem;
+  margin-bottom: 6px;
+}
+
+.author {
+  color: var(--plum-500);
+  margin-bottom: 10px;
+}
+
+.empty {
+  text-align: center;
+  padding: 40px 24px;
+}
+
+.tableCard {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-align: left;
+  color: var(--marvin-plum);
+  padding: 8px 10px;
+  border-bottom: 2px solid var(--border);
+}
+
+.table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.ingredient {
+  font-weight: 700;
+  color: var(--marvin-plum);
+  text-transform: capitalize;
+}
+
+.page {
+  text-align: right;
+  width: 64px;
+}

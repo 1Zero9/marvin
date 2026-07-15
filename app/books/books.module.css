@@ -1,0 +1,72 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.title {
+  font-size: 2rem;
+}
+
+.empty {
+  text-align: center;
+  padding: 40px 24px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.book {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  transition: transform 0.1s ease;
+}
+
+.book:hover {
+  transform: translateY(-2px);
+}
+
+.cover {
+  width: 72px;
+  height: 104px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.coverFallback {
+  width: 72px;
+  height: 104px;
+  border-radius: var(--radius-sm);
+  background: var(--marvin-peach);
+  color: var(--marvin-plum);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading), Georgia, serif;
+  font-size: 2rem;
+  font-weight: 900;
+  flex-shrink: 0;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.bookTitle {
+  font-size: 1.05rem;
+}
+
+.author {
+  font-size: 0.9rem;
+  color: var(--plum-500);
+}
