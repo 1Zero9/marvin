@@ -2,11 +2,20 @@
 
 import { useEffect, useRef, useState } from "react";
 import {
-  BrowserMultiFormatReader,
+  MultiFormatReader,
   BarcodeFormat,
   DecodeHintType,
+  BinaryBitmap,
+  HybridBinarizer,
+  HTMLCanvasElementLuminanceSource,
 } from "@zxing/library";
 import styles from "./BarcodeScanner.module.css";
+
+function isValidIsbn(text: string): boolean {
+  return text.length === 13
+    ? text.startsWith("978") || text.startsWith("979")
+    : text.length === 10;
+}
 
 export default function BarcodeScanner({
   onDetected,
@@ -19,7 +28,6 @@ export default function BarcodeScanner({
     "starting"
   );
   const [manual, setManual] = useState("");
-  const detectedRef = useRef(false);
 
   useEffect(() => {
     const hints = new Map();
@@ -28,8 +36,57 @@ export default function BarcodeScanner({
       BarcodeFormat.EAN_8,
     ]);
     hints.set(DecodeHintType.TRY_HARDER, true);
-    const reader = new BrowserMultiFormatReader(hints, 300);
-    let cancelled = false;
+    const reader = new MultiFormatReader();
+    reader.setHints(hints);
+
+    const canvas = document.createElement("canvas");
+    let stream: MediaStream | null = null;
+    let timer: ReturnType<typeof setInterval> | null = null;
+    let detected = false;
+    let tick = 0;
+
+    function stop() {
+      if (timer) clearInterval(timer);
+      timer = null;
+      stream?.getTracks().forEach((t) => t.stop());
+      stream = null;
+    }
+
+    function tryDecode(video: HTMLVideoElement) {
+      const vw = video.videoWidth;
+      const vh = video.videoHeight;
+      if (!vw || !vh) return;
+
+      tick++;
+      const full = tick % 3 === 0;
+      const sx = full ? 0 : Math.round(vw * 0.1);
+      const sy = full ? 0 : Math.round(vh * 0.3);
+      const sw = full ? vw : Math.round(vw * 0.8);
+      const sh = full ? vh : Math.round(vh * 0.4);
+
+      canvas.width = sw;
+      canvas.height = sh;
+      const ctx = canvas.getContext("2d", { willReadFrequently: true });
+      if (!ctx) return;
+      ctx.drawImage(video, sx, sy, sw, sh, 0, 0, sw, sh);
+
+      try {
+        const source = new HTMLCanvasElementLuminanceSource(canvas);
+        const bitmap = new BinaryBitmap(new HybridBinarizer(source));
+        const result = reader.decode(bitmap);
+        const text = result.getText().replace(/[^0-9Xx]/g, "");
+        if (isValidIsbn(text) && !detected) {
+          detected = true;
+          setStatus("found");
+          stop();
+          onDetected(text);
+        }
+      } catch {
+        // no barcode in this frame — keep scanning
+      } finally {
+        reader.reset();
+      }
+    }
 
     async function start() {
       if (!navigator.mediaDevices?.getUserMedia) {
@@ -37,35 +94,31 @@ export default function BarcodeScanner({
         return;
       }
       try {
-        await reader.decodeFromConstraints(
-          {
-            audio: false,
-            video: {
-              facingMode: { ideal: "environment" },
-              width: { ideal: 1920 },
-              height: { ideal: 1080 },
-            },
+        stream = await navigator.mediaDevices.getUserMedia({
+          audio: false,
+          video: {
+            facingMode: { ideal: "environment" },
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
           },
-          videoRef.current!,
-          (result) => {
-            if (cancelled || detectedRef.current) return;
-            if (!result) return;
-            const text = result.getText().replace(/[^0-9Xx]/g, "");
-            const valid =
-              text.length === 13
-                ? text.startsWith("978") || text.startsWith("979")
-                : text.length === 10;
-            if (valid) {
-              detectedRef.current = true;
-              setStatus("found");
-              reader.reset();
-              onDetected(text);
-            }
-          }
-        );
-        if (!cancelled) setStatus("scanning");
+        });
+
+        const track = stream.getVideoTracks()[0];
+        try {
+          await track.applyConstraints({
+            advanced: [{ focusMode: "continuous" } as MediaTrackConstraintSet],
+          });
+        } catch {
+          // focusMode unsupported — fine
+        }
+
+        const video = videoRef.current;
+        if (!video) return;
+        video.srcObject = stream;
+        await video.play();
+        setStatus("scanning");
+        timer = setInterval(() => tryDecode(video), 300);
       } catch (e) {
-        if (cancelled) return;
         const err = e as DOMException;
         if (err?.name === "NotAllowedError") {
           setError(
@@ -82,10 +135,7 @@ export default function BarcodeScanner({
     }
     start();
 
-    return () => {
-      cancelled = true;
-      reader.reset();
-    };
+    return stop;
   }, [onDetected]);
 
   return (
@@ -99,7 +149,7 @@ export default function BarcodeScanner({
               ? "Starting camera…"
               : status === "found"
                 ? "Barcode found!"
-                : "Hold the barcode inside the frame"}
+                : "Fill the frame with the barcode — about 15cm away"}
           </span>
         </div>
       )}
