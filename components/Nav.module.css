@@ -27,10 +27,21 @@
 }
 
 .name {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.1;
   font-family: var(--font-heading), Georgia, serif;
   font-weight: 900;
-  font-size: 1.4rem;
+  font-size: 1.7rem;
   color: var(--marvin-plum);
+}
+
+.tagline {
+  font-family: var(--font-body), system-ui, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--marvin-orange);
+  letter-spacing: 0.01em;
 }
 
 .nav {

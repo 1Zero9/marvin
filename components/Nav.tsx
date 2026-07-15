@@ -22,11 +22,14 @@ export default function Nav() {
           <Image
             src="/icons/icon-192.png"
             alt="Marvin"
-            width={36}
-            height={36}
+            width={44}
+            height={44}
             className={styles.logo}
           />
-          <span className={styles.name}>Marvin</span>
+          <span className={styles.name}>
+            Marvin
+            <span className={styles.tagline}>Starvin&rsquo;? Let&rsquo;s sort dinner.</span>
+          </span>
         </Link>
         <nav className={styles.nav}>
           {links.map((l) => {
