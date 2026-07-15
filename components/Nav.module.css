@@ -1,0 +1,66 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--marvin-cream);
+  border-bottom: 1px solid var(--border);
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  flex-wrap: wrap;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo {
+  border-radius: 10px;
+}
+
+.name {
+  font-family: var(--font-heading), Georgia, serif;
+  font-weight: 900;
+  font-size: 1.4rem;
+  color: var(--marvin-plum);
+}
+
+.nav {
+  display: flex;
+  gap: 4px;
+}
+
+.link {
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  font-weight: 700;
+  color: var(--marvin-plum);
+  font-size: 0.95rem;
+}
+
+.link:hover {
+  background: var(--marvin-blush);
+}
+
+.active {
+  background: var(--marvin-orange);
+  color: #fff;
+}
+
+.active:hover {
+  background: var(--orange-700);
+}
+
+@media (max-width: 480px) {
+  .inner {
+    justify-content: center;
+  }
+}

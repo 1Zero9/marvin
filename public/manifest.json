@@ -1,0 +1,23 @@
+{
+  "name": "Cookshelf",
+  "short_name": "Cookshelf",
+  "description": "Your personal cookbook index and recipe log.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFF7F1",
+  "theme_color": "#FF6A00",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

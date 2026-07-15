@@ -1,0 +1,72 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model Book {
+  id           String       @id @default(cuid())
+  isbn         String?      @unique
+  title        String
+  author       String?
+  coverUrl     String?
+  pageCount    Int?
+  createdAt    DateTime     @default(now())
+  indexEntries IndexEntry[]
+  recipes      Recipe[]
+}
+
+model IndexEntry {
+  id         String @id @default(cuid())
+  bookId     String
+  book       Book   @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  ingredient String
+  dish       String
+  page       Int
+
+  @@index([ingredient])
+  @@index([dish])
+}
+
+model Recipe {
+  id           String    @id @default(cuid())
+  title        String
+  source       String
+  bookId       String?
+  book         Book?     @relation(fields: [bookId], references: [id])
+  pageRef      Int?
+  ingredients  String?
+  instructions String?
+  tags         String[]
+  instagramUrl String?
+  shareSlug    String?   @unique
+  photos       Photo[]
+  cookLogs     CookLog[]
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model CookLog {
+  id        String   @id @default(cuid())
+  recipeId  String
+  recipe    Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  cookedAt  DateTime @default(now())
+  rating    Int?
+  notes     String?
+  photos    Photo[]
+  shareSlug String?  @unique
+}
+
+model Photo {
+  id        String   @id @default(cuid())
+  url       String
+  recipeId  String?
+  recipe    Recipe?  @relation(fields: [recipeId], references: [id])
+  cookLogId String?
+  cookLog   CookLog? @relation(fields: [cookLogId], references: [id])
+  createdAt DateTime @default(now())
+}

@@ -1,0 +1,56 @@
+:root {
+  /* Core palette */
+  --marvin-orange: #FF6A00;
+  --marvin-plum: #4B134B;
+  --marvin-peach: #FFC5A3;
+  --marvin-cream: #FFF7F1;
+  --marvin-blush: #F4E6E1;
+  --marvin-basil: #7BB661;
+  --marvin-charcoal: #2E2133;
+  --marvin-lilac: #E9E3E8;
+
+  /* Orange scale */
+  --orange-700: #D95800;
+  --orange-500: #FF6A00;
+  --orange-300: #FF8F45;
+  --orange-100: #FFE0CC;
+
+  /* Plum scale */
+  --plum-900: #2C082C;
+  --plum-700: #4B134B;
+  --plum-500: #6D2E6D;
+  --plum-300: #8D5A8D;
+  --plum-100: #E6DCE6;
+
+  /* Neutral scale */
+  --white: #FFFFFF;
+  --neutral-cream: #FFF7F1;
+  --neutral-blush: #F4E6E1;
+  --neutral-lilac: #E9E3E8;
+  --neutral-grey: #B7B2B8;
+  --neutral-charcoal: #2E2133;
+
+  /* Green scale */
+  --basil-dark: #4E8C3F;
+  --basil: #7BB661;
+  --mint: #A9D88D;
+  --sage: #DDEFD4;
+
+  /* Text */
+  --text-primary: #2E2133;
+  --text-secondary: #4B134B;
+
+  /* Surfaces */
+  --background: #FFF7F1;
+  --surface: #FFFFFF;
+  --border: #E9E3E8;
+
+  /* Semantic */
+  --primary: #FF6A00;
+  --secondary: #4B134B;
+  --accent: #FFC5A3;
+  --success: #7BB661;
+  --warning: #FFB347;
+  --danger: #E14C4C;
+  --info: #5A8DEE;
+}

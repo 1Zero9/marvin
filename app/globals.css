@@ -1,0 +1,150 @@
+:root {
+  --marvin-orange: #FF6A00;
+  --marvin-plum: #4B134B;
+  --marvin-peach: #FFC5A3;
+  --marvin-cream: #FFF7F1;
+  --marvin-blush: #F4E6E1;
+  --marvin-basil: #7BB661;
+
+  --orange-700: #D95800;
+  --orange-300: #FF8F45;
+  --orange-100: #FFE0CC;
+
+  --plum-900: #2C082C;
+  --plum-500: #6D2E6D;
+  --plum-300: #8D5A8D;
+  --plum-100: #E6DCE6;
+
+  --text-primary: #2E2133;
+  --text-secondary: #4B134B;
+
+  --background: #FFF7F1;
+  --surface: #FFFFFF;
+  --border: #E9E3E8;
+
+  --success: #7BB661;
+  --warning: #FFB347;
+  --danger: #E14C4C;
+  --info: #5A8DEE;
+
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-pill: 999px;
+  --shadow-card: 0 2px 12px rgba(75, 19, 75, 0.08);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
+body {
+  background: var(--background);
+  color: var(--text-primary);
+  font-family: var(--font-body), system-ui, sans-serif;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--font-heading), Georgia, serif;
+  color: var(--marvin-plum);
+  line-height: 1.15;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+}
+
+input,
+textarea,
+select {
+  font-family: inherit;
+  font-size: 1rem;
+}
+
+.container {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 16px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 12px 24px;
+  font-size: 1rem;
+  font-weight: 700;
+  transition: background 0.15s ease;
+}
+
+.btn-primary {
+  background: var(--marvin-orange);
+  color: #fff;
+}
+
+.btn-primary:hover {
+  background: var(--orange-700);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--marvin-plum);
+  border: 2px solid var(--marvin-plum);
+}
+
+.btn-secondary:hover {
+  background: var(--plum-100);
+}
+
+.card {
+  background: var(--surface);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 20px;
+}
+
+.tag {
+  display: inline-block;
+  background: var(--marvin-peach);
+  color: var(--marvin-plum);
+  border-radius: var(--radius-pill);
+  padding: 4px 12px;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.input {
+  width: 100%;
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  color: var(--text-primary);
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--marvin-orange);
+}
