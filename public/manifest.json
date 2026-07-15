@@ -1,7 +1,7 @@
 {
-  "name": "Cookshelf",
-  "short_name": "Cookshelf",
-  "description": "Your personal cookbook index and recipe log.",
+  "name": "Marvin",
+  "short_name": "Marvin",
+  "description": "Starvin'? Let's sort dinner. Your personal cookbook index and recipe log.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#FFF7F1",

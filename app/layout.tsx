@@ -17,9 +17,9 @@ const body = Nunito_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Cookshelf",
+  title: "Marvin",
   description:
-    "Your personal cookbook index and recipe log. Scan, search, cook, share.",
+    "Starvin'? Let's sort dinner. Your personal cookbook index and recipe log.",
   manifest: "/manifest.json",
   icons: { icon: "/icons/icon-192.png", apple: "/icons/icon-192.png" },
 };

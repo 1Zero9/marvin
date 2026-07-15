@@ -21,12 +21,12 @@ export default function Nav() {
         <Link href="/" className={styles.brand}>
           <Image
             src="/icons/icon-192.png"
-            alt="Cookshelf"
+            alt="Marvin"
             width={36}
             height={36}
             className={styles.logo}
           />
-          <span className={styles.name}>Cookshelf</span>
+          <span className={styles.name}>Marvin</span>
         </Link>
         <nav className={styles.nav}>
           {links.map((l) => {
