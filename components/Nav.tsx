@@ -26,22 +26,33 @@ function TabIcon({ name }: { name: IconName }) {
   return <svg viewBox="0 0 24 24" aria-hidden="true" className={styles.icon}>{paths[name]}</svg>;
 }
 
-export default function Nav() {
+function NavLinks({ linkClass, activeClass }: { linkClass: string; activeClass: string }) {
   const pathname = usePathname();
-  return <header className={styles.header}>
-    <div className={`container ${styles.inner}`}>
-      <Link href="/" className={styles.brand} aria-label="Marvin home">
-        <Image src="/icons/icon-192.png" alt="" width={42} height={42} className={styles.logo} />
-        <span className={styles.name}>Marvin</span>
-      </Link>
-      <nav className={styles.nav} aria-label="Main navigation">
-        {links.map((link) => {
-          const active = link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
-          return <Link key={link.href} href={link.href} className={`${styles.link} ${active ? styles.active : ""}`}>
-            <TabIcon name={link.icon} /><span>{link.label}</span>
-          </Link>;
-        })}
-      </nav>
-    </div>
-  </header>;
+  return <>
+    {links.map((link) => {
+      const active = link.href === "/" ? pathname === "/" : pathname.startsWith(link.href);
+      return <Link key={link.href} href={link.href} className={`${linkClass} ${active ? activeClass : ""}`}>
+        <TabIcon name={link.icon} /><span>{link.label}</span>
+      </Link>;
+    })}
+  </>;
+}
+
+export default function Nav() {
+  return <>
+    <header className={styles.header}>
+      <div className={`container ${styles.inner}`}>
+        <Link href="/" className={styles.brand} aria-label="Marvin home">
+          <Image src="/icons/icon-192.png" alt="" width={42} height={42} className={styles.logo} />
+          <span className={styles.name}>Marvin</span>
+        </Link>
+        <nav className={styles.nav} aria-label="Main navigation">
+          <NavLinks linkClass={styles.link} activeClass={styles.active} />
+        </nav>
+      </div>
+    </header>
+    <nav className={styles.dock} aria-label="Main navigation">
+      <NavLinks linkClass={styles.dockLink} activeClass={styles.dockActive} />
+    </nav>
+  </>;
 }
