@@ -165,5 +165,14 @@ export async function GET(
   if (!meta) {
     return NextResponse.json({ error: "Book not found" }, { status: 404 });
   }
+  if (!meta.coverUrl) {
+    for (const candidate of candidatesFor(clean)) {
+      const url = `https://covers.openlibrary.org/b/isbn/${candidate}-L.jpg?default=false`;
+      if (await coverExists(url)) {
+        meta.coverUrl = url;
+        break;
+      }
+    }
+  }
   return NextResponse.json({ ...meta, isbn: clean });
 }

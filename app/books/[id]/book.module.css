@@ -24,7 +24,39 @@
 
 .author {
   color: var(--plum-500);
+  margin-bottom: 6px;
+}
+
+.meta {
+  color: var(--plum-500);
+  font-size: 0.88rem;
   margin-bottom: 10px;
+}
+
+.heart {
+  color: var(--marvin-orange);
+}
+
+.sectionTitle {
+  font-size: 1.2rem;
+  margin-bottom: 10px;
+}
+
+.recipeList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.recipeLink {
+  color: var(--marvin-plum);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.recipeLink:hover {
+  color: var(--marvin-orange);
 }
 
 .empty {

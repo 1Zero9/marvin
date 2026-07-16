@@ -21,6 +21,7 @@ export default async function Home({
               { ingredient: { contains: query, mode: "insensitive" } },
               { dish: { contains: query, mode: "insensitive" } },
             ],
+            book: { archived: false },
           },
           include: { book: true },
           orderBy: [{ dish: "asc" }],

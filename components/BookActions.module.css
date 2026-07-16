@@ -1,0 +1,42 @@
+.actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+
+.favBtn {
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 8px 18px;
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--marvin-orange);
+  background: transparent;
+  color: var(--marvin-orange);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.favOn {
+  background: var(--marvin-orange);
+  color: #fff;
+}
+
+.deleteBtn {
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.95rem;
+  padding: 8px 18px;
+  border-radius: var(--radius-pill);
+  border: 2px solid #c0392b;
+  background: transparent;
+  color: #c0392b;
+  cursor: pointer;
+}
+
+.favBtn:disabled,
+.deleteBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}

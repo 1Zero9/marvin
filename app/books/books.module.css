@@ -70,3 +70,17 @@
   font-size: 0.9rem;
   color: var(--plum-500);
 }
+
+.heart {
+  color: var(--marvin-orange);
+}
+
+.archivedTitle {
+  font-size: 1.3rem;
+  margin: 28px 0 12px;
+  color: var(--plum-500);
+}
+
+.archivedGrid {
+  opacity: 0.65;
+}
