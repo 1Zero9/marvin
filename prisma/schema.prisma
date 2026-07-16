@@ -18,11 +18,15 @@ model Book {
   archived     Boolean      @default(false)
   householdId  String
   household    Household    @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  createdById  String?
+  createdBy    User?        @relation("BookCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  visibility   String       @default("private")
   createdAt    DateTime     @default(now())
   indexEntries IndexEntry[]
   recipes      Recipe[]
 
   @@index([householdId])
+  @@index([householdId, visibility])
 }
 
 model IndexEntry {
@@ -54,12 +58,16 @@ model Recipe {
   shareSlug    String?   @unique
   householdId  String
   household    Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  createdById  String?
+  createdBy    User?      @relation("RecipeCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  visibility   String     @default("private")
   photos       Photo[]
   cookLogs     CookLog[]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
   @@index([householdId])
+  @@index([householdId, visibility])
 }
 
 model CookLog {
@@ -98,6 +106,8 @@ model User {
   cookedLogs   CookLog[]    @relation("CookedBy")
   mealRatings  MealRating[]
   invitesSent  Invite[]     @relation("InvitedBy")
+  createdBooks Book[]       @relation("BookCreatedBy")
+  createdRecipes Recipe[]   @relation("RecipeCreatedBy")
 }
 
 model Household {

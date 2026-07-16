@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { requireHousehold } from "@/lib/auth";
+import { visibleTo } from "@/lib/privacy";
 import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
@@ -17,7 +18,7 @@ export default async function Home({
   const filter = f === "books" || f === "personal" ? f : "all";
 
   const [bookCount, entries, matchedRecipes] = await Promise.all([
-    prisma.book.count({ where: { householdId: identity.membership.householdId } }),
+    prisma.book.count({ where: { householdId: identity.membership.householdId, ...visibleTo(identity) } }),
     query && filter !== "personal"
       ? prisma.indexEntry.findMany({
           where: {
@@ -25,7 +26,7 @@ export default async function Home({
               { ingredient: { contains: query, mode: "insensitive" } },
               { dish: { contains: query, mode: "insensitive" } },
             ],
-            book: { archived: false, householdId: identity.membership.householdId },
+            book: { archived: false, householdId: identity.membership.householdId, ...visibleTo(identity) },
           },
           include: { book: true },
           orderBy: [{ dish: "asc" }],
@@ -49,6 +50,7 @@ export default async function Home({
                   ? { source: "personal" }
                   : {},
               { householdId: identity.membership.householdId },
+              visibleTo(identity),
             ],
           },
           include: {
@@ -64,7 +66,7 @@ export default async function Home({
   const entryRecipes = query
     ? await prisma.recipe.findMany({
         where: {
-          AND: [{ householdId: identity.membership.householdId }, { OR:
+          AND: [{ householdId: identity.membership.householdId }, visibleTo(identity), { OR:
             entries.length > 0
               ? entries.map((r) => ({ bookId: r.bookId, pageRef: r.page }))
               : [{ id: "none" }] }],

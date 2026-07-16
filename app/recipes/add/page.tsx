@@ -39,6 +39,7 @@ export default function AddRecipePage() {
   const [notes, setNotes] = useState("");
   const [tags, setTags] = useState("");
   const [links, setLinks] = useState<string[]>([""]);
+  const [visibility, setVisibility] = useState<"private" | "household">("private");
   const [photos, setPhotos] = useState<
     { data: string; mimeType: string; preview: string }[]
   >([]);
@@ -103,6 +104,7 @@ export default function AddRecipePage() {
             .map((t) => t.trim())
             .filter(Boolean),
           links: links.map((l) => l.trim()).filter(Boolean),
+          visibility,
         }),
       });
       if (!res.ok) throw new Error();
@@ -225,6 +227,14 @@ export default function AddRecipePage() {
             onChange={(e) => setTags(e.target.value)}
             placeholder="comma separated, e.g. quick, winter, outdoors, veggie"
           />
+        </label>
+
+        <label className={styles.label}>
+          Who can see this recipe?
+          <select className="input" value={visibility} onChange={(e) => setVisibility(e.target.value as "private" | "household")}>
+            <option value="private">Only me</option>
+            <option value="household">Everyone in my kitchen</option>
+          </select>
         </label>
 
         <div className={styles.label}>

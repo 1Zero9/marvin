@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { currentMembership } from "@/lib/auth";
+import { canManage } from "@/lib/privacy";
 
 export async function POST(
   req: Request,
@@ -13,6 +14,7 @@ export async function POST(
   if (!book) {
     return NextResponse.json({ error: "Book not found" }, { status: 404 });
   }
+  if (!canManage(identity, book.createdById)) return NextResponse.json({ error: "Only the owner or creator can change this private book." }, { status: 403 });
 
   const body = await req.json();
   const entries: { ingredient: string; dish: string; page: number }[] = (

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireHousehold } from "@/lib/auth";
+import { visibleTo } from "@/lib/privacy";
 import styles from "./recipe.module.css";
 import MealRatingActions from "@/components/MealRatingActions";
 
@@ -15,7 +16,7 @@ export default async function RecipePage({
   const { id } = await params;
   const identity = await requireHousehold();
   const recipe = await prisma.recipe.findUnique({
-    where: { id, householdId: identity.membership.householdId },
+    where: { id, householdId: identity.membership.householdId, ...visibleTo(identity) },
     include: {
       book: { select: { id: true, title: true } },
       photos: { orderBy: { createdAt: "asc" } },

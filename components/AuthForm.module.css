@@ -1,4 +1,6 @@
-.form { display: flex; flex-direction: column; gap: 14px; margin: 44px auto; max-width: 460px; }
+.form { display: flex; flex-direction: column; gap: 14px; margin: 0 auto; max-width: 460px; width: 100%; }
+.brand { align-items: center; color: var(--marvin-plum); display: flex; font-family: var(--font-heading), Georgia, serif; font-size: 1.55rem; font-weight: 900; gap: 9px; }
+.brand img { border-radius: 12px; }
 .title { font-size: 2rem; }
 .sub { color: var(--plum-500); margin-bottom: 4px; }
 .label { color: var(--marvin-plum); display: flex; flex-direction: column; font-size: .9rem; font-weight: 700; gap: 6px; }

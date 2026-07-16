@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireHousehold } from "@/lib/auth";
+import { visibleTo } from "@/lib/privacy";
 import BookActions from "@/components/BookActions";
 import BookCover from "@/components/BookCover";
 import styles from "./book.module.css";
@@ -16,7 +17,7 @@ export default async function BookPage({
   const { id } = await params;
   const identity = await requireHousehold();
   const book = await prisma.book.findUnique({
-    where: { id, householdId: identity.membership.householdId },
+    where: { id, householdId: identity.membership.householdId, ...visibleTo(identity) },
     include: {
       indexEntries: { orderBy: [{ ingredient: "asc" }, { page: "asc" }] },
       recipes: { orderBy: { createdAt: "desc" } },

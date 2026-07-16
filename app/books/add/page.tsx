@@ -45,6 +45,7 @@ export default function AddBookPage() {
   const [step, setStep] = useState<Step>("scan");
   const [meta, setMeta] = useState<Meta | null>(null);
   const [bookId, setBookId] = useState<string | null>(null);
+  const [visibility, setVisibility] = useState<"private" | "household">("private");
   const [images, setImages] = useState<{ data: string; mimeType: string; preview: string }[]>([]);
   const [entries, setEntries] = useState<Entry[]>([]);
   const [busy, setBusy] = useState(false);
@@ -83,7 +84,7 @@ export default function AddBookPage() {
       const res = await fetch("/api/books", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(meta),
+        body: JSON.stringify({ ...meta, visibility }),
       });
       if (!res.ok) throw new Error();
       const book = await res.json();
@@ -286,6 +287,13 @@ export default function AddBookPage() {
               value={meta.isbn}
               onChange={(e) => setMeta({ ...meta, isbn: e.target.value })}
             />
+          </label>
+          <label className={styles.label}>
+            Who can see this book?
+            <select className="input" value={visibility} onChange={(e) => setVisibility(e.target.value as "private" | "household")}>
+              <option value="private">Only me</option>
+              <option value="household">Everyone in my kitchen</option>
+            </select>
           </label>
           <div className={styles.actions}>
             <button className="btn btn-secondary" onClick={() => setStep("scan")}>

@@ -17,7 +17,7 @@ export async function POST(req: Request) {
   const identity = await currentMembership();
   if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
   const body = await req.json();
-  const { isbn, title, author, coverUrl, pageCount } = body ?? {};
+  const { isbn, title, author, coverUrl, pageCount, visibility } = body ?? {};
 
   if (!title || typeof title !== "string") {
     return NextResponse.json({ error: "Title is required" }, { status: 400 });
@@ -38,6 +38,8 @@ export async function POST(req: Request) {
       coverUrl: coverUrl || null,
       pageCount: typeof pageCount === "number" ? pageCount : null,
       householdId: identity.membership.householdId,
+      createdById: identity.user.id,
+      visibility: visibility === "household" ? "household" : "private",
     },
   });
 

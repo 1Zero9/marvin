@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 import styles from "./AuthForm.module.css";
@@ -27,6 +28,7 @@ export default function AuthForm({ setup = false }: { setup?: boolean }) {
 
   return (
     <form className={`card ${styles.form}`} onSubmit={submit}>
+      <div className={styles.brand}><Image src="/icons/icon-192.png" alt="" width={46} height={46} /><span>Marvin</span></div>
       <h1 className={styles.title}>{setup ? "Make Marvin yours" : "Welcome back"}</h1>
       <p className={styles.sub}>{setup ? "Create your private kitchen. You can invite the family afterwards." : "Sign in to your household kitchen."}</p>
       {error && <p className={styles.error}>{error}</p>}

@@ -6,12 +6,12 @@ import { usePathname } from "next/navigation";
 import styles from "./Nav.module.css";
 
 const links = [
-  { href: "/", label: "Search" },
-  { href: "/books", label: "Books" },
-  { href: "/recipes", label: "Recipes" },
-  { href: "/decide", label: "Tonight" },
-  { href: "/log", label: "Log" },
-  { href: "/household", label: "Kitchen" },
+  { href: "/", label: "Search", icon: "⌕" },
+  { href: "/books", label: "Books", icon: "▤" },
+  { href: "/recipes", label: "Recipes", icon: "◉" },
+  { href: "/decide", label: "Tonight", icon: "✦" },
+  { href: "/log", label: "Log", icon: "◷" },
+  { href: "/household", label: "Kitchen", icon: "⚙" },
 ];
 
 export default function Nav() {
@@ -43,6 +43,7 @@ export default function Nav() {
                 href={l.href}
                 className={`${styles.link} ${active ? styles.active : ""}`}
               >
+                <span className={styles.icon} aria-hidden="true">{l.icon}</span>
                 {l.label}
               </Link>
             );
