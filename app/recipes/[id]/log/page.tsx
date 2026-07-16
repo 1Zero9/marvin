@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useRef, useState } from "react";
+import { use, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./log.module.css";
 
@@ -42,6 +42,20 @@ export default function LogCookPage({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const raw = sessionStorage.getItem("marvin-snap");
+    if (!raw) return;
+    sessionStorage.removeItem("marvin-snap");
+    try {
+      const snap = JSON.parse(raw);
+      if (snap?.data && snap?.preview) {
+        setPhotos([
+          { data: snap.data, mimeType: snap.mimeType, preview: snap.preview },
+        ]);
+      }
+    } catch {}
+  }, []);
 
   async function onFiles(files: FileList | null) {
     if (!files) return;

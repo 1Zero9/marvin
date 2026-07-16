@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import styles from "./page.module.css";
 
@@ -80,6 +81,16 @@ export default async function Home({
   return (
     <div className={styles.wrap}>
       <section className={styles.hero}>
+        <div className={styles.logoWrap}>
+          <Image
+            src="/icons/icon-512.png"
+            alt="Marvin"
+            width={140}
+            height={140}
+            priority
+            className={styles.heroLogo}
+          />
+        </div>
         <h1 className={styles.title}>
           What&rsquo;s in your <span className={styles.accent}>cookbooks?</span>
         </h1>
@@ -99,6 +110,9 @@ export default async function Home({
             Search
           </button>
         </form>
+        <Link href="/snap" className={styles.snapCta}>
+          📷 Cooked something? Snap it and Marvin will log it
+        </Link>
       </section>
 
       {query ? (

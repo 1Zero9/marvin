@@ -51,6 +51,19 @@ export default function AddRecipePage() {
       .then((r) => r.json())
       .then(setBooks)
       .catch(() => {});
+
+    const raw = sessionStorage.getItem("marvin-snap");
+    if (!raw) return;
+    sessionStorage.removeItem("marvin-snap");
+    try {
+      const snap = JSON.parse(raw);
+      if (snap?.title) setTitle(snap.title);
+      if (snap?.data && snap?.preview) {
+        setPhotos([
+          { data: snap.data, mimeType: snap.mimeType, preview: snap.preview },
+        ]);
+      }
+    } catch {}
   }, []);
 
   async function onFiles(files: FileList | null) {
