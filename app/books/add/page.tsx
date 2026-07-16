@@ -48,7 +48,8 @@ export default function AddBookPage() {
   const [images, setImages] = useState<{ data: string; mimeType: string; preview: string }[]>([]);
   const [entries, setEntries] = useState<Entry[]>([]);
   const [busy, setBusy] = useState(false);
-  const [extractProgress, setExtractProgress] = useState<string | null>(null);
+  const [extractDone, setExtractDone] = useState(0);
+  const [extractTotal, setExtractTotal] = useState(0);
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -107,36 +108,85 @@ export default function AddBookPage() {
     }
   }
 
+  async function extractOne(
+    img: { data: string; mimeType: string },
+    photoNumber: number,
+    attempt = 0
+  ): Promise<Entry[]> {
+    let res: Response;
+    try {
+      res = await fetch("/api/extract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          images: [{ data: img.data, mimeType: img.mimeType }],
+        }),
+      });
+    } catch {
+      if (attempt < 2) {
+        await new Promise((r) => setTimeout(r, 2000 * (attempt + 1)));
+        return extractOne(img, photoNumber, attempt + 1);
+      }
+      throw new Error(
+        `Lost connection on photo ${photoNumber}. Keep the app open and try again.`
+      );
+    }
+    let data: { entries?: Entry[]; error?: string } | null = null;
+    try {
+      data = await res.json();
+    } catch {
+      data = null;
+    }
+    if (!res.ok) {
+      if (attempt < 2 && (res.status >= 500 || res.status === 429)) {
+        await new Promise((r) => setTimeout(r, 2000 * (attempt + 1)));
+        return extractOne(img, photoNumber, attempt + 1);
+      }
+      throw new Error(
+        data?.error ??
+          (res.status === 413
+            ? `Photo ${photoNumber} is too large — remove it and retake.`
+            : `Extraction failed on photo ${photoNumber} (${res.status}). Try again.`)
+      );
+    }
+    return data?.entries ?? [];
+  }
+
   async function extract() {
     setBusy(true);
     setError(null);
+    setExtractDone(0);
+    setExtractTotal(images.length);
+    let wakeLock: { release: () => Promise<void> } | null = null;
     try {
-      const merged: Entry[] = [];
-      for (let i = 0; i < images.length; i++) {
-        setExtractProgress(`Reading page ${i + 1} of ${images.length}…`);
-        const res = await fetch("/api/extract", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            images: [{ data: images[i].data, mimeType: images[i].mimeType }],
-          }),
-        });
-        let data: { entries?: Entry[]; error?: string } | null = null;
-        try {
-          data = await res.json();
-        } catch {
-          data = null;
-        }
-        if (!res.ok) {
-          throw new Error(
-            data?.error ??
-              (res.status === 413
-                ? `Photo ${i + 1} is too large — remove it and retake.`
-                : `Extraction failed on photo ${i + 1} (${res.status}). Try again.`)
+      try {
+        wakeLock =
+          (await (
+            navigator as Navigator & {
+              wakeLock?: {
+                request: (t: string) => Promise<{ release: () => Promise<void> }>;
+              };
+            }
+          ).wakeLock?.request("screen")) ?? null;
+      } catch {}
+
+      const results: Entry[][] = new Array(images.length);
+      let next = 0;
+      const worker = async () => {
+        while (next < images.length) {
+          const i = next++;
+          results[i] = await extractOne(
+            { data: images[i].data, mimeType: images[i].mimeType },
+            i + 1
           );
+          setExtractDone((d) => d + 1);
         }
-        merged.push(...(data?.entries ?? []));
-      }
+      };
+      await Promise.all(
+        Array.from({ length: Math.min(2, images.length) }, worker)
+      );
+
+      const merged = results.flat();
       setEntries(merged);
       setStep("review");
       if (merged.length === 0) {
@@ -147,7 +197,8 @@ export default function AddBookPage() {
       setError(e instanceof Error && e.message ? e.message : "Extraction failed.");
     } finally {
       setBusy(false);
-      setExtractProgress(null);
+      setExtractTotal(0);
+      wakeLock?.release().catch(() => {});
     }
   }
 
@@ -288,6 +339,23 @@ export default function AddBookPage() {
               ))}
             </div>
           )}
+          {busy && extractTotal > 0 && (
+            <div className={styles.progressWrap}>
+              <div className={styles.progressBar}>
+                <div
+                  className={styles.progressFill}
+                  style={{
+                    width: `${Math.max(4, (extractDone / extractTotal) * 100)}%`,
+                  }}
+                />
+              </div>
+              <p className={styles.progressText}>
+                Reading your index — {extractDone} of {extractTotal} photo
+                {extractTotal === 1 ? "" : "s"} done. Keep the app open; your
+                screen will stay awake.
+              </p>
+            </div>
+          )}
           <div className={styles.actions}>
             <button
               className="btn btn-secondary"
@@ -300,7 +368,7 @@ export default function AddBookPage() {
               onClick={extract}
               disabled={busy || images.length === 0}
             >
-              {busy ? (extractProgress ?? "Extracting…") : `Extract index (${images.length})`}
+              {busy ? "Extracting…" : `Extract index (${images.length})`}
             </button>
           </div>
         </section>
