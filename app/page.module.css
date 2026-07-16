@@ -84,6 +84,19 @@
   transform: translateY(-2px);
 }
 
+.decideCta {
+  display: block;
+  color: var(--marvin-orange);
+  font-size: 0.95rem;
+  font-weight: 800;
+  margin-top: 12px;
+}
+
+.decideCta:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
 .title {
   font-size: clamp(2rem, 6vw, 3rem);
   font-weight: 900;

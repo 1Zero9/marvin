@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { currentMembership } from "@/lib/auth";
 
 export const maxDuration = 120;
 
@@ -68,6 +69,8 @@ async function callGemini(parts: Part[], apiKey: string): Promise<Entry[] | null
 }
 
 export async function POST(req: Request) {
+  const identity = await currentMembership();
+  if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) {
     return NextResponse.json(

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { currentMembership } from "@/lib/auth";
 
 export const maxDuration = 60;
 
@@ -81,6 +82,8 @@ async function identify(
 }
 
 export async function POST(req: Request) {
+  const identity = await currentMembership();
+  if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
   const body = await req.json();
   const data: string | undefined = body?.data;
   const mimeType: string | undefined = body?.mimeType;
@@ -110,6 +113,7 @@ export async function POST(req: Request) {
 
   const matches = await prisma.recipe.findMany({
     where: {
+      householdId: identity.membership.householdId,
       OR: [
         { title: { contains: result.dish, mode: "insensitive" } },
         ...dishWords.map((w) => ({

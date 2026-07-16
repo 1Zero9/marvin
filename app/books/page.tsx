@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { requireHousehold } from "@/lib/auth";
 import styles from "./books.module.css";
 
 export const dynamic = "force-dynamic";
@@ -35,7 +36,9 @@ function BookTile({ book }: { book: BookCard }) {
 }
 
 export default async function BooksPage() {
+  const identity = await requireHousehold();
   const books = await prisma.book.findMany({
+    where: { householdId: identity.membership.householdId },
     orderBy: [{ favourite: "desc" }, { createdAt: "desc" }],
     include: { _count: { select: { indexEntries: true } } },
   });

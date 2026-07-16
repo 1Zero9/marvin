@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { currentMembership } from "@/lib/auth";
 
 export const maxDuration = 30;
 
@@ -64,6 +65,8 @@ async function extractKeywords(
 }
 
 export async function POST(req: Request) {
+  const identity = await currentMembership();
+  if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
   const body = await req.json();
   const {
     title,
@@ -113,6 +116,7 @@ export async function POST(req: Request) {
       tags: cleanTags,
       keywords,
       links: cleanLinks,
+      householdId: identity.membership.householdId,
     },
   });
 

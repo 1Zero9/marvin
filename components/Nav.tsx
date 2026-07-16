@@ -9,7 +9,9 @@ const links = [
   { href: "/", label: "Search" },
   { href: "/books", label: "Books" },
   { href: "/recipes", label: "Recipes" },
+  { href: "/decide", label: "Tonight" },
   { href: "/log", label: "Log" },
+  { href: "/household", label: "Kitchen" },
 ];
 
 export default function Nav() {

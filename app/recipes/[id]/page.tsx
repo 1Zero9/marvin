@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { requireHousehold } from "@/lib/auth";
 import styles from "./recipe.module.css";
+import MealRatingActions from "@/components/MealRatingActions";
 
 export const dynamic = "force-dynamic";
 
@@ -11,14 +13,15 @@ export default async function RecipePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
+  const identity = await requireHousehold();
   const recipe = await prisma.recipe.findUnique({
-    where: { id },
+    where: { id, householdId: identity.membership.householdId },
     include: {
       book: { select: { id: true, title: true } },
       photos: { orderBy: { createdAt: "asc" } },
       cookLogs: {
         orderBy: { cookedAt: "desc" },
-        include: { photos: true },
+        include: { photos: true, cookedBy: { select: { displayName: true } }, ratings: { include: { user: { select: { displayName: true } } } } },
       },
     },
   });
@@ -29,6 +32,12 @@ export default async function RecipePage({
     month: "short",
     year: "numeric",
   });
+  const ratedLogs = recipe.cookLogs.filter((log) => log.rating != null);
+  const averageRating = ratedLogs.length
+    ? ratedLogs.reduce((total, log) => total + (log.rating ?? 0), 0) /
+      ratedLogs.length
+    : null;
+  const lastCooked = recipe.cookLogs[0]?.cookedAt;
 
   return (
     <div className={styles.wrap}>
@@ -56,6 +65,13 @@ export default async function RecipePage({
               </span>
             ))}
           </div>
+        )}
+        {recipe.cookLogs.length > 0 && (
+          <p className={styles.cookSummary}>
+            Cooked {recipe.cookLogs.length} {recipe.cookLogs.length === 1 ? "time" : "times"}
+            {lastCooked ? ` · last cooked ${lastCooked.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}` : ""}
+            {averageRating ? ` · ${averageRating.toFixed(1)} ★ average` : ""}
+          </p>
         )}
       </div>
 
@@ -133,6 +149,7 @@ export default async function RecipePage({
                       year: "numeric",
                     })}
                   </span>
+                  {log.cookedBy && <span className={styles.cookedBy}>Cooked by {log.cookedBy.displayName}</span>}
                   {log.rating != null && (
                     <span className={styles.stars}>
                       {"★".repeat(log.rating)}
@@ -141,6 +158,8 @@ export default async function RecipePage({
                   )}
                 </div>
                 {log.notes && <p className={styles.pre}>{log.notes}</p>}
+                {log.ratings.length > 0 && <p className={styles.ratings}>{log.ratings.map((rating) => `${rating.user.displayName}: ${"★".repeat(rating.rating)}`).join(" · ")}</p>}
+                <MealRatingActions logId={log.id} initialRating={log.ratings.find((rating) => rating.userId === identity.user.id)?.rating} initialNotes={log.ratings.find((rating) => rating.userId === identity.user.id)?.notes ?? undefined} />
                 {log.photos.length > 0 && (
                   <div className={styles.photos}>
                     {log.photos.map((p) => (

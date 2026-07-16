@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
+import { currentMembership } from "@/lib/auth";
 
 export const maxDuration = 30;
 
@@ -8,6 +9,8 @@ export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const identity = await currentMembership();
+  if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
   const { id } = await params;
   const body = await req.json();
   const data: string | undefined = body?.data;
@@ -21,7 +24,7 @@ export async function POST(
     return NextResponse.json({ error: "Image too large" }, { status: 400 });
   }
 
-  const book = await prisma.book.findUnique({ where: { id } });
+  const book = await prisma.book.findFirst({ where: { id, householdId: identity.membership.householdId } });
   if (!book) {
     return NextResponse.json({ error: "Book not found" }, { status: 404 });
   }

@@ -16,6 +16,13 @@
   font-size: 0.95rem;
 }
 
+.cookSummary {
+  color: var(--marvin-orange);
+  font-size: 0.9rem;
+  font-weight: 700;
+  margin-top: 8px;
+}
+
 .bookLink {
   color: var(--marvin-orange);
   font-weight: 700;
@@ -129,6 +136,9 @@
   color: var(--marvin-orange);
   letter-spacing: 2px;
 }
+
+.cookedBy, .ratings { color: var(--plum-500); font-size: .88rem; }
+.ratings { color: var(--marvin-orange); font-weight: 700; }
 
 @media (max-width: 700px) {
   .columns {
