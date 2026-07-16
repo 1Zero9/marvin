@@ -2,6 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import BookActions from "@/components/BookActions";
+import BookCover from "@/components/BookCover";
 import styles from "./book.module.css";
 
 export const dynamic = "force-dynamic";
@@ -30,10 +31,11 @@ export default async function BookPage({
   return (
     <div className={styles.wrap}>
       <div className={styles.header}>
-        {book.coverUrl ? (
-          /* eslint-disable-next-line @next/next/no-img-element */
-          <img src={book.coverUrl} alt="" className={styles.cover} />
-        ) : null}
+        <BookCover
+          bookId={book.id}
+          coverUrl={book.coverUrl}
+          title={book.title}
+        />
         <div>
           <h1 className={styles.title}>
             {book.title}

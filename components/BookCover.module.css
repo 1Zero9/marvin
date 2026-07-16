@@ -1,0 +1,48 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+.cover {
+  width: 96px;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-card);
+}
+
+.fallback {
+  width: 96px;
+  height: 138px;
+  border-radius: var(--radius-sm);
+  background: var(--marvin-peach);
+  color: var(--marvin-plum);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading), Georgia, serif;
+  font-size: 2.4rem;
+  font-weight: 900;
+}
+
+.fileInput {
+  display: none;
+}
+
+.photoBtn {
+  font-family: inherit;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  border: 2px solid var(--border);
+  background: #fff;
+  color: var(--marvin-plum);
+  cursor: pointer;
+}
+
+.photoBtn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
