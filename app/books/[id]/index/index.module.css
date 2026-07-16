@@ -1,0 +1,16 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.title {
+  font-size: 1.6rem;
+  color: var(--marvin-plum);
+}
+
+.subtitle {
+  color: var(--plum-500);
+  font-weight: 600;
+  margin-top: -8px;
+}

@@ -80,12 +80,20 @@ export default async function BookPage({
           <p style={{ marginBottom: 16 }}>
             No index entries yet for this book.
           </p>
-          <Link href="/books/add" className="btn btn-primary">
+          <Link href={`/books/${book.id}/index`} className="btn btn-primary">
             Photograph its index
           </Link>
         </div>
       ) : (
         <div className={`card ${styles.tableCard}`}>
+          <div className={styles.tableActions}>
+            <Link
+              href={`/books/${book.id}/index`}
+              className="btn btn-secondary"
+            >
+              Add index photos
+            </Link>
+          </div>
           <table className={styles.table}>
             <thead>
               <tr>

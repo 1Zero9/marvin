@@ -68,6 +68,12 @@
   overflow-x: auto;
 }
 
+.tableActions {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 12px;
+}
+
 .table {
   width: 100%;
   min-width: 480px;
