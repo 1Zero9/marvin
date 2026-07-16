@@ -1,8 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Nunito_Sans } from "next/font/google";
 import "./globals.css";
-import Nav from "@/components/Nav";
-import Footer from "@/components/Footer";
+import AppShell from "@/components/AppShell";
 import SwRegister from "@/components/SwRegister";
 
 const heading = Fraunces({
@@ -37,11 +36,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${heading.variable} ${body.variable}`}>
       <body>
-        <Nav />
-        <main className="container" style={{ paddingBottom: 64, paddingTop: 24, minHeight: "calc(100vh - 180px)" }}>
-          {children}
-        </main>
-        <Footer />
+        <div className="container"><AppShell>{children}</AppShell></div>
         <SwRegister />
       </body>
     </html>

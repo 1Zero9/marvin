@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { currentMembership } from "@/lib/auth";
+import { canManage } from "@/lib/privacy";
 
 export const maxDuration = 30;
 
@@ -28,6 +29,7 @@ export async function POST(
   if (!book) {
     return NextResponse.json({ error: "Book not found" }, { status: 404 });
   }
+  if (!canManage(identity, book.createdById)) return NextResponse.json({ error: "Only the owner or creator can change this private book." }, { status: 403 });
 
   const ext = mimeType.split("/")[1] === "png" ? "png" : "jpg";
   const blob = await put(`covers/${id}.${ext}`, buffer, {

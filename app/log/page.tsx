@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireHousehold } from "@/lib/auth";
+import { visibleTo } from "@/lib/privacy";
 import styles from "./log.module.css";
 
 export const dynamic = "force-dynamic";
@@ -34,6 +35,7 @@ export default async function LogPage({
         ...(selectedRating ? { rating: selectedRating } : {}),
         recipe: {
           householdId: identity.membership.householdId,
+          ...visibleTo(identity),
           ...(query
             ? { title: { contains: query, mode: "insensitive" } }
             : {}),

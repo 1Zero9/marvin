@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { currentMembership } from "@/lib/auth";
+import { canManage } from "@/lib/privacy";
 
 export async function PATCH(
   req: Request,
@@ -19,6 +20,7 @@ export async function PATCH(
   try {
     const found = await prisma.book.findFirst({ where: { id, householdId: identity.membership.householdId } });
     if (!found) throw new Error("not found");
+    if (!canManage(identity, found.createdById)) return NextResponse.json({ error: "Only the owner or creator can change this private book." }, { status: 403 });
     const book = await prisma.book.update({ where: { id }, data });
     return NextResponse.json(book);
   } catch {
@@ -36,6 +38,7 @@ export async function DELETE(
   try {
     const found = await prisma.book.findFirst({ where: { id, householdId: identity.membership.householdId } });
     if (!found) throw new Error("not found");
+    if (!canManage(identity, found.createdById)) return NextResponse.json({ error: "Only the owner or creator can delete this private book." }, { status: 403 });
     await prisma.book.delete({ where: { id } });
     return NextResponse.json({ ok: true });
   } catch {

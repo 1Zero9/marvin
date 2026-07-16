@@ -2,6 +2,7 @@ import { requireHousehold } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import InvitePanel from "@/components/InvitePanel";
 import SignOutButton from "@/components/SignOutButton";
+import Link from "next/link";
 import styles from "./household.module.css";
 
 export default async function HouseholdPage() {
@@ -12,6 +13,7 @@ export default async function HouseholdPage() {
     <p className={styles.sub}>Your private household kitchen. Recipes, books, and meal memories stay here.</p>
     <section className={`card ${styles.members}`}><h2>People in this kitchen</h2><ul>{members.map((member) => <li key={member.id}><span>{member.user.displayName}</span><span className={styles.meta}>{member.role === "owner" ? "Owner" : "Member"} · {member.user.email}</span></li>)}</ul></section>
     {identity.membership.role === "owner" && <InvitePanel />}
+    {identity.membership.role === "owner" && <Link href="/admin" className="btn btn-secondary">Open admin portal</Link>}
     <SignOutButton />
   </div>;
 }

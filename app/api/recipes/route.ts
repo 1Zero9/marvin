@@ -78,6 +78,7 @@ export async function POST(req: Request) {
     notes,
     tags,
     links,
+    visibility,
   } = body ?? {};
 
   if (!title || typeof title !== "string" || !title.trim()) {
@@ -117,6 +118,8 @@ export async function POST(req: Request) {
       keywords,
       links: cleanLinks,
       householdId: identity.membership.householdId,
+      createdById: identity.user.id,
+      visibility: visibility === "household" ? "household" : "private",
     },
   });
 

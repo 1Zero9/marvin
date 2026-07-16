@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireHousehold } from "@/lib/auth";
+import { visibleTo } from "@/lib/privacy";
 import styles from "./decide.module.css";
 
 export const dynamic = "force-dynamic";
@@ -57,6 +58,7 @@ export default async function DecidePage({
   const [recipes, shelfEntries, bookRecipeRefs] = await Promise.all([prisma.recipe.findMany({
     where: {
       householdId: identity.membership.householdId,
+      ...visibleTo(identity),
       ...(filter === "quick" ? { tags: { has: "quick" } } : {}),
       ...(filter === "book" ? { source: "book" } : {}),
       ...(filter === "personal" ? { source: "personal" } : {}),
@@ -67,11 +69,11 @@ export default async function DecidePage({
       cookLogs: { select: { cookedAt: true, rating: true }, orderBy: { cookedAt: "desc" } },
     },
   }), prisma.indexEntry.findMany({
-    where: { book: { householdId: identity.membership.householdId, archived: false } },
+    where: { book: { householdId: identity.membership.householdId, archived: false, ...visibleTo(identity) } },
     include: { book: { select: { id: true, title: true, coverUrl: true } } },
     orderBy: { dish: "asc" },
     take: 100,
-  }), prisma.recipe.findMany({ where: { householdId: identity.membership.householdId, bookId: { not: null }, pageRef: { not: null } }, select: { bookId: true, pageRef: true } })]);
+  }), prisma.recipe.findMany({ where: { householdId: identity.membership.householdId, ...visibleTo(identity), bookId: { not: null }, pageRef: { not: null } }, select: { bookId: true, pageRef: true } })]);
 
   const scored = recipes
     .map((recipe) => {
