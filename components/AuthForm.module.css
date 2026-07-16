@@ -1,5 +1,5 @@
-.form { display: flex; flex-direction: column; gap: 14px; margin: 0 auto; max-width: 460px; width: 100%; }
-.brand { align-items: center; color: var(--marvin-plum); display: flex; font-family: var(--font-heading), Georgia, serif; font-size: 1.55rem; font-weight: 900; gap: 9px; }
+.form { background: transparent; box-shadow: none; display: flex; flex-direction: column; gap: 14px; margin: 0 auto; max-width: 390px; padding: 0; width: 100%; }
+.brand { align-items: center; color: var(--marvin-plum); display: flex; font-family: var(--font-heading), Georgia, serif; font-size: 1.7rem; font-weight: 900; gap: 9px; justify-content: center; margin-bottom: 14px; }
 .brand img { border-radius: 12px; }
 .title { font-size: 2rem; }
 .sub { color: var(--plum-500); margin-bottom: 4px; }
@@ -7,3 +7,4 @@
 .error { background: #FBE3E3; border-radius: var(--radius-md); color: var(--danger); font-weight: 700; padding: 10px 12px; }
 .switch { color: var(--plum-500); font-size: .9rem; text-align: center; }
 .switch a { color: var(--marvin-orange); font-weight: 800; }
+@media (max-width: 480px) { .form { gap: 16px; }.title { font-size: 2rem; text-align: center; }.sub { text-align: center; }.brand { margin-bottom: 20px; } }
