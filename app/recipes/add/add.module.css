@@ -1,0 +1,135 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 2rem;
+}
+
+.error {
+  background: #FBE3E3;
+  color: var(--danger);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  font-weight: 700;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sourceRow {
+  display: flex;
+  gap: 8px;
+}
+
+.sourcePill {
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 8px 18px;
+  border-radius: var(--radius-pill);
+  border: none;
+  background: var(--marvin-blush);
+  color: var(--marvin-plum);
+  cursor: pointer;
+}
+
+.sourceActive {
+  background: var(--marvin-orange);
+  color: #fff;
+}
+
+.label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-weight: 700;
+  color: var(--marvin-plum);
+  font-size: 0.9rem;
+}
+
+.bookRow {
+  display: grid;
+  grid-template-columns: 1fr 100px;
+  gap: 12px;
+}
+
+.textarea {
+  resize: vertical;
+  font-family: inherit;
+}
+
+.linkRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.addLinkBtn {
+  align-self: flex-start;
+  font-family: inherit;
+  font-weight: 700;
+  font-size: 0.85rem;
+  background: none;
+  border: none;
+  color: var(--marvin-orange);
+  cursor: pointer;
+  padding: 2px 0;
+}
+
+.removeBtn {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: var(--marvin-plum);
+  color: #fff;
+  font-size: 1rem;
+  line-height: 1;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+.fileInput {
+  display: none;
+}
+
+.thumbs {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+
+.thumbBox {
+  position: relative;
+}
+
+.thumb {
+  width: 84px;
+  height: 84px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  border: 2px solid var(--border);
+}
+
+.thumbBox .removeBtn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 24px;
+  height: 24px;
+}
+
+@media (max-width: 480px) {
+  .bookRow {
+    grid-template-columns: 1fr 80px;
+  }
+}

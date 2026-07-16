@@ -1,0 +1,75 @@
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.title {
+  font-size: 2rem;
+}
+
+.empty {
+  text-align: center;
+  padding: 40px 24px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.recipe {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  transition: transform 0.1s ease;
+}
+
+.recipe:hover {
+  transform: translateY(-2px);
+}
+
+.photo {
+  width: 84px;
+  height: 84px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  flex-shrink: 0;
+}
+
+.photoFallback {
+  width: 84px;
+  height: 84px;
+  border-radius: var(--radius-sm);
+  background: var(--marvin-peach);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  flex-shrink: 0;
+}
+
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.recipeTitle {
+  font-size: 1.05rem;
+}
+
+.meta {
+  font-size: 0.9rem;
+  color: var(--plum-500);
+}
+
+.tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}

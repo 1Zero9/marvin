@@ -7,14 +7,15 @@ export const dynamic = "force-dynamic";
 export default async function Home({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; f?: string }>;
 }) {
-  const { q } = await searchParams;
+  const { q, f } = await searchParams;
   const query = q?.trim() ?? "";
+  const filter = f === "books" || f === "personal" ? f : "all";
 
-  const [bookCount, results] = await Promise.all([
+  const [bookCount, entries, matchedRecipes] = await Promise.all([
     prisma.book.count(),
-    query
+    query && filter !== "personal"
       ? prisma.indexEntry.findMany({
           where: {
             OR: [
@@ -28,22 +29,53 @@ export default async function Home({
           take: 100,
         })
       : Promise.resolve([]),
+    query
+      ? prisma.recipe.findMany({
+          where: {
+            AND: [
+              {
+                OR: [
+                  { title: { contains: query, mode: "insensitive" } },
+                  { keywords: { has: query.toLowerCase() } },
+                  { tags: { has: query.toLowerCase() } },
+                ],
+              },
+              filter === "books"
+                ? { source: "book" }
+                : filter === "personal"
+                  ? { source: "personal" }
+                  : {},
+            ],
+          },
+          include: {
+            book: { select: { id: true, title: true } },
+            photos: { take: 1, orderBy: { createdAt: "asc" } },
+          },
+          orderBy: { title: "asc" },
+          take: 50,
+        })
+      : Promise.resolve([]),
   ]);
 
-  const recipes = query
+  const entryRecipes = query
     ? await prisma.recipe.findMany({
         where: {
-          OR: results.map((r) => ({
-            bookId: r.bookId,
-            pageRef: r.page,
-          })),
+          OR:
+            entries.length > 0
+              ? entries.map((r) => ({ bookId: r.bookId, pageRef: r.page }))
+              : [{ id: "none" }],
         },
         select: { id: true, bookId: true, pageRef: true },
       })
     : [];
 
   const recipeFor = (bookId: string, page: number) =>
-    recipes.find((r) => r.bookId === bookId && r.pageRef === page);
+    entryRecipes.find((r) => r.bookId === bookId && r.pageRef === page);
+
+  const total = entries.length + matchedRecipes.length;
+
+  const filterHref = (value: string) =>
+    `/?q=${encodeURIComponent(query)}${value === "all" ? "" : `&f=${value}`}`;
 
   return (
     <div className={styles.wrap}>
@@ -52,7 +84,7 @@ export default async function Home({
           What&rsquo;s in your <span className={styles.accent}>cookbooks?</span>
         </h1>
         <p className={styles.sub}>
-          Search every indexed book by ingredient or dish name.
+          Search every indexed book and saved recipe by ingredient or dish.
         </p>
         <form className={styles.searchForm} action="/" method="get">
           <input
@@ -70,55 +102,117 @@ export default async function Home({
       </section>
 
       {query ? (
-        results.length === 0 ? (
-          <div className={`card ${styles.empty}`}>
-            <h2 className={styles.emptyTitle}>
-              Nothing for &ldquo;{query}&rdquo;
-            </h2>
-            <p className={styles.emptyText}>
-              Try a different ingredient, or index more books.
-            </p>
+        <>
+          <div className={styles.filterRow}>
+            {[
+              { value: "all", label: "All" },
+              { value: "books", label: "From books" },
+              { value: "personal", label: "My recipes" },
+            ].map((opt) => (
+              <Link
+                key={opt.value}
+                href={filterHref(opt.value)}
+                className={`${styles.filterPill} ${
+                  filter === opt.value ? styles.filterActive : ""
+                }`}
+              >
+                {opt.label}
+              </Link>
+            ))}
           </div>
-        ) : (
-          <section className={styles.results}>
-            <p className={styles.count}>
-              {results.length} result{results.length === 1 ? "" : "s"} for
-              &ldquo;{query}&rdquo;
-            </p>
-            {results.map((r) => {
-              const recipe = recipeFor(r.bookId, r.page);
-              return (
-                <div key={r.id} className={`card ${styles.result}`}>
-                  {r.book.coverUrl ? (
+
+          {total === 0 ? (
+            <div className={`card ${styles.empty}`}>
+              <h2 className={styles.emptyTitle}>
+                Nothing for &ldquo;{query}&rdquo;
+              </h2>
+              <p className={styles.emptyText}>
+                Try a different ingredient, or index more books.
+              </p>
+            </div>
+          ) : (
+            <section className={styles.results}>
+              <p className={styles.count}>
+                {total} result{total === 1 ? "" : "s"} for &ldquo;{query}&rdquo;
+              </p>
+
+              {matchedRecipes.map((r) => (
+                <Link
+                  key={`recipe-${r.id}`}
+                  href={`/recipes/${r.id}`}
+                  className={`card ${styles.result}`}
+                >
+                  {r.photos[0] ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
-                    <img src={r.book.coverUrl} alt="" className={styles.resultCover} />
+                    <img
+                      src={r.photos[0].url}
+                      alt=""
+                      className={styles.resultCover}
+                    />
                   ) : (
-                    <div className={styles.resultCoverFallback}>
-                      {r.book.title.slice(0, 1)}
-                    </div>
+                    <div className={styles.resultCoverFallback}>🍽</div>
                   )}
                   <div className={styles.resultInfo}>
-                    <h2 className={styles.resultDish}>{r.dish}</h2>
+                    <h2 className={styles.resultDish}>{r.title}</h2>
                     <p className={styles.resultMeta}>
-                      <Link href={`/books/${r.bookId}`} className={styles.bookLink}>
-                        {r.book.title}
-                      </Link>{" "}
-                      · p.{r.page}
+                      {r.book
+                        ? `${r.book.title}${r.pageRef ? ` · p.${r.pageRef}` : ""}`
+                        : "My own recipe"}
                     </p>
                     <div className={styles.resultTags}>
-                      <span className="tag">{r.ingredient}</span>
-                      {recipe && (
-                        <Link href={`/recipes/${recipe.id}`} className={styles.recipeLink}>
-                          View recipe log →
-                        </Link>
-                      )}
+                      <span className="tag">
+                        {r.source === "book" ? "Book recipe" : "Personal"}
+                      </span>
                     </div>
                   </div>
-                </div>
-              );
-            })}
-          </section>
-        )
+                </Link>
+              ))}
+
+              {entries.map((r) => {
+                const recipe = recipeFor(r.bookId, r.page);
+                return (
+                  <div key={r.id} className={`card ${styles.result}`}>
+                    {r.book.coverUrl ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
+                        src={r.book.coverUrl}
+                        alt=""
+                        className={styles.resultCover}
+                      />
+                    ) : (
+                      <div className={styles.resultCoverFallback}>
+                        {r.book.title.slice(0, 1)}
+                      </div>
+                    )}
+                    <div className={styles.resultInfo}>
+                      <h2 className={styles.resultDish}>{r.dish}</h2>
+                      <p className={styles.resultMeta}>
+                        <Link
+                          href={`/books/${r.bookId}`}
+                          className={styles.bookLink}
+                        >
+                          {r.book.title}
+                        </Link>{" "}
+                        · p.{r.page}
+                      </p>
+                      <div className={styles.resultTags}>
+                        <span className="tag">{r.ingredient}</span>
+                        {recipe && (
+                          <Link
+                            href={`/recipes/${recipe.id}`}
+                            className={styles.recipeLink}
+                          >
+                            View recipe log →
+                          </Link>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </section>
+          )}
+        </>
       ) : bookCount === 0 ? (
         <section>
           <div className={`card ${styles.empty}`}>

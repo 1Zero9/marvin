@@ -53,6 +53,27 @@
   max-width: 420px;
 }
 
+.filterRow {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.filterPill {
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 8px 18px;
+  border-radius: var(--radius-pill);
+  background: var(--marvin-blush);
+  color: var(--marvin-plum);
+}
+
+.filterActive {
+  background: var(--marvin-orange);
+  color: #fff;
+}
+
 .results {
   display: flex;
   flex-direction: column;

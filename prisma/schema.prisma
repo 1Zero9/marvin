@@ -42,7 +42,10 @@ model Recipe {
   pageRef      Int?
   ingredients  String?
   instructions String?
+  notes        String?
   tags         String[]
+  keywords     String[]
+  links        String[]
   instagramUrl String?
   shareSlug    String?   @unique
   photos       Photo[]

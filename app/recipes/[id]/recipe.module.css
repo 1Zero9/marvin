@@ -1,0 +1,142 @@
+.wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 840px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 2rem;
+  margin-bottom: 4px;
+}
+
+.meta {
+  color: var(--plum-500);
+  font-size: 0.95rem;
+}
+
+.bookLink {
+  color: var(--marvin-orange);
+  font-weight: 700;
+}
+
+.tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+
+.photos {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.photo {
+  width: 160px;
+  height: 160px;
+  object-fit: cover;
+  border-radius: var(--radius-md);
+}
+
+.photoSmall {
+  width: 84px;
+  height: 84px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+}
+
+.columns {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.sectionTitle {
+  font-size: 1.15rem;
+}
+
+.pre {
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
+.notes {
+  background: var(--marvin-peach);
+}
+
+.linkList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.extLink {
+  color: var(--marvin-orange);
+  font-weight: 700;
+  word-break: break-all;
+}
+
+.logHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.emptyText {
+  color: var(--plum-500);
+}
+
+.logList {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.logItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+
+.logTop {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.logDate {
+  font-weight: 700;
+  color: var(--marvin-plum);
+}
+
+.stars {
+  color: var(--marvin-orange);
+  letter-spacing: 2px;
+}
+
+@media (max-width: 700px) {
+  .columns {
+    grid-template-columns: 1fr;
+  }
+
+  .photo {
+    width: 120px;
+    height: 120px;
+  }
+}
