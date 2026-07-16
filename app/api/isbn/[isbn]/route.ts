@@ -8,9 +8,31 @@ type BookMeta = {
   pageCount: number | null;
 };
 
-async function fromGoogleBooks(isbn: string): Promise<BookMeta | null> {
+function isbn13to10(isbn13: string): string | null {
+  if (isbn13.length !== 13 || !isbn13.startsWith("978")) return null;
+  const core = isbn13.slice(3, 12);
+  let sum = 0;
+  for (let i = 0; i < 9; i++) sum += (10 - i) * Number(core[i]);
+  const check = (11 - (sum % 11)) % 11;
+  return core + (check === 10 ? "X" : String(check));
+}
+
+function isbn10to13(isbn10: string): string | null {
+  if (isbn10.length !== 10) return null;
+  const core = "978" + isbn10.slice(0, 9);
+  let sum = 0;
+  for (let i = 0; i < 12; i++) sum += Number(core[i]) * (i % 2 === 0 ? 1 : 3);
+  return core + String((10 - (sum % 10)) % 10);
+}
+
+function candidatesFor(isbn: string): string[] {
+  const alt = isbn.length === 13 ? isbn13to10(isbn) : isbn10to13(isbn);
+  return alt ? [isbn, alt] : [isbn];
+}
+
+async function fromGoogleBooks(isbn: string, query?: string): Promise<BookMeta | null> {
   const res = await fetch(
-    `https://www.googleapis.com/books/v1/volumes?q=isbn:${encodeURIComponent(isbn)}`,
+    `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query ?? `isbn:${isbn}`)}&maxResults=5`,
     { next: { revalidate: 0 } }
   );
   if (!res.ok) return null;
@@ -72,9 +94,16 @@ export async function GET(
     return NextResponse.json({ error: "Invalid ISBN" }, { status: 400 });
   }
 
-  const meta = (await fromGoogleBooks(clean)) ?? (await fromOpenLibrary(clean));
+  let meta: BookMeta | null = null;
+  for (const candidate of candidatesFor(clean)) {
+    meta =
+      (await fromGoogleBooks(candidate)) ??
+      (await fromOpenLibrary(candidate)) ??
+      (await fromGoogleBooks(candidate, candidate));
+    if (meta) break;
+  }
   if (!meta) {
     return NextResponse.json({ error: "Book not found" }, { status: 404 });
   }
-  return NextResponse.json(meta);
+  return NextResponse.json({ ...meta, isbn: clean });
 }

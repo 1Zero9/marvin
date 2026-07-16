@@ -210,7 +210,12 @@ export default function AddBookPage() {
           </label>
           <label className={styles.label}>
             ISBN
-            <input className="input" value={meta.isbn} readOnly />
+            <input
+              className="input"
+              inputMode="numeric"
+              value={meta.isbn}
+              onChange={(e) => setMeta({ ...meta, isbn: e.target.value })}
+            />
           </label>
           <div className={styles.actions}>
             <button className="btn btn-secondary" onClick={() => setStep("scan")}>
