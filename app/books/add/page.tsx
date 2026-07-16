@@ -48,6 +48,7 @@ export default function AddBookPage() {
   const [images, setImages] = useState<{ data: string; mimeType: string; preview: string }[]>([]);
   const [entries, setEntries] = useState<Entry[]>([]);
   const [busy, setBusy] = useState(false);
+  const [extractProgress, setExtractProgress] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -110,18 +111,35 @@ export default function AddBookPage() {
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch("/api/extract", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          images: images.map(({ data, mimeType }) => ({ data, mimeType })),
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error);
-      setEntries(data.entries);
+      const merged: Entry[] = [];
+      for (let i = 0; i < images.length; i++) {
+        setExtractProgress(`Reading page ${i + 1} of ${images.length}…`);
+        const res = await fetch("/api/extract", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            images: [{ data: images[i].data, mimeType: images[i].mimeType }],
+          }),
+        });
+        let data: { entries?: Entry[]; error?: string } | null = null;
+        try {
+          data = await res.json();
+        } catch {
+          data = null;
+        }
+        if (!res.ok) {
+          throw new Error(
+            data?.error ??
+              (res.status === 413
+                ? `Photo ${i + 1} is too large — remove it and retake.`
+                : `Extraction failed on photo ${i + 1} (${res.status}). Try again.`)
+          );
+        }
+        merged.push(...(data?.entries ?? []));
+      }
+      setEntries(merged);
       setStep("review");
-      if (data.entries.length === 0) {
+      if (merged.length === 0) {
         setError("Nothing extracted — try clearer photos.");
         setStep("photos");
       }
@@ -129,6 +147,7 @@ export default function AddBookPage() {
       setError(e instanceof Error && e.message ? e.message : "Extraction failed.");
     } finally {
       setBusy(false);
+      setExtractProgress(null);
     }
   }
 
@@ -281,7 +300,7 @@ export default function AddBookPage() {
               onClick={extract}
               disabled={busy || images.length === 0}
             >
-              {busy ? "Extracting…" : `Extract index (${images.length})`}
+              {busy ? (extractProgress ?? "Extracting…") : `Extract index (${images.length})`}
             </button>
           </div>
         </section>
