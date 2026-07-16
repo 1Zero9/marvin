@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+export const maxDuration = 30;
+
 type BookMeta = {
   isbn: string;
   title: string;
@@ -84,6 +86,63 @@ async function fromOpenLibrary(isbn: string): Promise<BookMeta | null> {
   };
 }
 
+async function fromGemini(isbn: string): Promise<BookMeta | null> {
+  const apiKey = process.env.GEMINI_API_KEY;
+  if (!apiKey) return null;
+  const models = [
+    process.env.GEMINI_MODEL || "gemini-flash-latest",
+    "gemini-flash-lite-latest",
+  ];
+  try {
+    let data: unknown = null;
+    for (const model of models) {
+      const res = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+          body: JSON.stringify({
+            contents: [
+              {
+                parts: [
+                  {
+                    text: `Search the web to identify the book with ISBN ${isbn}. Reply with ONLY a JSON object, no prose, no markdown fences: {"title": string, "author": string or null, "pageCount": number or null}. If you cannot confidently identify it, reply exactly {"title": null}.`,
+                  },
+                ],
+              },
+            ],
+            tools: [{ google_search: {} }],
+          }),
+        }
+      );
+      if (res.ok) {
+        data = await res.json();
+        break;
+      }
+      if (res.status !== 429 && res.status !== 404) return null;
+    }
+    if (!data) return null;
+    const text: string =
+      (data as { candidates?: { content?: { parts?: { text?: string }[] } }[] })
+        ?.candidates?.[0]?.content?.parts
+        ?.map((p) => p.text ?? "")
+        .join("") ?? "";
+    const match = text.match(/\{[\s\S]*\}/);
+    if (!match) return null;
+    const parsed = JSON.parse(match[0]);
+    if (!parsed?.title || typeof parsed.title !== "string") return null;
+    return {
+      isbn,
+      title: parsed.title,
+      author: typeof parsed.author === "string" ? parsed.author : null,
+      coverUrl: null,
+      pageCount: typeof parsed.pageCount === "number" ? parsed.pageCount : null,
+    };
+  } catch {
+    return null;
+  }
+}
+
 export async function GET(
   _req: Request,
   { params }: { params: Promise<{ isbn: string }> }
@@ -102,6 +161,7 @@ export async function GET(
       (await fromGoogleBooks(candidate, candidate));
     if (meta) break;
   }
+  meta ??= await fromGemini(clean);
   if (!meta) {
     return NextResponse.json({ error: "Book not found" }, { status: 404 });
   }
