@@ -39,6 +39,7 @@
   background: var(--marvin-blush);
   color: var(--marvin-plum);
   cursor: pointer;
+  min-height: 44px;
 }
 
 .sourceActive {
@@ -129,6 +130,12 @@
 }
 
 @media (max-width: 480px) {
+  .sourcePill {
+    flex: 1;
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
   .bookRow {
     grid-template-columns: 1fr 80px;
   }

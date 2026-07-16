@@ -70,7 +70,28 @@
 
 .table {
   width: 100%;
+  min-width: 480px;
   border-collapse: collapse;
+}
+
+@media (max-width: 480px) {
+  .header {
+    gap: 14px;
+  }
+
+  .cover {
+    width: 76px;
+  }
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  .tableCard {
+    margin-left: -2px;
+    margin-right: -2px;
+    padding: 12px 0;
+  }
 }
 
 .table th {

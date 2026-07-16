@@ -29,4 +29,4 @@
 .reason { color: var(--marvin-orange); display: inline-block; font-size: .82rem; font-weight: 700; margin-top: 7px; }
 .empty { align-items: center; display: flex; flex-direction: column; gap: 12px; padding: 40px 24px; text-align: center; }
 .empty h2 { font-size: 1.35rem; }
-@media (max-width: 480px) { .pickBody { align-items: flex-start; } .pickPhoto, .pickFallback { flex-basis: 84px; width: 84px; height: 84px; } }
+@media (max-width: 480px) { .pickBody { align-items: flex-start; } .pickPhoto, .pickFallback { flex-basis: 84px; width: 84px; height: 84px; } .filter { min-height: 40px; padding: 9px 12px; } .shelfPick .btn { align-self: stretch; } }
