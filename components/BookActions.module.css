@@ -15,6 +15,7 @@
   background: transparent;
   color: var(--marvin-orange);
   cursor: pointer;
+  min-height: 44px;
   transition: background 0.15s ease;
 }
 
@@ -33,6 +34,20 @@
   background: transparent;
   color: #c0392b;
   cursor: pointer;
+  min-height: 44px;
+}
+
+@media (max-width: 480px) {
+  .actions {
+    gap: 8px;
+  }
+
+  .favBtn,
+  .deleteBtn,
+  .actions :global(.btn) {
+    flex: 1 1 calc(50% - 8px);
+    justify-content: center;
+  }
 }
 
 .favBtn:disabled,

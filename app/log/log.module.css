@@ -1,5 +1,5 @@
 .wrap { display: flex; flex-direction: column; gap: 20px; max-width: 840px; margin: 0 auto; }
-.header { display: flex; align-items: end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.header { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
 .title { font-size: 2rem; }
 .sub { color: var(--plum-500); margin-top: 4px; }
 .summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
@@ -15,7 +15,7 @@
 .photo { object-fit: cover; }
 .photoFallback { align-items: center; background: var(--marvin-peach); display: flex; font-size: 1.8rem; justify-content: center; }
 .entryBody { display: flex; flex: 1; flex-direction: column; gap: 8px; min-width: 0; }
-.entryTop { display: flex; align-items: start; justify-content: space-between; gap: 12px; }
+.entryTop { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
 .recipeLink { color: var(--marvin-plum); font-family: var(--font-heading), Georgia, serif; font-size: 1.1rem; font-weight: 900; }
 .recipeLink:hover { color: var(--marvin-orange); }
 .meta { color: var(--plum-500); font-size: .9rem; }

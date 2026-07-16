@@ -96,6 +96,7 @@ select {
   padding: 12px 24px;
   font-size: 1rem;
   font-weight: 700;
+  min-height: 44px;
   transition: background 0.15s ease;
 }
 
@@ -142,6 +143,22 @@ select {
   border-radius: var(--radius-md);
   padding: 12px 16px;
   color: var(--text-primary);
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .card {
+    border-radius: 20px;
+    padding: 16px;
+  }
+
+  .input {
+    min-height: 48px;
+  }
 }
 
 .input:focus {
