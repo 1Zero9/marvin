@@ -1,0 +1,1 @@
+.button { background: none; border: 0; color: var(--plum-500); font-size: .85rem; font-weight: 700; padding: 5px 0; }.button:hover { color: var(--marvin-orange); text-decoration: underline; text-underline-offset: 3px; }

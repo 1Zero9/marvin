@@ -1,11 +1,14 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
+import { requireHousehold } from "@/lib/auth";
 import styles from "./recipes.module.css";
 
 export const dynamic = "force-dynamic";
 
 export default async function RecipesPage() {
+  const identity = await requireHousehold();
   const recipes = await prisma.recipe.findMany({
+    where: { householdId: identity.membership.householdId },
     orderBy: { createdAt: "desc" },
     include: {
       book: { select: { title: true } },

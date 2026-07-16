@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { currentMembership } from "@/lib/auth";
 
 export const maxDuration = 30;
 
@@ -147,6 +148,8 @@ export async function GET(
   _req: Request,
   { params }: { params: Promise<{ isbn: string }> }
 ) {
+  const identity = await currentMembership();
+  if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
   const { isbn } = await params;
   const clean = isbn.replace(/[^0-9Xx]/g, "");
   if (clean.length !== 10 && clean.length !== 13) {

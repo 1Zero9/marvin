@@ -1,12 +1,15 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { currentMembership } from "@/lib/auth";
 
 export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const identity = await currentMembership();
+  if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
   const { id } = await params;
-  const book = await prisma.book.findUnique({ where: { id } });
+  const book = await prisma.book.findFirst({ where: { id, householdId: identity.membership.householdId } });
   if (!book) {
     return NextResponse.json({ error: "Book not found" }, { status: 404 });
   }

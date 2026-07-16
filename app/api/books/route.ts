@@ -1,9 +1,12 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { currentMembership } from "@/lib/auth";
 
 export async function GET() {
+  const identity = await currentMembership();
+  if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
   const books = await prisma.book.findMany({
-    where: { archived: false },
+    where: { archived: false, householdId: identity.membership.householdId },
     orderBy: { title: "asc" },
     select: { id: true, title: true, author: true },
   });
@@ -11,6 +14,8 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
+  const identity = await currentMembership();
+  if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
   const body = await req.json();
   const { isbn, title, author, coverUrl, pageCount } = body ?? {};
 
@@ -19,7 +24,7 @@ export async function POST(req: Request) {
   }
 
   if (isbn) {
-    const existing = await prisma.book.findUnique({ where: { isbn } });
+    const existing = await prisma.book.findFirst({ where: { isbn, householdId: identity.membership.householdId } });
     if (existing) {
       return NextResponse.json(existing);
     }
@@ -32,6 +37,7 @@ export async function POST(req: Request) {
       author: author || null,
       coverUrl: coverUrl || null,
       pageCount: typeof pageCount === "number" ? pageCount : null,
+      householdId: identity.membership.householdId,
     },
   });
 

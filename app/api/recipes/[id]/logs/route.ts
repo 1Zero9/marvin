@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
+import { currentMembership } from "@/lib/auth";
 
 export const maxDuration = 60;
 
@@ -10,10 +11,12 @@ export async function POST(
   req: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const identity = await currentMembership();
+  if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
   const { id } = await params;
   const body = await req.json();
 
-  const recipe = await prisma.recipe.findUnique({ where: { id } });
+  const recipe = await prisma.recipe.findFirst({ where: { id, householdId: identity.membership.householdId } });
   if (!recipe) {
     return NextResponse.json({ error: "Recipe not found" }, { status: 404 });
   }
@@ -32,7 +35,8 @@ export async function POST(
       : null;
 
   const log = await prisma.cookLog.create({
-    data: { recipeId: id, cookedAt, rating, notes },
+    data: { recipeId: id, cookedAt, rating, notes, cookedById: identity.user.id,
+      ...(rating ? { ratings: { create: { userId: identity.user.id, rating } } } : {}) },
   });
 
   const photos: PhotoInput[] = Array.isArray(body?.photos)

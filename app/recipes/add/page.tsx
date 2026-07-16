@@ -223,7 +223,7 @@ export default function AddRecipePage() {
             className="input"
             value={tags}
             onChange={(e) => setTags(e.target.value)}
-            placeholder="comma separated, e.g. quick, veggie"
+            placeholder="comma separated, e.g. quick, winter, outdoors, veggie"
           />
         </label>
 

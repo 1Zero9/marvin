@@ -16,9 +16,13 @@ model Book {
   pageCount    Int?
   favourite    Boolean      @default(false)
   archived     Boolean      @default(false)
+  householdId  String
+  household    Household    @relation(fields: [householdId], references: [id], onDelete: Cascade)
   createdAt    DateTime     @default(now())
   indexEntries IndexEntry[]
   recipes      Recipe[]
+
+  @@index([householdId])
 }
 
 model IndexEntry {
@@ -48,10 +52,14 @@ model Recipe {
   links        String[]
   instagramUrl String?
   shareSlug    String?   @unique
+  householdId  String
+  household    Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
   photos       Photo[]
   cookLogs     CookLog[]
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
+
+  @@index([householdId])
 }
 
 model CookLog {
@@ -63,6 +71,9 @@ model CookLog {
   notes     String?
   photos    Photo[]
   shareSlug String?  @unique
+  cookedById String?
+  cookedBy   User?    @relation("CookedBy", fields: [cookedById], references: [id], onDelete: SetNull)
+  ratings    MealRating[]
 }
 
 model Photo {
@@ -73,4 +84,83 @@ model Photo {
   cookLogId String?
   cookLog   CookLog? @relation(fields: [cookLogId], references: [id])
   createdAt DateTime @default(now())
+}
+
+model User {
+  id           String       @id @default(cuid())
+  email        String       @unique
+  displayName  String
+  passwordHash String
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  memberships  Membership[]
+  sessions     Session[]
+  cookedLogs   CookLog[]    @relation("CookedBy")
+  mealRatings  MealRating[]
+  invitesSent  Invite[]     @relation("InvitedBy")
+}
+
+model Household {
+  id          String       @id @default(cuid())
+  name        String
+  createdAt   DateTime     @default(now())
+  memberships Membership[]
+  invites     Invite[]
+  books       Book[]
+  recipes     Recipe[]
+}
+
+model Membership {
+  id          String    @id @default(cuid())
+  userId      String
+  householdId String
+  role        String    @default("member")
+  createdAt   DateTime  @default(now())
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, householdId])
+  @@index([householdId])
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Invite {
+  id          String    @id @default(cuid())
+  householdId String
+  invitedById String
+  email       String?
+  token       String    @unique
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  household   Household @relation(fields: [householdId], references: [id], onDelete: Cascade)
+  invitedBy   User      @relation("InvitedBy", fields: [invitedById], references: [id], onDelete: Cascade)
+
+  @@index([householdId])
+}
+
+model MealRating {
+  id        String   @id @default(cuid())
+  cookLogId String
+  userId    String
+  rating    Int
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  cookLog   CookLog  @relation(fields: [cookLogId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([cookLogId, userId])
+  @@index([userId])
 }

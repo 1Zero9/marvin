@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
+import { requireHousehold } from "@/lib/auth";
 import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
@@ -11,11 +12,12 @@ export default async function Home({
   searchParams: Promise<{ q?: string; f?: string }>;
 }) {
   const { q, f } = await searchParams;
+  const identity = await requireHousehold();
   const query = q?.trim() ?? "";
   const filter = f === "books" || f === "personal" ? f : "all";
 
   const [bookCount, entries, matchedRecipes] = await Promise.all([
-    prisma.book.count(),
+    prisma.book.count({ where: { householdId: identity.membership.householdId } }),
     query && filter !== "personal"
       ? prisma.indexEntry.findMany({
           where: {
@@ -23,7 +25,7 @@ export default async function Home({
               { ingredient: { contains: query, mode: "insensitive" } },
               { dish: { contains: query, mode: "insensitive" } },
             ],
-            book: { archived: false },
+            book: { archived: false, householdId: identity.membership.householdId },
           },
           include: { book: true },
           orderBy: [{ dish: "asc" }],
@@ -46,6 +48,7 @@ export default async function Home({
                 : filter === "personal"
                   ? { source: "personal" }
                   : {},
+              { householdId: identity.membership.householdId },
             ],
           },
           include: {
@@ -61,10 +64,10 @@ export default async function Home({
   const entryRecipes = query
     ? await prisma.recipe.findMany({
         where: {
-          OR:
+          AND: [{ householdId: identity.membership.householdId }, { OR:
             entries.length > 0
               ? entries.map((r) => ({ bookId: r.bookId, pageRef: r.page }))
-              : [{ id: "none" }],
+              : [{ id: "none" }] }],
         },
         select: { id: true, bookId: true, pageRef: true },
       })
@@ -112,6 +115,9 @@ export default async function Home({
         </form>
         <Link href="/snap" className={styles.snapCta}>
           📷 Cooked something? Snap it and Marvin will log it
+        </Link>
+        <Link href="/decide" className={styles.decideCta}>
+          Need inspiration? Let Marvin choose dinner →
         </Link>
       </section>
 
