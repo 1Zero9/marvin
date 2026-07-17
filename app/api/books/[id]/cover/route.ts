@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { put } from "@vercel/blob";
+import { del, put } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { currentMembership } from "@/lib/auth";
 import { canManage } from "@/lib/privacy";
@@ -32,11 +32,16 @@ export async function POST(
   if (!canManage(identity, book.createdById)) return NextResponse.json({ error: "Only the owner or creator can change this private book." }, { status: 403 });
 
   const ext = mimeType.split("/")[1] === "png" ? "png" : "jpg";
-  const blob = await put(`covers/${id}.${ext}`, buffer, {
+  const blob = await put(`covers/${id}-${Date.now()}.${ext}`, buffer, {
     access: "public",
     contentType: mimeType,
-    allowOverwrite: true,
   });
+
+  if (book.coverUrl?.includes(".blob.vercel-storage.com/")) {
+    try {
+      await del(book.coverUrl);
+    } catch {}
+  }
 
   const updated = await prisma.book.update({
     where: { id },

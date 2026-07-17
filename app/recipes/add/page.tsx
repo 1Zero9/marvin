@@ -44,8 +44,11 @@ export default function AddRecipePage() {
     { data: string; mimeType: string; preview: string }[]
   >([]);
   const [busy, setBusy] = useState(false);
+  const [scanning, setScanning] = useState(false);
+  const [scanned, setScanned] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  const scanRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetch("/api/books")
@@ -76,6 +79,49 @@ export default function AddRecipePage() {
     } finally {
       setBusy(false);
       if (fileRef.current) fileRef.current.value = "";
+    }
+  }
+
+  async function onScanFiles(files: FileList | null) {
+    if (!files || files.length === 0) return;
+    setScanning(true);
+    setError(null);
+    try {
+      const resized = await Promise.all(
+        Array.from(files).slice(0, 6).map(resizeImage)
+      );
+      const res = await fetch("/api/recipes/extract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          images: resized.map((r) => ({ data: r.data, mimeType: r.mimeType })),
+        }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        setError(body?.error ?? "Couldn't read the recipe from that photo.");
+        return;
+      }
+      const extracted = await res.json();
+      if (extracted.title && !title.trim()) setTitle(extracted.title);
+      if (extracted.ingredients) setIngredients(extracted.ingredients);
+      if (extracted.instructions) setInstructions(extracted.instructions);
+      if (extracted.notes) setNotes((prev) => prev || extracted.notes);
+      if (extracted.tags?.length) {
+        setTags((prev) => {
+          const existing = prev
+            .split(",")
+            .map((t) => t.trim())
+            .filter(Boolean);
+          return Array.from(new Set([...existing, ...extracted.tags])).join(", ");
+        });
+      }
+      setScanned(true);
+    } catch {
+      setError("Couldn't read the recipe from that photo.");
+    } finally {
+      setScanning(false);
+      if (scanRef.current) scanRef.current.value = "";
     }
   }
 
@@ -127,6 +173,37 @@ export default function AddRecipePage() {
     <div className={styles.wrap}>
       <h1 className={styles.title}>Add a recipe</h1>
       {error && <p className={styles.error}>{error}</p>}
+
+      <section className={`card ${styles.scanCard}`}>
+        <div>
+          <h2 className={styles.scanTitle}>✍️ Got it written down?</h2>
+          <p className={styles.scanHint}>
+            Photograph a handwritten recipe, cookbook page, or a screenshot from
+            Instagram or your notes — Marvin will fill the form in for you.
+          </p>
+        </div>
+        <input
+          ref={scanRef}
+          type="file"
+          accept="image/*"
+          multiple
+          className={styles.fileInput}
+          onChange={(e) => onScanFiles(e.target.files)}
+        />
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={() => scanRef.current?.click()}
+          disabled={scanning}
+        >
+          {scanning ? "Reading recipe…" : scanned ? "Scan again" : "📷 Scan a recipe"}
+        </button>
+        {scanned && !scanning && (
+          <p className={styles.scanDone}>
+            Filled in below — check it over, then save.
+          </p>
+        )}
+      </section>
 
       <section className={`card ${styles.form}`}>
         <div className={styles.sourceRow}>

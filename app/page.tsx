@@ -145,14 +145,14 @@ export default async function Home({
         </h1>
         <form className={styles.searchForm} action="/" method="get">
           <input
-            className={`input ${styles.searchInput}`}
+            className={styles.searchInput}
             type="search"
             name="q"
             defaultValue={query}
-            placeholder="What’s on your mind? Try “aubergine”…"
+            placeholder="Try “aubergine” or “Tuesday curry”…"
             autoComplete="off"
           />
-          <button type="submit" className="btn btn-primary">
+          <button type="submit" className={styles.searchBtn}>
             Search
           </button>
         </form>

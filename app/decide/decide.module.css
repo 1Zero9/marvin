@@ -1,7 +1,7 @@
 .wrap { display: flex; flex-direction: column; gap: 20px; max-width: 840px; margin: 0 auto; }
-.hero { text-align: center; padding: 12px 0 0; }
-.title { font-size: clamp(2rem, 6vw, 2.7rem); }
-.sub { color: var(--plum-500); margin: 8px auto 0; max-width: 480px; }
+.hero { text-align: center; padding: 8px 0 0; }
+.title { font-size: clamp(1.9rem, 6vw, 2.7rem); }
+.sub { color: var(--plum-500); margin: 6px auto 0; max-width: 480px; }
 .pick { background: var(--marvin-blush); }
 .shelfPick { background: #fff; border: 2px solid var(--marvin-peach); display: flex; flex-direction: column; gap: 7px; }
 .shelfPick p:not(.eyebrow) { color: var(--plum-500); }
@@ -29,4 +29,13 @@
 .reason { color: var(--marvin-orange); display: inline-block; font-size: .82rem; font-weight: 700; margin-top: 7px; }
 .empty { align-items: center; display: flex; flex-direction: column; gap: 12px; padding: 40px 24px; text-align: center; }
 .empty h2 { font-size: 1.35rem; }
-@media (max-width: 480px) { .pickBody { align-items: flex-start; } .pickPhoto, .pickFallback { flex-basis: 84px; width: 84px; height: 84px; } .filter { min-height: 40px; padding: 9px 12px; } .shelfPick .btn { align-self: stretch; } }
+@media (max-width: 480px) {
+  .wrap { gap: 16px; }
+  .pickBody { align-items: flex-start; gap: 14px; }
+  .pickPhoto, .pickFallback { flex-basis: 84px; width: 84px; height: 84px; }
+  .pickTitle { font-size: 1.3rem; }
+  .filters { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; margin: 0 -16px; padding: 2px 16px 8px; scrollbar-width: none; }
+  .filters::-webkit-scrollbar { display: none; }
+  .filter { flex-shrink: 0; white-space: nowrap; min-height: 40px; padding: 9px 14px; display: inline-flex; align-items: center; }
+  .shelfPick .btn { align-self: stretch; }
+}

@@ -165,3 +165,46 @@ select {
   outline: none;
   border-color: var(--marvin-orange);
 }
+
+.page-loading {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 32px 0;
+}
+
+.skeleton {
+  background: linear-gradient(
+    100deg,
+    var(--marvin-blush) 40%,
+    #fff 50%,
+    var(--marvin-blush) 60%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.2s ease-in-out infinite;
+  border-radius: var(--radius-lg);
+}
+
+.skeleton-title {
+  height: 44px;
+  max-width: 320px;
+  margin: 0 auto;
+  width: 60%;
+}
+
+.skeleton-block {
+  height: 140px;
+}
+
+.skeleton-block.short {
+  height: 90px;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

@@ -24,6 +24,39 @@
   gap: 14px;
 }
 
+.scanCard {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background: var(--marvin-blush);
+}
+
+.scanCard .btn {
+  align-self: flex-start;
+}
+
+.scanTitle {
+  font-size: 1.15rem;
+}
+
+.scanHint {
+  color: var(--plum-500);
+  font-size: 0.9rem;
+  margin-top: 4px;
+}
+
+.scanDone {
+  color: var(--success);
+  font-weight: 700;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 480px) {
+  .scanCard .btn {
+    align-self: stretch;
+  }
+}
+
 .sourceRow {
   display: flex;
   gap: 8px;
