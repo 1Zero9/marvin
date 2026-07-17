@@ -1,7 +1,6 @@
 "use client";
 
 import { useRef, useState } from "react";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import styles from "./snap.module.css";
 
@@ -43,13 +42,21 @@ async function resizeImage(
 export default function SnapPage() {
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
+  const today = new Date().toISOString().slice(0, 10);
   const [photo, setPhoto] = useState<{
     data: string;
     mimeType: string;
     preview: string;
   } | null>(null);
   const [result, setResult] = useState<Result | null>(null);
+  const [dishName, setDishName] = useState("");
+  const [selectedMatch, setSelectedMatch] = useState<string | null>(null);
+  const [rating, setRating] = useState(0);
+  const [notes, setNotes] = useState("");
+  const [date, setDate] = useState(today);
+  const [moreOpen, setMoreOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function onFile(files: FileList | null) {
@@ -58,6 +65,10 @@ export default function SnapPage() {
     setBusy(true);
     setError(null);
     setResult(null);
+    setSelectedMatch(null);
+    setRating(0);
+    setNotes("");
+    setMoreOpen(false);
     try {
       const resized = await resizeImage(file);
       setPhoto(resized);
@@ -67,7 +78,9 @@ export default function SnapPage() {
         body: JSON.stringify({ data: resized.data, mimeType: resized.mimeType }),
       });
       if (!res.ok) throw new Error();
-      setResult(await res.json());
+      const identified: Result = await res.json();
+      setResult(identified);
+      setDishName(identified.dish ?? "");
     } catch {
       setError("Couldn't identify that photo. Try another one.");
     } finally {
@@ -76,7 +89,37 @@ export default function SnapPage() {
     }
   }
 
-  function stashPhoto(title?: string) {
+  async function saveLog() {
+    if (!selectedMatch && !dishName.trim()) {
+      setError("Give the dish a name first.");
+      return;
+    }
+    setSaving(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/logs/quick", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          recipeId: selectedMatch,
+          title: dishName.trim(),
+          rating: rating || null,
+          notes,
+          cookedAt: date,
+          ingredients: result?.ingredients ?? [],
+          photo: photo ? { data: photo.data, mimeType: photo.mimeType } : null,
+        }),
+      });
+      if (!res.ok) throw new Error();
+      router.push("/log");
+      router.refresh();
+    } catch {
+      setError("Couldn't save that. Try again.");
+      setSaving(false);
+    }
+  }
+
+  function openFullForm() {
     if (photo) {
       sessionStorage.setItem(
         "marvin-snap",
@@ -84,28 +127,21 @@ export default function SnapPage() {
           data: photo.data,
           mimeType: photo.mimeType,
           preview: photo.preview,
-          title: title ?? null,
+          title: dishName.trim() || result?.dish || null,
         })
       );
     }
-  }
-
-  function logCook(recipeId: string) {
-    stashPhoto();
-    router.push(`/recipes/${recipeId}/log`);
-  }
-
-  function saveAsRecipe() {
-    stashPhoto(result?.dish ?? undefined);
     router.push("/recipes/add");
   }
 
   return (
     <div className={styles.wrap}>
-      <h1 className={styles.title}>Snap your dinner</h1>
-      <p className={styles.sub}>
-        Take a photo of what you cooked and Marvin will work out what it is.
-      </p>
+      {!result && <h1 className={styles.title}>Snap your dinner</h1>}
+      {!result && !busy && (
+        <p className={styles.sub}>
+          Take a photo of what you cooked — Marvin works out the rest.
+        </p>
+      )}
 
       <input
         ref={fileRef}
@@ -144,67 +180,108 @@ export default function SnapPage() {
 
       {result && !busy && (
         <div className={styles.results}>
-          {result.dish ? (
-            <>
-              <div className={`card ${styles.guess}`}>
-                <h2 className={styles.guessTitle}>
-                  Looks like <span className={styles.dish}>{result.dish}</span>
-                </h2>
-                {result.ingredients.length > 0 && (
-                  <p className={styles.ingredients}>
-                    A meal with {result.ingredients.join(", ")}.
-                  </p>
-                )}
-                <p className={styles.question}>Do you want to log it?</p>
-              </div>
-
+          {result.dish !== null ? (
+            <div className={`card ${styles.quickCard}`}>
               {result.matches.length > 0 && (
-                <div className={`card ${styles.matches}`}>
-                  <h3 className={styles.matchesTitle}>
-                    Matches your recipes
-                  </h3>
-                  <ul className={styles.matchList}>
-                    {result.matches.map((m) => (
-                      <li key={m.id} className={styles.matchItem}>
-                        <div>
-                          <Link
-                            href={`/recipes/${m.id}`}
-                            className={styles.matchLink}
-                          >
-                            {m.title}
-                          </Link>
-                          <p className={styles.matchMeta}>
-                            {m.bookTitle
-                              ? `${m.bookTitle}${m.pageRef ? ` · p.${m.pageRef}` : ""}`
-                              : "My own recipe"}
-                          </p>
-                        </div>
-                        <button
-                          className="btn btn-primary"
-                          onClick={() => logCook(m.id)}
-                        >
-                          Log it
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
+                <div className={styles.chips}>
+                  <button
+                    type="button"
+                    className={`${styles.chip} ${selectedMatch === null ? styles.chipActive : ""}`}
+                    onClick={() => setSelectedMatch(null)}
+                  >
+                    ✨ New dish
+                  </button>
+                  {result.matches.map((m) => (
+                    <button
+                      key={m.id}
+                      type="button"
+                      className={`${styles.chip} ${selectedMatch === m.id ? styles.chipActive : ""}`}
+                      onClick={() => setSelectedMatch(m.id)}
+                    >
+                      {m.title}
+                      {m.bookTitle ? ` · ${m.bookTitle}` : ""}
+                    </button>
+                  ))}
                 </div>
               )}
 
-              <div className={styles.actions}>
-                <button className="btn btn-primary" onClick={saveAsRecipe}>
-                  {result.matches.length > 0
-                    ? "Save as a new recipe instead"
-                    : "Save as a new recipe"}
-                </button>
-                <button
-                  className="btn btn-secondary"
-                  onClick={() => fileRef.current?.click()}
-                >
-                  Try another photo
-                </button>
+              {selectedMatch === null && (
+                <input
+                  className={`input ${styles.dishInput}`}
+                  value={dishName}
+                  onChange={(e) => setDishName(e.target.value)}
+                  placeholder="What did you make?"
+                  aria-label="Dish name"
+                />
+              )}
+
+              <div className={styles.stars}>
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <button
+                    key={n}
+                    type="button"
+                    className={styles.star}
+                    onClick={() => setRating(n === rating ? 0 : n)}
+                    aria-label={`${n} star${n === 1 ? "" : "s"}`}
+                  >
+                    {n <= rating ? "★" : "☆"}
+                  </button>
+                ))}
               </div>
-            </>
+
+              <textarea
+                className={`input ${styles.notes}`}
+                rows={2}
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Any notes? Who loved it? (optional)"
+              />
+
+              <button
+                className={`btn btn-primary ${styles.saveBtn}`}
+                onClick={saveLog}
+                disabled={saving}
+              >
+                {saving ? "Saving…" : "Save to my log"}
+              </button>
+
+              <button
+                type="button"
+                className={styles.moreToggle}
+                onClick={() => setMoreOpen((v) => !v)}
+              >
+                {moreOpen ? "Fewer options" : "More options"}
+              </button>
+
+              {moreOpen && (
+                <div className={styles.moreBox}>
+                  <label className={styles.moreLabel}>
+                    When was it?
+                    <input
+                      className="input"
+                      type="date"
+                      value={date}
+                      max={today}
+                      onChange={(e) => setDate(e.target.value)}
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={openFullForm}
+                  >
+                    Add full recipe details
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => fileRef.current?.click()}
+                  >
+                    Try another photo
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
             <div className={`card ${styles.guess}`}>
               <h2 className={styles.guessTitle}>
