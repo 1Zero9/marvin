@@ -68,33 +68,147 @@
   }
 }
 
-.snapCta {
-  display: inline-block;
-  margin-top: 18px;
-  font-weight: 700;
-  color: var(--marvin-plum);
-  background: var(--marvin-blush);
-  border-radius: var(--radius-pill);
-  padding: 10px 22px;
-  transition: background 0.15s ease, transform 0.15s ease;
+.welcome {
+  color: var(--marvin-orange);
+  font-weight: 800;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+  margin-bottom: 8px;
 }
 
-.snapCta:hover {
-  background: var(--marvin-peach);
+.actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  max-width: 560px;
+  margin: 18px auto 0;
+}
+
+.snapAction,
+.inspireAction {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  border-radius: var(--radius-lg, 20px);
+  padding: 14px 16px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: var(--shadow-card);
+}
+
+.snapAction {
+  background: var(--marvin-orange);
+  color: #fff;
+}
+
+.inspireAction {
+  background: var(--marvin-blush);
+  color: var(--marvin-plum);
+}
+
+.snapAction:hover,
+.inspireAction:hover {
   transform: translateY(-2px);
 }
 
-.decideCta {
-  display: block;
-  color: var(--marvin-orange);
-  font-size: 0.95rem;
-  font-weight: 800;
-  margin-top: 12px;
+.actionEmoji {
+  font-size: 1.5rem;
+  flex-shrink: 0;
 }
 
-.decideCta:hover {
+.snapAction strong,
+.inspireAction strong {
+  display: block;
+  font-size: 0.98rem;
+  line-height: 1.25;
+}
+
+.snapAction small,
+.inspireAction small {
+  display: block;
+  font-size: 0.8rem;
+  opacity: 0.85;
+}
+
+.inspo {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.inspoHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.inspoTitle {
+  font-size: 1.3rem;
+}
+
+.inspoMore {
+  color: var(--marvin-orange);
+  font-weight: 800;
+  font-size: 0.9rem;
+  white-space: nowrap;
+}
+
+.inspoMore:hover {
   text-decoration: underline;
   text-underline-offset: 3px;
+}
+
+.inspoRow {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.inspoCard {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+}
+
+.inspoPhoto {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+}
+
+.inspoFallback {
+  width: 100%;
+  height: 120px;
+  background: var(--marvin-peach);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
+
+.inspoInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 12px 14px 14px;
+}
+
+.inspoDish {
+  font-size: 1rem;
+  line-height: 1.3;
+}
+
+.inspoMeta {
+  font-size: 0.82rem;
+  color: var(--plum-500);
+}
+
+.inspoReason {
+  color: var(--marvin-orange);
+  font-size: 0.82rem;
+  font-weight: 700;
 }
 
 .title {
@@ -237,8 +351,29 @@
   font-size: 0.9rem;
 }
 
+@media (max-width: 720px) {
+  .inspoRow {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding-bottom: 6px;
+    margin: 0 -16px;
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .inspoCard {
+    flex: 0 0 200px;
+    scroll-snap-align: start;
+  }
+}
+
 @media (max-width: 480px) {
   .searchForm {
     flex-direction: column;
+  }
+
+  .actions {
+    grid-template-columns: 1fr;
   }
 }

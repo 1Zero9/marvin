@@ -78,6 +78,41 @@ export default async function Home({
   const recipeFor = (bookId: string, page: number) =>
     entryRecipes.find((r) => r.bookId === bookId && r.pageRef === page);
 
+  const inspiration = !query
+    ? await prisma.recipe.findMany({
+        where: { householdId: identity.membership.householdId, ...visibleTo(identity) },
+        include: {
+          book: { select: { title: true } },
+          photos: { take: 1, orderBy: { createdAt: "asc" } },
+          cookLogs: { select: { cookedAt: true, rating: true }, orderBy: { cookedAt: "desc" } },
+        },
+      })
+    : [];
+
+  const MONTH = 30 * 24 * 60 * 60 * 1000;
+  const suggestions = inspiration
+    .map((recipe) => {
+      const ratings = recipe.cookLogs.filter((log) => log.rating != null);
+      const average = ratings.length
+        ? ratings.reduce((sum, log) => sum + (log.rating ?? 0), 0) / ratings.length
+        : 0;
+      const lastCooked = recipe.cookLogs[0]?.cookedAt.getTime() ?? 0;
+      const monthsAgo = lastCooked ? Math.floor((Date.now() - lastCooked) / MONTH) : null;
+      const reason =
+        average >= 4
+          ? `${average.toFixed(1)} ★ house favourite`
+          : monthsAgo == null
+            ? "Waiting for its first cook"
+            : monthsAgo >= 2
+              ? `Not made for ${monthsAgo} months`
+              : `Cooked ${recipe.cookLogs.length} ${recipe.cookLogs.length === 1 ? "time" : "times"}`;
+      return { recipe, average, lastCooked, reason };
+    })
+    .sort((a, b) => b.average - a.average || a.lastCooked - b.lastCooked)
+    .slice(0, 6);
+
+  const firstName = identity.user.displayName.trim().split(/\s+/)[0];
+
   const total = entries.length + matchedRecipes.length;
 
   const filterHref = (value: string) =>
@@ -96,32 +131,72 @@ export default async function Home({
             className={styles.heroLogo}
           />
         </div>
+        <p className={styles.welcome}>Welcome back, {firstName}</p>
         <h1 className={styles.title}>
-          What&rsquo;s in your <span className={styles.accent}>cookbooks?</span>
+          What are we <span className={styles.accent}>making?</span>
         </h1>
-        <p className={styles.sub}>
-          Search every indexed book and saved recipe by ingredient or dish.
-        </p>
         <form className={styles.searchForm} action="/" method="get">
           <input
             className={`input ${styles.searchInput}`}
             type="search"
             name="q"
             defaultValue={query}
-            placeholder="Try “aubergine” or “ragu”…"
+            placeholder="What’s on your mind? Try “aubergine”…"
             autoComplete="off"
           />
           <button type="submit" className="btn btn-primary">
             Search
           </button>
         </form>
-        <Link href="/snap" className={styles.snapCta}>
-          📷 Cooked something? Snap it and Marvin will log it
-        </Link>
-        <Link href="/decide" className={styles.decideCta}>
-          Need inspiration? Let Marvin choose dinner →
-        </Link>
+        <div className={styles.actions}>
+          <Link href="/snap" className={styles.snapAction}>
+            <span className={styles.actionEmoji}>📷</span>
+            <span>
+              <strong>Snap what you cooked</strong>
+              <small>Marvin logs it for you</small>
+            </span>
+          </Link>
+          <Link href="/decide" className={styles.inspireAction}>
+            <span className={styles.actionEmoji}>✨</span>
+            <span>
+              <strong>Inspire me</strong>
+              <small>Let Marvin choose dinner</small>
+            </span>
+          </Link>
+        </div>
       </section>
+
+      {!query && suggestions.length > 0 && (
+        <section className={styles.inspo}>
+          <div className={styles.inspoHead}>
+            <h2 className={styles.inspoTitle}>A little inspiration</h2>
+            <Link href="/decide" className={styles.inspoMore}>
+              See more →
+            </Link>
+          </div>
+          <div className={styles.inspoRow}>
+            {suggestions.map(({ recipe, reason }) => (
+              <Link
+                key={recipe.id}
+                href={`/recipes/${recipe.id}`}
+                className={`card ${styles.inspoCard}`}
+              >
+                {recipe.photos[0] ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={recipe.photos[0].url} alt="" className={styles.inspoPhoto} />
+                ) : (
+                  <div className={styles.inspoFallback}>🍽</div>
+                )}
+                <div className={styles.inspoInfo}>
+                  <h3 className={styles.inspoDish}>{recipe.title}</h3>
+                  <p className={styles.inspoMeta}>{recipe.book?.title ?? "My own recipe"}</p>
+                  <span className={styles.inspoReason}>{reason}</span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {query ? (
         <>
