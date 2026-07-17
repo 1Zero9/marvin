@@ -46,6 +46,9 @@ export default function AddRecipePage() {
   const [busy, setBusy] = useState(false);
   const [scanning, setScanning] = useState(false);
   const [scanned, setScanned] = useState(false);
+  const [pasteOpen, setPasteOpen] = useState(false);
+  const [pasteText, setPasteText] = useState("");
+  const [sorting, setSorting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
   const scanRef = useRef<HTMLInputElement>(null);
@@ -82,6 +85,29 @@ export default function AddRecipePage() {
     }
   }
 
+  function applyExtracted(extracted: {
+    title?: string | null;
+    ingredients?: string;
+    instructions?: string;
+    notes?: string;
+    tags?: string[];
+  }) {
+    if (extracted.title && !title.trim()) setTitle(extracted.title);
+    if (extracted.ingredients) setIngredients(extracted.ingredients);
+    if (extracted.instructions) setInstructions(extracted.instructions);
+    if (extracted.notes) setNotes((prev) => prev || extracted.notes!);
+    if (extracted.tags?.length) {
+      setTags((prev) => {
+        const existing = prev
+          .split(",")
+          .map((t) => t.trim())
+          .filter(Boolean);
+        return Array.from(new Set([...existing, ...extracted.tags!])).join(", ");
+      });
+    }
+    setScanned(true);
+  }
+
   async function onScanFiles(files: FileList | null) {
     if (!files || files.length === 0) return;
     setScanning(true);
@@ -102,26 +128,40 @@ export default function AddRecipePage() {
         setError(body?.error ?? "Couldn't read the recipe from that photo.");
         return;
       }
-      const extracted = await res.json();
-      if (extracted.title && !title.trim()) setTitle(extracted.title);
-      if (extracted.ingredients) setIngredients(extracted.ingredients);
-      if (extracted.instructions) setInstructions(extracted.instructions);
-      if (extracted.notes) setNotes((prev) => prev || extracted.notes);
-      if (extracted.tags?.length) {
-        setTags((prev) => {
-          const existing = prev
-            .split(",")
-            .map((t) => t.trim())
-            .filter(Boolean);
-          return Array.from(new Set([...existing, ...extracted.tags])).join(", ");
-        });
-      }
-      setScanned(true);
+      applyExtracted(await res.json());
     } catch {
       setError("Couldn't read the recipe from that photo.");
     } finally {
       setScanning(false);
       if (scanRef.current) scanRef.current.value = "";
+    }
+  }
+
+  async function sortPastedText() {
+    if (pasteText.trim().length < 20) {
+      setError("Paste a bit more of the recipe first.");
+      return;
+    }
+    setSorting(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/recipes/extract", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text: pasteText }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        setError(body?.error ?? "Couldn't make sense of that text.");
+        return;
+      }
+      applyExtracted(await res.json());
+      setPasteText("");
+      setPasteOpen(false);
+    } catch {
+      setError("Couldn't make sense of that text.");
+    } finally {
+      setSorting(false);
     }
   }
 
@@ -178,8 +218,8 @@ export default function AddRecipePage() {
         <div>
           <h2 className={styles.scanTitle}>✍️ Got it written down?</h2>
           <p className={styles.scanHint}>
-            Photograph a handwritten recipe, cookbook page, or a screenshot from
-            Instagram or your notes — Marvin will fill the form in for you.
+            Photograph a handwritten recipe, cookbook page, or a screenshot —
+            or paste the text in — and Marvin will fill the form in for you.
           </p>
         </div>
         <input
@@ -190,15 +230,44 @@ export default function AddRecipePage() {
           className={styles.fileInput}
           onChange={(e) => onScanFiles(e.target.files)}
         />
-        <button
-          type="button"
-          className="btn btn-primary"
-          onClick={() => scanRef.current?.click()}
-          disabled={scanning}
-        >
-          {scanning ? "Reading recipe…" : scanned ? "Scan again" : "📷 Scan a recipe"}
-        </button>
-        {scanned && !scanning && (
+        <div className={styles.scanActions}>
+          <button
+            type="button"
+            className="btn btn-primary"
+            onClick={() => scanRef.current?.click()}
+            disabled={scanning || sorting}
+          >
+            {scanning ? "Reading recipe…" : scanned ? "Scan again" : "📷 Scan a recipe"}
+          </button>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => setPasteOpen((v) => !v)}
+            disabled={scanning || sorting}
+          >
+            📋 Paste text
+          </button>
+        </div>
+        {pasteOpen && (
+          <div className={styles.pasteBox}>
+            <textarea
+              className={`input ${styles.textarea}`}
+              rows={7}
+              value={pasteText}
+              onChange={(e) => setPasteText(e.target.value)}
+              placeholder="Paste the whole recipe here — title, ingredients, method, the lot. Marvin will sort it out."
+            />
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={sortPastedText}
+              disabled={sorting || !pasteText.trim()}
+            >
+              {sorting ? "Sorting it out…" : "✨ Sort it out"}
+            </button>
+          </div>
+        )}
+        {scanned && !scanning && !sorting && (
           <p className={styles.scanDone}>
             Filled in below — check it over, then save.
           </p>

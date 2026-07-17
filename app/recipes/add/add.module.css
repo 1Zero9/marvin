@@ -45,6 +45,22 @@
   margin-top: 4px;
 }
 
+.scanActions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.pasteBox {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pasteBox .btn {
+  align-self: flex-start;
+}
+
 .scanDone {
   color: var(--success);
   font-weight: 700;

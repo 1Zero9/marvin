@@ -16,6 +16,22 @@ Rules:
 - "isRecipe" is false if the images do not contain a recipe.
 - Transcribe faithfully; do not invent quantities or steps that are not visible.`;
 
+const TEXT_PROMPT = `You are reading raw pasted text of a recipe. It may be copied from a website, a message, an email, or notes, and may include clutter such as ads, headers, comments, or unrelated text.
+
+Rules:
+- Return ONLY a JSON object, no prose, no markdown fences.
+- Schema: { "title": string or null, "ingredients": string, "instructions": string, "notes": string, "tags": string[], "isRecipe": boolean }
+- "title" is the recipe name. null if there is no clear name.
+- "ingredients" is the full ingredient list, one ingredient per line, with quantities exactly as written.
+- "instructions" is the method, one step per paragraph, in order, faithful to the original wording. Strip step numbers if present.
+- "notes" captures any extra tips, serving suggestions, or asides. Empty string if none.
+- "tags" is 0-4 short lowercase tags such as "quick", "veggie", "winter", "baking" if evident.
+- "isRecipe" is false if the text does not contain a recipe.
+- Ignore clutter that is not part of the recipe. Transcribe faithfully; do not invent quantities or steps that are not present.
+
+Text follows:
+`;
+
 type Extracted = {
   title: string | null;
   ingredients: string;
@@ -26,10 +42,21 @@ type Extracted = {
 };
 
 async function extractRecipe(
-  images: { data: string; mimeType: string }[]
+  input:
+    | { images: { data: string; mimeType: string }[] }
+    | { text: string }
 ): Promise<Extracted | null> {
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return null;
+  const parts =
+    "text" in input
+      ? [{ text: TEXT_PROMPT + input.text }]
+      : [
+          { text: PROMPT },
+          ...input.images.map((img) => ({
+            inline_data: { mime_type: img.mimeType, data: img.data },
+          })),
+        ];
   const models = Array.from(
     new Set([
       process.env.GEMINI_MODEL || "gemini-flash-latest",
@@ -49,16 +76,7 @@ async function extractRecipe(
             "x-goog-api-key": apiKey,
           },
           body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  { text: PROMPT },
-                  ...images.map((img) => ({
-                    inline_data: { mime_type: img.mimeType, data: img.data },
-                  })),
-                ],
-              },
-            ],
+            contents: [{ parts }],
             generationConfig: {
               response_mime_type: "application/json",
               temperature: 0,
@@ -100,6 +118,7 @@ export async function POST(req: Request) {
   const identity = await currentMembership();
   if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
   const body = await req.json();
+  const text = typeof body?.text === "string" ? body.text.trim() : "";
   const images: { data?: string; mimeType?: string }[] = Array.isArray(body?.images)
     ? body.images.slice(0, 6)
     : [];
@@ -107,8 +126,14 @@ export async function POST(req: Request) {
     (img): img is { data: string; mimeType: string } =>
       typeof img?.data === "string" && !!img?.mimeType?.startsWith("image/")
   );
-  if (valid.length === 0) {
-    return NextResponse.json({ error: "Image required" }, { status: 400 });
+  if (valid.length === 0 && text.length < 20) {
+    return NextResponse.json(
+      { error: "Paste some recipe text or add a photo" },
+      { status: 400 }
+    );
+  }
+  if (text.length > 40000) {
+    return NextResponse.json({ error: "Text too long" }, { status: 400 });
   }
   const totalBytes = valid.reduce(
     (sum, img) => sum + Buffer.from(img.data, "base64").length,
@@ -118,7 +143,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Images too large" }, { status: 400 });
   }
 
-  const result = await extractRecipe(valid);
+  const result = await extractRecipe(
+    valid.length > 0 ? { images: valid } : { text }
+  );
   if (!result) {
     return NextResponse.json(
       { error: "Couldn't read the recipe" },
@@ -127,7 +154,12 @@ export async function POST(req: Request) {
   }
   if (!result.isRecipe) {
     return NextResponse.json(
-      { error: "That doesn't look like a recipe" },
+      {
+        error:
+          valid.length > 0
+            ? "That doesn't look like a recipe"
+            : "That text doesn't look like a recipe",
+      },
       { status: 422 }
     );
   }
