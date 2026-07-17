@@ -6,66 +6,7 @@
 
 .hero {
   text-align: center;
-  padding: 24px 0 8px;
-}
-
-.logoWrap {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 16px;
-}
-
-.heroLogo {
-  border-radius: 32px;
-  box-shadow: var(--shadow-card);
-  animation: logoIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1), logoFloat 5s ease-in-out 0.6s infinite;
-}
-
-.heroLogo:hover {
-  animation: logoWiggle 0.5s ease-in-out;
-}
-
-@keyframes logoIn {
-  from {
-    opacity: 0;
-    transform: scale(0.6) rotate(-8deg);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) rotate(0deg);
-  }
-}
-
-@keyframes logoFloat {
-  0%,
-  100% {
-    transform: translateY(0) rotate(0deg);
-  }
-  25% {
-    transform: translateY(-8px) rotate(-2deg);
-  }
-  75% {
-    transform: translateY(-4px) rotate(2deg);
-  }
-}
-
-@keyframes logoWiggle {
-  0%,
-  100% {
-    transform: rotate(0deg);
-  }
-  25% {
-    transform: rotate(-6deg) scale(1.05);
-  }
-  75% {
-    transform: rotate(6deg) scale(1.05);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .heroLogo {
-    animation: none;
-  }
+  padding: 28px 0 8px;
 }
 
 .welcome {
@@ -102,8 +43,8 @@
 }
 
 .inspireAction {
-  background: var(--marvin-blush);
-  color: var(--marvin-plum);
+  background: var(--marvin-plum);
+  color: #fff;
 }
 
 .snapAction:hover,
@@ -127,7 +68,38 @@
 .inspireAction small {
   display: block;
   font-size: 0.8rem;
-  opacity: 0.85;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.92);
+}
+
+.lastCooked {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 16px;
+  padding: 8px 16px;
+  border-radius: var(--radius-pill);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+  color: var(--marvin-plum);
+  font-size: 0.88rem;
+  font-weight: 600;
+  max-width: 100%;
+}
+
+.lastCooked strong {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.lastCookedWhen {
+  color: var(--plum-500);
+  white-space: nowrap;
+}
+
+.lastCooked:hover {
+  color: var(--marvin-orange);
 }
 
 .inspo {
@@ -236,6 +208,11 @@
 .searchInput {
   flex: 1;
   border-radius: var(--radius-pill);
+}
+
+.searchInput::placeholder {
+  color: var(--plum-500);
+  opacity: 1;
 }
 
 .empty {

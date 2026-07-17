@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { requireHousehold } from "@/lib/auth";
 import { visibleTo } from "@/lib/privacy";
@@ -113,6 +112,25 @@ export default async function Home({
 
   const firstName = identity.user.displayName.trim().split(/\s+/)[0];
 
+  const lastCookedRecipe = inspiration
+    .filter((recipe) => recipe.cookLogs.length > 0)
+    .sort(
+      (a, b) => b.cookLogs[0].cookedAt.getTime() - a.cookLogs[0].cookedAt.getTime()
+    )[0];
+  const lastCookedDays = lastCookedRecipe
+    ? Math.floor(
+        (Date.now() - lastCookedRecipe.cookLogs[0].cookedAt.getTime()) / 86400000
+      )
+    : null;
+  const lastCookedWhen =
+    lastCookedDays == null
+      ? null
+      : lastCookedDays === 0
+        ? "today"
+        : lastCookedDays === 1
+          ? "yesterday"
+          : `${lastCookedDays} days ago`;
+
   const total = entries.length + matchedRecipes.length;
 
   const filterHref = (value: string) =>
@@ -121,16 +139,6 @@ export default async function Home({
   return (
     <div className={styles.wrap}>
       <section className={styles.hero}>
-        <div className={styles.logoWrap}>
-          <Image
-            src="/icons/icon-512.png"
-            alt="Marvin"
-            width={140}
-            height={140}
-            priority
-            className={styles.heroLogo}
-          />
-        </div>
         <p className={styles.welcome}>Welcome back, {firstName}</p>
         <h1 className={styles.title}>
           What are we <span className={styles.accent}>making?</span>
@@ -164,6 +172,12 @@ export default async function Home({
             </span>
           </Link>
         </div>
+        {!query && lastCookedRecipe && (
+          <Link href={`/recipes/${lastCookedRecipe.id}`} className={styles.lastCooked}>
+            🍳 Last cooked: <strong>{lastCookedRecipe.title}</strong>
+            <span className={styles.lastCookedWhen}>{lastCookedWhen}</span>
+          </Link>
+        )}
       </section>
 
       {!query && suggestions.length > 0 && (
@@ -320,6 +334,19 @@ export default async function Home({
             </p>
             <Link href="/books/add" className="btn btn-primary">
               Add your first book
+            </Link>
+          </div>
+        </section>
+      ) : suggestions.length === 0 ? (
+        <section>
+          <div className={`card ${styles.empty}`}>
+            <h2 className={styles.emptyTitle}>Nothing logged yet</h2>
+            <p className={styles.emptyText}>
+              Cook something tonight and snap it — Marvin will start learning
+              your household favourites and suggest them here.
+            </p>
+            <Link href="/snap" className="btn btn-primary">
+              Snap tonight&rsquo;s dinner
             </Link>
           </div>
         </section>
