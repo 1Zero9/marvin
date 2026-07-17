@@ -11,6 +11,16 @@
   font-size: 2rem;
 }
 
+@media (max-width: 480px) {
+  .header {
+    flex-wrap: nowrap;
+  }
+
+  .title {
+    font-size: 1.65rem;
+  }
+}
+
 .empty {
   text-align: center;
   padding: 40px 24px;

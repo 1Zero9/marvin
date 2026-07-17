@@ -21,5 +21,6 @@
 .meta { color: var(--plum-500); font-size: .9rem; }
 .stars { color: var(--marvin-orange); letter-spacing: 1px; white-space: nowrap; }
 .notes { white-space: pre-wrap; }
-@media (max-width: 700px) { .summary { grid-template-columns: 1fr; } .filters { grid-template-columns: 1fr 1fr; } .filters input { grid-column: 1 / -1; } }
-@media (max-width: 420px) { .filters { grid-template-columns: 1fr; } .entry { align-items: flex-start; } .photo, .photoFallback { flex-basis: 64px; width: 64px; height: 64px; } .entryTop { flex-direction: column; gap: 4px; } }
+@media (max-width: 700px) { .summary { grid-template-columns: 1fr; } .filters { grid-template-columns: 1fr 1fr; } .filters input { grid-column: 1 / -1; } .filters button { grid-column: 1 / -1; } }
+@media (max-width: 480px) { .title { font-size: 1.65rem; } }
+@media (max-width: 420px) { .entry { align-items: flex-start; } .photo, .photoFallback { flex-basis: 64px; width: 64px; height: 64px; } .entryTop { flex-direction: column; gap: 4px; } }

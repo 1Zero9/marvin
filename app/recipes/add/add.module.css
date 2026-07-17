@@ -10,6 +10,12 @@
   font-size: 2rem;
 }
 
+@media (max-width: 480px) {
+  .title {
+    font-size: 1.65rem;
+  }
+}
+
 .error {
   background: #FBE3E3;
   color: var(--danger);
@@ -31,9 +37,6 @@
   background: var(--marvin-blush);
 }
 
-.scanCard .btn {
-  align-self: flex-start;
-}
 
 .scanTitle {
   font-size: 1.15rem;
@@ -48,7 +51,11 @@
 .scanActions {
   display: flex;
   gap: 8px;
-  flex-wrap: wrap;
+}
+
+.scanActions .btn {
+  flex: 1 1 0;
+  white-space: nowrap;
 }
 
 .pasteBox {
@@ -61,17 +68,18 @@
   align-self: flex-start;
 }
 
+@media (max-width: 480px) {
+  .pasteBox .btn {
+    align-self: stretch;
+  }
+}
+
 .scanDone {
   color: var(--success);
   font-weight: 700;
   font-size: 0.9rem;
 }
 
-@media (max-width: 480px) {
-  .scanCard .btn {
-    align-self: stretch;
-  }
-}
 
 .sourceRow {
   display: flex;
