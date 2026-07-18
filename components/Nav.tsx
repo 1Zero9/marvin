@@ -39,8 +39,10 @@ function NavLinks({ linkClass, activeClass }: { linkClass: string; activeClass: 
 }
 
 export default function Nav() {
+  const pathname = usePathname();
+  const isHome = pathname === "/";
   return <>
-    <header className={styles.header}>
+    <header className={`${styles.header} ${isHome ? styles.headerHome : ""}`}>
       <div className={`container ${styles.inner}`}>
         <Link href="/" className={styles.brand} aria-label="Marvin home">
           <Image src="/icons/icon-192.png" alt="" width={42} height={42} className={styles.logo} />

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { requireHousehold } from "@/lib/auth";
 import { visibleTo } from "@/lib/privacy";
@@ -16,7 +17,7 @@ export default async function Home({
   const query = q?.trim() ?? "";
   const filter = f === "books" || f === "personal" ? f : "all";
 
-  const [bookCount, entries, matchedRecipes, inspiration] = await Promise.all([
+  const [bookCount, entries, matchedRecipes] = await Promise.all([
     prisma.book.count({ where: { householdId: identity.membership.householdId, ...visibleTo(identity) } }),
     query && filter !== "personal"
       ? prisma.indexEntry.findMany({
@@ -60,16 +61,6 @@ export default async function Home({
           take: 50,
         })
       : Promise.resolve([]),
-    !query
-      ? prisma.recipe.findMany({
-          where: { householdId: identity.membership.householdId, ...visibleTo(identity) },
-          include: {
-            book: { select: { title: true } },
-            photos: { take: 1, orderBy: { createdAt: "asc" } },
-            cookLogs: { select: { cookedAt: true, rating: true }, orderBy: { cookedAt: "desc" }, take: 50 },
-          },
-        })
-      : Promise.resolve([]),
   ]);
 
   const entryRecipes = query
@@ -87,48 +78,7 @@ export default async function Home({
   const recipeFor = (bookId: string, page: number) =>
     entryRecipes.find((r) => r.bookId === bookId && r.pageRef === page);
 
-  const MONTH = 30 * 24 * 60 * 60 * 1000;
-  const suggestions = inspiration
-    .map((recipe) => {
-      const ratings = recipe.cookLogs.filter((log) => log.rating != null);
-      const average = ratings.length
-        ? ratings.reduce((sum, log) => sum + (log.rating ?? 0), 0) / ratings.length
-        : 0;
-      const lastCooked = recipe.cookLogs[0]?.cookedAt.getTime() ?? 0;
-      const monthsAgo = lastCooked ? Math.floor((Date.now() - lastCooked) / MONTH) : null;
-      const reason =
-        average >= 4
-          ? `${average.toFixed(1)} ★ house favourite`
-          : monthsAgo == null
-            ? "Waiting for its first cook"
-            : monthsAgo >= 2
-              ? `Not made for ${monthsAgo} months`
-              : `Cooked ${recipe.cookLogs.length} ${recipe.cookLogs.length === 1 ? "time" : "times"}`;
-      return { recipe, average, lastCooked, reason };
-    })
-    .sort((a, b) => b.average - a.average || a.lastCooked - b.lastCooked)
-    .slice(0, 6);
-
   const firstName = identity.user.displayName.trim().split(/\s+/)[0];
-
-  const lastCookedRecipe = inspiration
-    .filter((recipe) => recipe.cookLogs.length > 0)
-    .sort(
-      (a, b) => b.cookLogs[0].cookedAt.getTime() - a.cookLogs[0].cookedAt.getTime()
-    )[0];
-  const lastCookedDays = lastCookedRecipe
-    ? Math.floor(
-        (Date.now() - lastCookedRecipe.cookLogs[0].cookedAt.getTime()) / 86400000
-      )
-    : null;
-  const lastCookedWhen =
-    lastCookedDays == null
-      ? null
-      : lastCookedDays === 0
-        ? "today"
-        : lastCookedDays === 1
-          ? "yesterday"
-          : `${lastCookedDays} days ago`;
 
   const total = entries.length + matchedRecipes.length;
 
@@ -137,79 +87,50 @@ export default async function Home({
 
   return (
     <div className={styles.wrap}>
-      <section className={styles.hero}>
-        <p className={styles.welcome}>Welcome back, {firstName}</p>
-        <h1 className={styles.title}>
-          What are we <span className={styles.accent}>making?</span>
-        </h1>
-        <form className={styles.searchForm} action="/" method="get">
-          <input
-            className={styles.searchInput}
-            type="search"
-            name="q"
-            defaultValue={query}
-            placeholder="Try “aubergine” or “Tuesday curry”…"
-            autoComplete="off"
+      <section className={`${styles.hero} ${query ? styles.heroCompact : ""}`}>
+        <div className={styles.logoLockup}>
+          <Image
+            src="/icons/icon-192.png"
+            alt=""
+            width={96}
+            height={96}
+            className={styles.heroLogo}
+            priority
           />
-          <button type="submit" className={styles.searchBtn}>
-            Search
-          </button>
-        </form>
-        <div className={styles.actions}>
-          <Link href="/snap" className={styles.snapAction}>
-            <span className={styles.actionEmoji}>📷</span>
-            <span>
-              <strong>Snap what you cooked</strong>
-              <small>Marvin logs it for you</small>
-            </span>
-          </Link>
-          <Link href="/decide" className={styles.inspireAction}>
-            <span className={styles.actionEmoji}>✨</span>
-            <span>
-              <strong>Inspire me</strong>
-              <small>Let Marvin choose dinner</small>
-            </span>
-          </Link>
+          <h1 className={styles.heroName}>Marvin</h1>
         </div>
-        {!query && lastCookedRecipe && (
-          <Link href={`/recipes/${lastCookedRecipe.id}`} className={styles.lastCooked}>
-            🍳 Last cooked: <strong>{lastCookedRecipe.title}</strong>
-            <span className={styles.lastCookedWhen}>{lastCookedWhen}</span>
+        {!query && (
+          <p className={styles.tagline}>
+            What are we <span className={styles.accent}>making</span>, {firstName}?
+          </p>
+        )}
+        <form className={styles.searchForm} action="/" method="get">
+          <div className={styles.searchBox}>
+            <span className={styles.searchIcon} aria-hidden="true">🔍</span>
+            <input
+              className={styles.searchInput}
+              type="search"
+              name="q"
+              defaultValue={query}
+              placeholder="Try “aubergine” or “Tuesday curry”…"
+              autoComplete="off"
+            />
+          </div>
+          <div className={styles.searchButtons}>
+            <button type="submit" className={styles.searchBtn}>
+              Search
+            </button>
+            <Link href="/decide" className={styles.inspireBtn}>
+              ✨ Inspire me
+            </Link>
+          </div>
+        </form>
+        {!query && (
+          <Link href="/snap" className={styles.snapPill}>
+            📷 Snap what you cooked
           </Link>
         )}
       </section>
-
-      {!query && suggestions.length > 0 && (
-        <section className={styles.inspo}>
-          <div className={styles.inspoHead}>
-            <h2 className={styles.inspoTitle}>A little inspiration</h2>
-            <Link href="/decide" className={styles.inspoMore}>
-              See more →
-            </Link>
-          </div>
-          <div className={styles.inspoRow}>
-            {suggestions.map(({ recipe, reason }) => (
-              <Link
-                key={recipe.id}
-                href={`/recipes/${recipe.id}`}
-                className={`card ${styles.inspoCard}`}
-              >
-                {recipe.photos[0] ? (
-                  /* eslint-disable-next-line @next/next/no-img-element */
-                  <img src={recipe.photos[0].url} alt="" className={styles.inspoPhoto} />
-                ) : (
-                  <div className={styles.inspoFallback}>🍽</div>
-                )}
-                <div className={styles.inspoInfo}>
-                  <h3 className={styles.inspoDish}>{recipe.title}</h3>
-                  <p className={styles.inspoMeta}>{recipe.book?.title ?? "My own recipe"}</p>
-                  <span className={styles.inspoReason}>{reason}</span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </section>
-      )}
 
       {query ? (
         <>
@@ -333,19 +254,6 @@ export default async function Home({
             </p>
             <Link href="/books/add" className="btn btn-primary">
               Add your first book
-            </Link>
-          </div>
-        </section>
-      ) : suggestions.length === 0 ? (
-        <section>
-          <div className={`card ${styles.empty}`}>
-            <h2 className={styles.emptyTitle}>Nothing logged yet</h2>
-            <p className={styles.emptyText}>
-              Cook something tonight and snap it — Marvin will start learning
-              your household favourites and suggest them here.
-            </p>
-            <Link href="/snap" className="btn btn-primary">
-              Snap tonight&rsquo;s dinner
             </Link>
           </div>
         </section>

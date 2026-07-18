@@ -13,12 +13,13 @@
 
 @media (max-width: 850px) {
   .header { border-bottom: 0; }
+  .headerHome { display: none; }
   .inner { justify-content: center; padding: 10px 16px; }
   .name { font-size: 1.6rem; }
   .logo { height: 46px; width: 46px; border-radius: 14px; }
   .nav { display: none; }
-  .dock { -webkit-backdrop-filter: blur(20px) saturate(1.7); backdrop-filter: blur(20px) saturate(1.7); background: rgba(255, 250, 245, .68); border: 1px solid rgba(255, 255, 255, .65); border-radius: 30px; bottom: calc(12px + env(safe-area-inset-bottom)); box-shadow: 0 14px 36px rgba(61, 16, 60, .22), 0 2px 6px rgba(61, 16, 60, .08); display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); left: 12px; padding: 8px; position: fixed; right: 12px; z-index: 80; }
-  .dockLink { align-items: center; border-radius: 22px; color: var(--marvin-plum); display: flex; flex-direction: column; font-size: .74rem; font-weight: 700; gap: 5px; justify-content: center; min-height: 62px; padding: 7px 2px; }
-  .dockLink .icon { height: 24px; width: 24px; }
-  .dockActive { background: var(--marvin-blush); color: var(--marvin-orange); }
+  .dock { -webkit-backdrop-filter: blur(20px) saturate(1.7); backdrop-filter: blur(20px) saturate(1.7); background: rgba(255, 250, 245, .82); border: 1px solid rgba(255, 255, 255, .7); border-radius: 34px; bottom: calc(12px + env(safe-area-inset-bottom)); box-shadow: 0 14px 36px rgba(61, 16, 60, .24), 0 2px 6px rgba(61, 16, 60, .08); display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 4px; left: 10px; padding: 10px; position: fixed; right: 10px; z-index: 80; }
+  .dockLink { align-items: center; border-radius: 24px; color: var(--marvin-plum); display: flex; flex-direction: column; font-size: .8rem; font-weight: 800; gap: 6px; justify-content: center; min-height: 70px; padding: 8px 2px; }
+  .dockLink .icon { height: 27px; width: 27px; stroke-width: 2; }
+  .dockActive { background: var(--marvin-orange); color: #fff; box-shadow: 0 6px 16px rgba(255, 106, 0, .38); }
 }
