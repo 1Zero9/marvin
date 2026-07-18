@@ -66,7 +66,7 @@ export default async function DecidePage({
     include: {
       book: { select: { title: true } },
       photos: { take: 1, orderBy: { createdAt: "asc" } },
-      cookLogs: { select: { cookedAt: true, rating: true }, orderBy: { cookedAt: "desc" } },
+      cookLogs: { select: { cookedAt: true, rating: true }, orderBy: { cookedAt: "desc" }, take: 50 },
     },
   }), prisma.indexEntry.findMany({
     where: { book: { householdId: identity.membership.householdId, archived: false, ...visibleTo(identity) } },

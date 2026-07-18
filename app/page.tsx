@@ -16,7 +16,7 @@ export default async function Home({
   const query = q?.trim() ?? "";
   const filter = f === "books" || f === "personal" ? f : "all";
 
-  const [bookCount, entries, matchedRecipes] = await Promise.all([
+  const [bookCount, entries, matchedRecipes, inspiration] = await Promise.all([
     prisma.book.count({ where: { householdId: identity.membership.householdId, ...visibleTo(identity) } }),
     query && filter !== "personal"
       ? prisma.indexEntry.findMany({
@@ -60,6 +60,16 @@ export default async function Home({
           take: 50,
         })
       : Promise.resolve([]),
+    !query
+      ? prisma.recipe.findMany({
+          where: { householdId: identity.membership.householdId, ...visibleTo(identity) },
+          include: {
+            book: { select: { title: true } },
+            photos: { take: 1, orderBy: { createdAt: "asc" } },
+            cookLogs: { select: { cookedAt: true, rating: true }, orderBy: { cookedAt: "desc" }, take: 50 },
+          },
+        })
+      : Promise.resolve([]),
   ]);
 
   const entryRecipes = query
@@ -76,17 +86,6 @@ export default async function Home({
 
   const recipeFor = (bookId: string, page: number) =>
     entryRecipes.find((r) => r.bookId === bookId && r.pageRef === page);
-
-  const inspiration = !query
-    ? await prisma.recipe.findMany({
-        where: { householdId: identity.membership.householdId, ...visibleTo(identity) },
-        include: {
-          book: { select: { title: true } },
-          photos: { take: 1, orderBy: { createdAt: "asc" } },
-          cookLogs: { select: { cookedAt: true, rating: true }, orderBy: { cookedAt: "desc" } },
-        },
-      })
-    : [];
 
   const MONTH = 30 * 24 * 60 * 60 * 1000;
   const suggestions = inspiration
