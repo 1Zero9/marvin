@@ -30,7 +30,11 @@ function BookTile({ book }: { book: BookCard }) {
           {book.favourite && <span className={styles.heart}> ♥</span>}
         </h2>
         {book.author && <p className={styles.author}>{book.author}</p>}
-        <span className="tag">{book._count.indexEntries} index entries</span>
+        <p className={styles.indexMeta}>
+          {book._count.indexEntries > 0
+            ? `${book._count.indexEntries} dishes indexed`
+            : "Not indexed yet"}
+        </p>
       </div>
     </Link>
   );
@@ -49,9 +53,9 @@ export default async function BooksPage() {
   return (
     <div>
       <div className={styles.header}>
-        <h1 className={styles.title}>Your books</h1>
-        <Link href="/books/add" className="btn btn-primary">
-          Add a book
+        <h1 className={styles.title}>Books</h1>
+        <Link href="/books/add" className={styles.addLink}>
+          + Add
         </Link>
       </div>
 

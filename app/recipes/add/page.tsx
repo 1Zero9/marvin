@@ -214,14 +214,7 @@ export default function AddRecipePage() {
       <h1 className={styles.title}>Add a recipe</h1>
       {error && <p className={styles.error}>{error}</p>}
 
-      <section className={`card ${styles.scanCard}`}>
-        <div>
-          <h2 className={styles.scanTitle}>✍️ Got it written down?</h2>
-          <p className={styles.scanHint}>
-            Photograph a handwritten recipe, cookbook page, or a screenshot —
-            or paste the text in — and Marvin will fill the form in for you.
-          </p>
-        </div>
+      <section className={styles.scanCard}>
         <input
           ref={scanRef}
           type="file"
@@ -248,6 +241,9 @@ export default function AddRecipePage() {
             📋 Paste text
           </button>
         </div>
+        <p className={styles.scanHint}>
+          Marvin fills the form in from a photo or pasted text.
+        </p>
         {pasteOpen && (
           <div className={styles.pasteBox}>
             <textarea
@@ -365,61 +361,66 @@ export default function AddRecipePage() {
           />
         </label>
 
-        <label className={styles.label}>
-          Tags
-          <input
-            className="input"
-            value={tags}
-            onChange={(e) => setTags(e.target.value)}
-            placeholder="comma separated, e.g. quick, winter, outdoors, veggie"
-          />
-        </label>
-
-        <label className={styles.label}>
-          Who can see this recipe?
-          <select className="input" value={visibility} onChange={(e) => setVisibility(e.target.value as "private" | "household")}>
-            <option value="private">Only me</option>
-            <option value="household">Everyone in my kitchen</option>
-          </select>
-        </label>
-
-        <div className={styles.label}>
-          Links
-          {links.map((l, i) => (
-            <div key={i} className={styles.linkRow}>
+        <details className={styles.moreOptions} open={Boolean(tags || links.some((l) => l.trim()))}>
+          <summary className={styles.moreSummary}>More options</summary>
+          <div className={styles.moreBody}>
+            <label className={styles.label}>
+              Tags
               <input
                 className="input"
-                type="url"
-                value={l}
-                onChange={(e) =>
-                  setLinks((prev) =>
-                    prev.map((x, idx) => (idx === i ? e.target.value : x))
-                  )
-                }
-                placeholder="https://…"
+                value={tags}
+                onChange={(e) => setTags(e.target.value)}
+                placeholder="comma separated, e.g. quick, winter, veggie"
               />
-              {links.length > 1 && (
-                <button
-                  type="button"
-                  className={styles.removeBtn}
-                  onClick={() =>
-                    setLinks((prev) => prev.filter((_, idx) => idx !== i))
-                  }
-                  aria-label="Remove link"
-                >
-                  ×
-                </button>
-              )}
+            </label>
+
+            <label className={styles.label}>
+              Who can see this recipe?
+              <select className="input" value={visibility} onChange={(e) => setVisibility(e.target.value as "private" | "household")}>
+                <option value="private">Only me</option>
+                <option value="household">Everyone in my kitchen</option>
+              </select>
+            </label>
+
+            <div className={styles.label}>
+              Links
+              {links.map((l, i) => (
+                <div key={i} className={styles.linkRow}>
+                  <input
+                    className="input"
+                    type="url"
+                    value={l}
+                    onChange={(e) =>
+                      setLinks((prev) =>
+                        prev.map((x, idx) => (idx === i ? e.target.value : x))
+                      )
+                    }
+                    placeholder="https://…"
+                  />
+                  {links.length > 1 && (
+                    <button
+                      type="button"
+                      className={styles.removeBtn}
+                      onClick={() =>
+                        setLinks((prev) => prev.filter((_, idx) => idx !== i))
+                      }
+                      aria-label="Remove link"
+                    >
+                      ×
+                    </button>
+                  )}
+                </div>
+              ))}
+              <button
+                type="button"
+                className={styles.addLinkBtn}
+                onClick={() => setLinks((prev) => [...prev, ""])}
+              >
+                + Add another link
+              </button>
             </div>
-          ))}
-          <button
-            type="button"
-            className={styles.addLinkBtn}
-            onClick={() => setLinks((prev) => [...prev, ""])}
-          >
-            + Add another link
-          </button>
-        </div>
+          </div>
+        </details>
 
         <div className={styles.label}>
           Photos

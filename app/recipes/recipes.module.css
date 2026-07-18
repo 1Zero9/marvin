@@ -78,8 +78,9 @@
   color: var(--plum-500);
 }
 
-.tags {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
+.addLink {
+  font-weight: 700;
+  color: var(--marvin-orange);
+  font-size: 1rem;
+  white-space: nowrap;
 }

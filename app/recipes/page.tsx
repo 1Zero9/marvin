@@ -21,9 +21,9 @@ export default async function RecipesPage() {
   return (
     <div>
       <div className={styles.header}>
-        <h1 className={styles.title}>Your recipes</h1>
-        <Link href="/recipes/add" className="btn btn-primary">
-          Add a recipe
+        <h1 className={styles.title}>Recipes</h1>
+        <Link href="/recipes/add" className={styles.addLink}>
+          + Add
         </Link>
       </div>
 
@@ -56,17 +56,9 @@ export default async function RecipesPage() {
                   {r.book
                     ? `${r.book.title}${r.pageRef ? ` · p.${r.pageRef}` : ""}`
                     : "My own"}
+                  {r._count.cookLogs > 0 &&
+                    ` · cooked ${r._count.cookLogs}×`}
                 </p>
-                <div className={styles.tags}>
-                  <span className="tag">
-                    {r.source === "book" ? "From a book" : "Personal"}
-                  </span>
-                  {r._count.cookLogs > 0 && (
-                    <span className="tag">
-                      Cooked {r._count.cookLogs}×
-                    </span>
-                  )}
-                </div>
               </div>
             </Link>
           ))}

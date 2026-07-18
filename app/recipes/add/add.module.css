@@ -33,19 +33,13 @@
 .scanCard {
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  background: var(--marvin-blush);
-}
-
-
-.scanTitle {
-  font-size: 1.15rem;
+  gap: 8px;
 }
 
 .scanHint {
   color: var(--plum-500);
-  font-size: 0.9rem;
-  margin-top: 4px;
+  font-size: 0.85rem;
+  text-align: center;
 }
 
 .scanActions {
@@ -122,6 +116,26 @@
 .textarea {
   resize: vertical;
   font-family: inherit;
+}
+
+.moreOptions {
+  margin-top: 2px;
+}
+
+.moreSummary {
+  color: var(--plum-500);
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.9rem;
+  width: fit-content;
+  padding: 2px 4px;
+}
+
+.moreBody {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin-top: 12px;
 }
 
 .linkRow {

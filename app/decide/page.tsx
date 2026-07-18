@@ -103,7 +103,6 @@ export default async function DecidePage({
     <div className={styles.wrap}>
       <section className={styles.hero}>
         <h1 className={styles.title}>What should we cook?</h1>
-        <p className={styles.sub}>A small nudge from the recipes and meals you already love.</p>
       </section>
 
       {dailyPick && (
@@ -124,12 +123,9 @@ export default async function DecidePage({
       )}
 
       {shelfPick && (
-        <section className={`card ${styles.shelfPick}`}>
-          <p className={styles.eyebrow}>From your shelf — not tried yet</p>
-          <h2 className={styles.shelfTitle}>{shelfPick.dish}</h2>
-          <p>{shelfPick.book.title} · page {shelfPick.page} · indexed under {shelfPick.ingredient}</p>
-          <Link href={`/books/${shelfPick.book.id}`} className="btn btn-secondary">Find it in the book</Link>
-        </section>
+        <Link href={`/books/${shelfPick.book.id}`} className={styles.shelfLine}>
+          Something new: <strong>{shelfPick.dish}</strong> · {shelfPick.book.title}, p.{shelfPick.page} →
+        </Link>
       )}
 
       <nav className={styles.filters} aria-label="Recipe suggestions">

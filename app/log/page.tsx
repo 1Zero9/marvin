@@ -90,11 +90,8 @@ export default async function LogPage({
   return (
     <div className={styles.wrap}>
       <div className={styles.header}>
-        <div>
-          <h1 className={styles.title}>Cooking log</h1>
-          <p className={styles.sub}>The meals you&rsquo;ll want to remember.</p>
-        </div>
-        <Link href="/snap" className="btn btn-primary">Snap a dinner</Link>
+        <h1 className={styles.title}>Log</h1>
+        <Link href="/snap" className={styles.snapLink}>📷 Snap a dinner</Link>
       </div>
 
       {logs.length > 0 && (
@@ -118,26 +115,33 @@ export default async function LogPage({
         </section>
       )}
 
-      <form className={`card ${styles.filters}`} action="/log" method="get">
-        <input
-          className="input"
-          name="q"
-          type="search"
-          defaultValue={query}
-          placeholder="Find a recipe…"
-          aria-label="Find a recipe in your cooking log"
-        />
-        <select className="input" name="rating" defaultValue={selectedRating?.toString() ?? ""} aria-label="Filter by rating">
-          <option value="">Any rating</option>
-          {[5, 4, 3, 2, 1].map((value) => <option key={value} value={value}>{value} stars</option>)}
-        </select>
-        <select className="input" name="book" defaultValue={book ?? ""} aria-label="Filter by book">
-          <option value="">All recipes</option>
-          <option value="personal">My own recipes</option>
-          {books.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}
-        </select>
-        <button className="btn btn-secondary" type="submit">Filter</button>
-      </form>
+      {(logs.length > 0 || query || selectedRating || book) && (
+        <form className={styles.filters} action="/log" method="get">
+          <input
+            className={`input ${styles.search}`}
+            name="q"
+            type="search"
+            defaultValue={query}
+            placeholder="Find a meal…"
+            aria-label="Find a recipe in your cooking log"
+          />
+          <details className={styles.moreFilters} open={Boolean(selectedRating || book)}>
+            <summary className={styles.moreSummary}>Filters</summary>
+            <div className={styles.moreRow}>
+              <select className="input" name="rating" defaultValue={selectedRating?.toString() ?? ""} aria-label="Filter by rating">
+                <option value="">Any rating</option>
+                {[5, 4, 3, 2, 1].map((value) => <option key={value} value={value}>{value} stars</option>)}
+              </select>
+              <select className="input" name="book" defaultValue={book ?? ""} aria-label="Filter by book">
+                <option value="">All recipes</option>
+                <option value="personal">My own recipes</option>
+                {books.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}
+              </select>
+              <button className="btn btn-secondary" type="submit">Apply</button>
+            </div>
+          </details>
+        </form>
+      )}
 
       {logs.length === 0 ? (
         <section className={`card ${styles.empty}`}>
