@@ -91,7 +91,7 @@ export default async function LogPage({
     <div className={styles.wrap}>
       <div className={styles.header}>
         <h1 className={styles.title}>Log</h1>
-        <Link href="/snap" className={styles.snapLink}>📷 Snap a dinner</Link>
+        <Link href="/log/add" className={styles.snapLink}>＋ Add a meal</Link>
       </div>
 
       {logs.length > 0 && (
@@ -149,9 +149,9 @@ export default async function LogPage({
           <p>
             {query || selectedRating || book
               ? "Try widening your search, or clear the filters."
-              : "Log a cook from any recipe, or snap the dinner you just made."}
+              : "Add a meal from a photo, a pasted recipe, or a few quick details."}
           </p>
-          {!query && !selectedRating && !book && <Link href="/recipes" className="btn btn-primary">Browse recipes</Link>}
+          {!query && !selectedRating && !book && <Link href="/log/add" className="btn btn-primary">Add a meal</Link>}
         </section>
       ) : (
         <ol className={styles.timeline}>

@@ -1,0 +1,23 @@
+.wrap { max-width: 680px; margin: 0 auto; }
+.header { align-items: flex-start; display: flex; gap: 16px; justify-content: space-between; margin-bottom: 20px; }
+.header h1 { font-size: 2rem; }
+.header p { color: var(--plum-500); margin-top: 4px; }
+.form { display: flex; flex-direction: column; gap: 16px; padding: 20px; }
+.form label { display: flex; flex-direction: column; font-size: .9rem; font-weight: 800; gap: 6px; }
+.context { background: var(--marvin-blush); border-radius: var(--radius-pill); display: grid; grid-template-columns: 1fr 1fr; padding: 4px; }
+.context button { background: transparent; border: 0; border-radius: var(--radius-pill); color: var(--marvin-plum); cursor: pointer; font: inherit; font-weight: 800; padding: 10px 8px; }
+.context .active { background: var(--marvin-orange); color: white; }
+.hidden { display: none; }
+.photoAction { align-items: center; display: flex; flex-wrap: wrap; gap: 10px; }
+.photoAction img { border-radius: var(--radius-sm); height: 72px; object-fit: cover; width: 72px; }
+.remove, .pasteToggle { background: none; border: 0; color: var(--marvin-orange); cursor: pointer; font: inherit; font-weight: 800; padding: 4px 0; text-align: left; }
+.paste { display: flex; flex-direction: column; gap: 8px; }
+.paste textarea { resize: vertical; }
+.form details { color: var(--plum-500); }
+.form summary { cursor: pointer; font-weight: 800; }
+.form details label { margin-top: 12px; color: var(--marvin-plum); }
+.bottom { display: flex; gap: 28px; }
+.stars { display: flex; }
+.stars button { background: none; border: 0; color: var(--marvin-orange); cursor: pointer; font-size: 1.6rem; padding: 0 2px; }
+.error { background: #fff0ee; border-radius: var(--radius-sm); color: #aa2e1c; margin-bottom: 12px; padding: 10px 12px; }
+@media (max-width: 520px) { .header { flex-direction: column; } .bottom { flex-direction: column; gap: 12px; } }

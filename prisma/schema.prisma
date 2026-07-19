@@ -77,11 +77,16 @@ model CookLog {
   cookedAt  DateTime @default(now())
   rating    Int?
   notes     String?
+  context   String   @default("home")
+  venue     String?
+  tags      String[] @default([])
   photos    Photo[]
   shareSlug String?  @unique
   cookedById String?
   cookedBy   User?    @relation("CookedBy", fields: [cookedById], references: [id], onDelete: SetNull)
   ratings    MealRating[]
+
+  @@index([context])
 }
 
 model Photo {

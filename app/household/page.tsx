@@ -11,6 +11,7 @@ export default async function HouseholdPage() {
   return <div className={styles.wrap}>
     <h1 className={styles.title}>{identity.membership.household.name}</h1>
     <section className={`card ${styles.members}`}><h2>People in this kitchen</h2><ul>{members.map((member) => <li key={member.id}><span>{member.user.displayName}</span><span className={styles.meta}>{member.role === "owner" ? "Owner" : "Member"} · {member.user.email}</span></li>)}</ul></section>
+    <section className={`card ${styles.members}`}><h2>Food memories</h2><p className={styles.meta}>Restaurant and holiday meals, with photos and tags for recreating at home.</p><Link href="/moments" className="btn btn-secondary">View food memories</Link></section>
     {identity.membership.role === "owner" && <InvitePanel />}
     {identity.membership.role === "owner" && <Link href="/admin" className="btn btn-secondary">Open admin portal</Link>}
     <SignOutButton />

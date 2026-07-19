@@ -32,6 +32,20 @@ export async function POST(req: Request) {
       : null;
   const notes =
     typeof body?.notes === "string" && body.notes.trim() ? body.notes.trim() : null;
+  const context = body?.context === "out" ? "out" : "home";
+  const venue = typeof body?.venue === "string" && body.venue.trim()
+    ? body.venue.trim().slice(0, 120)
+    : null;
+  const tags: string[] = Array.isArray(body?.tags)
+    ? body.tags
+        .filter((tag: unknown): tag is string => typeof tag === "string")
+        .map((tag: string) => tag.trim().toLowerCase().replace(/^#/, ""))
+        .filter(Boolean)
+        .slice(0, 12)
+    : [];
+  const instructions = typeof body?.instructions === "string" && body.instructions.trim()
+    ? body.instructions.trim()
+    : null;
   const cookedAt = body?.cookedAt ? new Date(body.cookedAt) : new Date();
   if (Number.isNaN(cookedAt.getTime())) {
     return NextResponse.json({ error: "Invalid date" }, { status: 400 });
@@ -62,7 +76,8 @@ export async function POST(req: Request) {
       data: {
         title,
         source: "personal",
-        tags: [],
+        instructions,
+        tags,
         keywords: keywordsFrom(title, ingredients),
         links: [],
         householdId: identity.membership.householdId,
@@ -80,6 +95,9 @@ export async function POST(req: Request) {
       cookedAt,
       rating,
       notes,
+      context,
+      venue,
+      tags,
       cookedById: identity.user.id,
       ...(rating
         ? { ratings: { create: { userId: identity.user.id, rating } } }
