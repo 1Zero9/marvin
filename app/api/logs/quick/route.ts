@@ -36,6 +36,9 @@ export async function POST(req: Request) {
   const venue = typeof body?.venue === "string" && body.venue.trim()
     ? body.venue.trim().slice(0, 120)
     : null;
+  const link = typeof body?.link === "string" && body.link.trim()
+    ? body.link.trim().slice(0, 500)
+    : null;
   const tags: string[] = Array.isArray(body?.tags)
     ? body.tags
         .filter((tag: unknown): tag is string => typeof tag === "string")
@@ -79,7 +82,8 @@ export async function POST(req: Request) {
         instructions,
         tags,
         keywords: keywordsFrom(title, ingredients),
-        links: [],
+        links: link ? [link] : [],
+        instagramUrl: link && /instagram\.com/i.test(link) ? link : null,
         householdId: identity.membership.householdId,
         createdById: identity.user.id,
         visibility: "household",

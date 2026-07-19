@@ -38,6 +38,7 @@ export default function LogMealForm({ recipes }: { recipes: Recipe[] }) {
   const [date, setDate] = useState(today);
   const [context, setContext] = useState<"home" | "out">("home");
   const [venue, setVenue] = useState("");
+  const [link, setLink] = useState("");
   const [tags, setTags] = useState("");
   const [sorting, setSorting] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -72,7 +73,7 @@ export default function LogMealForm({ recipes }: { recipes: Recipe[] }) {
     try {
       const res = await fetch("/api/logs/quick", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({
         recipeId: recipeId || null, title, ingredients: ingredients.split(/[\n,]/).map((item) => item.trim()).filter(Boolean), instructions,
-        rating: rating || null, notes, cookedAt: date, context, venue, tags: tags.split(",").map((tag) => tag.trim()).filter(Boolean), photo,
+        rating: rating || null, notes, cookedAt: date, context, venue, link, tags: tags.split(",").map((tag) => tag.trim()).filter(Boolean), photo,
       }) });
       if (!res.ok) throw new Error();
       router.push(context === "out" ? "/moments" : "/log"); router.refresh();
@@ -89,7 +90,7 @@ export default function LogMealForm({ recipes }: { recipes: Recipe[] }) {
       {context === "out" && <label>Where?<input className="input" value={venue} onChange={(event) => setVenue(event.target.value)} placeholder="Restaurant, city, market…" /></label>}
       <input ref={photoRef} className={styles.hidden} type="file" accept="image/*" capture="environment" onChange={(event) => choosePhoto(event.target.files)} />
       <div className={styles.photoAction}><button type="button" className="btn btn-secondary" onClick={() => photoRef.current?.click()}>🖼 Add a photo</button>{photo && <><img src={photo.preview} alt="Meal preview" /><button type="button" className={styles.remove} onClick={() => setPhoto(null)}>Remove</button></>}</div>
-      {!recipeId && <><button type="button" className={styles.pasteToggle} onClick={() => setPasteOpen((open) => !open)}>📋 {pasteOpen ? "Hide pasted recipe" : "Paste recipe text"}</button>{pasteOpen && <div className={styles.paste}><textarea className="input" rows={6} value={paste} onChange={(event) => setPaste(event.target.value)} placeholder="Paste a recipe, menu description, or a note from your holiday…" /><button type="button" className="btn btn-secondary" disabled={sorting} onClick={sortPaste}>{sorting ? "Sorting…" : "✨ Fill in details"}</button></div>}<details><summary>Recipe details (optional)</summary><label>Ingredients<textarea className="input" rows={3} value={ingredients} onChange={(event) => setIngredients(event.target.value)} /></label><label>Method<textarea className="input" rows={4} value={instructions} onChange={(event) => setInstructions(event.target.value)} /></label></details></>}
+      {!recipeId && <><label>Link <input className="input" type="url" value={link} onChange={(event) => setLink(event.target.value)} placeholder="Instagram, TikTok, article, or recipe link" /></label><button type="button" className={styles.pasteToggle} onClick={() => setPasteOpen((open) => !open)}>📋 {pasteOpen ? "Hide pasted recipe" : "Paste recipe text"}</button>{pasteOpen && <div className={styles.paste}><textarea className="input" rows={6} value={paste} onChange={(event) => setPaste(event.target.value)} placeholder="Paste a recipe, menu description, or a note from your holiday…" /><button type="button" className="btn btn-secondary" disabled={sorting} onClick={sortPaste}>{sorting ? "Sorting…" : "✨ Fill in details"}</button></div>}<details><summary>Recipe details (optional)</summary><label>Ingredients<textarea className="input" rows={3} value={ingredients} onChange={(event) => setIngredients(event.target.value)} /></label><label>Method<textarea className="input" rows={4} value={instructions} onChange={(event) => setInstructions(event.target.value)} /></label></details></>}
       <label>Tags <input className="input" value={tags} onChange={(event) => setTags(event.target.value)} placeholder="holiday, tapas, Lisbon" /></label>
       <div className={styles.bottom}><label>When?<input className="input" type="date" max={today} value={date} onChange={(event) => setDate(event.target.value)} /></label><div><span>How was it?</span><div className={styles.stars}>{[1,2,3,4,5].map((number) => <button type="button" key={number} onClick={() => setRating(rating === number ? 0 : number)}>{number <= rating ? "★" : "☆"}</button>)}</div></div></div>
       <label>Notes<textarea className="input" rows={3} value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Who was there? What would you make differently?" /></label>
