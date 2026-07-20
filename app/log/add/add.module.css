@@ -11,6 +11,7 @@
 .photoAction { align-items: center; display: flex; flex-wrap: wrap; gap: 10px; }
 .photoAction img { border-radius: var(--radius-sm); height: 72px; object-fit: cover; width: 72px; }
 .remove, .pasteToggle { background: none; border: 0; color: var(--marvin-orange); cursor: pointer; font: inherit; font-weight: 800; padding: 4px 0; text-align: left; }
+.reading { color: var(--plum-500); font-size: .85rem; font-weight: 700; }
 .paste { display: flex; flex-direction: column; gap: 8px; }
 .paste textarea { resize: vertical; }
 .form details { color: var(--plum-500); }
