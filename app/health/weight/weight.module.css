@@ -1,0 +1,44 @@
+.wrap { display: flex; flex-direction: column; gap: 18px; }
+.header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.title { font-size: 2rem; }
+.back { color: var(--plum-500); font-weight: 700; font-size: 0.9rem; }
+
+.goalCard { display: flex; flex-direction: column; gap: 10px; }
+.goalTop { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.progress { font-size: 1.6rem; font-family: var(--font-heading), Georgia, serif; color: var(--marvin-plum); }
+.progressSub { color: var(--plum-500); font-size: 0.85rem; }
+.editGoal { color: var(--marvin-orange); font-weight: 700; font-size: 0.85rem; align-self: flex-start; }
+.goalForm { display: flex; flex-direction: column; gap: 12px; }
+.goalActions { display: flex; gap: 10px; }
+
+.chartCard { display: flex; flex-direction: column; gap: 10px; }
+.legend { display: flex; gap: 16px; font-size: 0.8rem; color: var(--plum-500); }
+.legendDot { display: inline-flex; align-items: center; gap: 6px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.dotAvg { background: var(--marvin-orange); }
+.dotTarget { background: var(--marvin-basil); }
+
+.form { display: flex; flex-direction: column; gap: 12px; }
+.formTitle { font-size: 1.15rem; }
+.formRow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.form label, .goalForm label { display: flex; flex-direction: column; gap: 4px; font-size: 0.85rem; font-weight: 700; color: var(--plum-500); }
+
+.error { color: var(--danger); font-size: 0.85rem; font-weight: 700; }
+
+.list { display: flex; flex-direction: column; gap: 0; }
+.listTitle { font-size: 1.15rem; margin-bottom: 4px; }
+.entry { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; padding: 10px 0; border-top: 1px solid var(--border); }
+.entry:first-of-type { border-top: none; }
+.entryLeft { display: flex; flex-direction: column; }
+.entryWeight { font-weight: 700; }
+.entryDate { font-size: 0.8rem; color: var(--plum-500); }
+.entryNotes { font-size: 0.8rem; color: var(--plum-500); }
+.deleteBtn { background: none; border: none; color: var(--plum-300); font-size: 0.9rem; padding: 4px 8px; }
+.deleteBtn:hover { color: var(--danger); }
+
+.empty { text-align: center; padding: 32px 20px; color: var(--plum-500); }
+
+@media (max-width: 480px) {
+  .title { font-size: 1.65rem; }
+  .formRow { grid-template-columns: 1fr; }
+}

@@ -1,0 +1,15 @@
+.wrap { display: flex; flex-direction: column; gap: 18px; }
+.title { font-size: 2rem; }
+.sub { color: var(--plum-500); margin-top: -8px; }
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 16px; }
+.tile { display: flex; flex-direction: column; gap: 6px; transition: transform 0.1s ease; }
+.tile:hover { transform: translateY(-2px); }
+.tileTop { display: flex; align-items: center; gap: 10px; }
+.icon { font-size: 1.6rem; }
+.tileTitle { font-size: 1.1rem; }
+.tileDesc { color: var(--plum-500); font-size: 0.85rem; }
+.stat { font-weight: 700; color: var(--marvin-orange); font-size: 0.9rem; }
+
+@media (max-width: 480px) {
+  .title { font-size: 1.65rem; }
+}

@@ -1,0 +1,39 @@
+.wrap { display: flex; flex-direction: column; gap: 18px; }
+.header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.title { font-size: 2rem; }
+.back { color: var(--plum-500); font-weight: 700; font-size: 0.9rem; }
+
+.todayCard { display: flex; flex-direction: column; gap: 14px; }
+.todayTitle { font-size: 1.1rem; }
+.section { display: flex; flex-direction: column; gap: 8px; }
+.sectionLabel { font-size: 0.85rem; font-weight: 700; color: var(--plum-500); }
+
+.stuckRow { display: flex; gap: 8px; }
+.stuckBtn { flex: 1; padding: 12px; border-radius: var(--radius-md); border: 2px solid var(--border); background: var(--surface); font-weight: 700; font-size: 0.9rem; }
+.stuckYes.active { border-color: var(--marvin-basil); background: #eef6e9; color: #4a7a34; }
+.stuckPartial.active { border-color: var(--marvin-peach); background: var(--orange-100); color: var(--orange-700); }
+.stuckNo.active { border-color: var(--plum-300); background: var(--plum-100); color: var(--marvin-plum); }
+
+.energyRow { display: flex; gap: 8px; }
+.energyBtn { flex: 1; padding: 12px 0; border-radius: var(--radius-md); border: 2px solid var(--border); background: var(--surface); font-weight: 700; font-size: 1rem; }
+.energyBtn.active { border-color: var(--marvin-orange); background: var(--orange-100); color: var(--orange-700); }
+
+.noteRow { display: flex; flex-direction: column; gap: 8px; }
+.saveNote { align-self: flex-start; }
+.saved { font-size: 0.8rem; color: var(--marvin-basil); font-weight: 700; }
+
+.list { display: flex; flex-direction: column; gap: 0; }
+.listTitle { font-size: 1.15rem; margin-bottom: 4px; }
+.listHint { font-size: 0.8rem; color: var(--plum-500); margin-top: -6px; margin-bottom: 4px; }
+.historyRow { display: flex; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid var(--border); }
+.historyRow:first-of-type { border-top: none; }
+.historyDate { font-size: 0.85rem; font-weight: 700; color: var(--plum-500); min-width: 80px; }
+.historyStuck { font-size: 0.78rem; font-weight: 700; border-radius: var(--radius-pill); padding: 2px 10px; }
+.historyEnergy { font-size: 0.85rem; color: var(--marvin-plum); font-weight: 700; }
+.historyNote { font-size: 0.8rem; color: var(--plum-500); flex: 1; }
+
+.empty { text-align: center; padding: 24px 20px; color: var(--plum-500); }
+
+@media (max-width: 480px) {
+  .title { font-size: 1.65rem; }
+}

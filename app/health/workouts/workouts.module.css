@@ -1,0 +1,55 @@
+.wrap { display: flex; flex-direction: column; gap: 18px; }
+.header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.title { font-size: 2rem; }
+.back { color: var(--plum-500); font-weight: 700; font-size: 0.9rem; }
+
+.suggestionCard { display: flex; flex-direction: column; gap: 10px; background: var(--marvin-plum); color: #fff; }
+.suggestionCard h2, .suggestionCard p { color: #fff; }
+.suggestionList { display: flex; flex-wrap: wrap; gap: 8px; }
+.suggestionTag { background: rgba(255,255,255,0.15); border-radius: var(--radius-pill); padding: 4px 12px; font-size: 0.8rem; font-weight: 700; }
+
+.builderCard { display: flex; flex-direction: column; gap: 14px; }
+.builderTitle { font-size: 1.15rem; }
+.categoryGroup { display: flex; flex-direction: column; gap: 8px; }
+.categoryLabel { font-size: 0.8rem; font-weight: 800; letter-spacing: 0.04em; text-transform: uppercase; color: var(--plum-500); }
+.rehabLabel { color: var(--marvin-orange); }
+
+.exerciseRow { display: flex; align-items: flex-start; gap: 10px; padding: 10px; border-radius: var(--radius-md); border: 1px solid var(--border); }
+.exerciseRowSelected { border-color: var(--marvin-orange); background: var(--orange-100); }
+.rehabRow { border-style: dashed; }
+.exerciseCheck { margin-top: 3px; }
+.exerciseBody { display: flex; flex-direction: column; gap: 3px; flex: 1; }
+.exerciseTop { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.exerciseName { font-weight: 700; }
+.physioBadge { font-size: 0.68rem; font-weight: 800; color: var(--marvin-orange); background: var(--orange-100); border-radius: var(--radius-pill); padding: 2px 8px; }
+.exerciseCue { font-size: 0.85rem; color: var(--plum-500); }
+.exerciseSafe { font-size: 0.8rem; color: var(--marvin-basil); }
+.exerciseRx { font-size: 0.8rem; color: var(--marvin-plum); font-weight: 700; }
+.exerciseVariants { font-size: 0.78rem; color: var(--plum-300); }
+.exerciseDetails { display: flex; flex-direction: column; gap: 3px; margin-top: 2px; }
+
+.formRow { display: grid; grid-template-columns: 1fr 2fr; gap: 12px; }
+.form label { display: flex; flex-direction: column; gap: 4px; font-size: 0.85rem; font-weight: 700; color: var(--plum-500); }
+.error { color: var(--danger); font-size: 0.85rem; font-weight: 700; }
+.selectedCount { font-size: 0.85rem; color: var(--plum-500); }
+
+.list { display: flex; flex-direction: column; gap: 0; }
+.listTitle { font-size: 1.15rem; margin-bottom: 4px; }
+.entry { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; padding: 12px 0; border-top: 1px solid var(--border); }
+.entry:first-of-type { border-top: none; }
+.entryLeft { display: flex; flex-direction: column; gap: 4px; }
+.entryTop { display: flex; align-items: baseline; gap: 8px; }
+.entryDate { font-weight: 700; }
+.entryDuration { font-size: 0.8rem; color: var(--plum-500); }
+.entryTags { display: flex; flex-wrap: wrap; gap: 6px; }
+.entryTag { font-size: 0.75rem; background: var(--orange-100); color: var(--orange-700); border-radius: var(--radius-pill); padding: 2px 10px; }
+.entryNotes { font-size: 0.8rem; color: var(--plum-500); }
+.deleteBtn { background: none; border: none; color: var(--plum-300); font-size: 0.9rem; padding: 4px 8px; }
+.deleteBtn:hover { color: var(--danger); }
+
+.empty { text-align: center; padding: 24px 20px; color: var(--plum-500); }
+
+@media (max-width: 480px) {
+  .title { font-size: 1.65rem; }
+  .formRow { grid-template-columns: 1fr; }
+}
