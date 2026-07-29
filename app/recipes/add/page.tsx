@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./add.module.css";
+import ScanningDisclosure from "@/components/ScanningDisclosure";
 
 type BookOption = { id: string; title: string; author: string | null };
 
@@ -244,6 +245,7 @@ export default function AddRecipePage() {
         <p className={styles.scanHint}>
           Marvin fills the form in from a photo or pasted text.
         </p>
+        <ScanningDisclosure kind="recipe" />
         {pasteOpen && (
           <div className={styles.pasteBox}>
             <textarea

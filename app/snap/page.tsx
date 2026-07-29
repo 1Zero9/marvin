@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./snap.module.css";
+import ScanningDisclosure from "@/components/ScanningDisclosure";
 
 type Match = {
   id: string;
@@ -153,13 +154,13 @@ export default function SnapPage() {
       />
 
       {!photo && (
-        <button
+        <><ScanningDisclosure kind="food" /><button
           className={`btn btn-primary ${styles.bigSnap}`}
           onClick={() => fileRef.current?.click()}
           disabled={busy}
         >
           📷 Take a photo
-        </button>
+        </button></>
       )}
 
       {photo && (

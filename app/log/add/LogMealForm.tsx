@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./add.module.css";
+import ScanningDisclosure from "@/components/ScanningDisclosure";
 
 type Recipe = { id: string; title: string };
 type Photo = { data: string; mimeType: string; preview: string };
@@ -109,6 +110,7 @@ export default function LogMealForm({ recipes }: { recipes: Recipe[] }) {
       {!recipeId && <label>What was it?<input className="input" value={title} onChange={(event) => setTitle(event.target.value)} placeholder={context === "out" ? "e.g. Smoky prawn tacos" : "e.g. Tuesday night curry"} /></label>}
       {context === "out" && <label>Where?<input className="input" value={venue} onChange={(event) => setVenue(event.target.value)} placeholder="Restaurant, city, market…" /></label>}
       <input ref={photoRef} className={styles.hidden} type="file" accept="image/*" capture="environment" onChange={(event) => choosePhoto(event.target.files)} />
+      {!recipeId && <ScanningDisclosure kind="recipe" />}
       <div className={styles.photoAction}><button type="button" className="btn btn-secondary" onClick={() => photoRef.current?.click()}>🖼 Add a photo</button>{photo && <><img src={photo.preview} alt="Meal preview" /><button type="button" className={styles.remove} onClick={() => setPhoto(null)}>Remove</button></>}{reading && <span className={styles.reading}>🔎 Reading photo…</span>}</div>
       {!recipeId && <><label>Link <input className="input" type="url" value={link} onChange={(event) => setLink(event.target.value)} placeholder="Instagram, TikTok, article, or recipe link" /></label><button type="button" className={styles.pasteToggle} onClick={() => setPasteOpen((open) => !open)}>📋 {pasteOpen ? "Hide pasted recipe" : "Paste recipe text"}</button>{pasteOpen && <div className={styles.paste}><textarea className="input" rows={6} value={paste} onChange={(event) => setPaste(event.target.value)} placeholder="Paste a recipe, menu description, or a note from your holiday…" /><button type="button" className="btn btn-secondary" disabled={sorting} onClick={sortPaste}>{sorting ? "Sorting…" : "✨ Fill in details"}</button></div>}<details open={detailsOpen} onToggle={(event) => setDetailsOpen(event.currentTarget.open)}><summary>Recipe details (optional)</summary><label>Ingredients<textarea className="input" rows={3} value={ingredients} onChange={(event) => setIngredients(event.target.value)} /></label><label>Method<textarea className="input" rows={4} value={instructions} onChange={(event) => setInstructions(event.target.value)} /></label></details></>}
       <label>Tags <input className="input" value={tags} onChange={(event) => setTags(event.target.value)} placeholder="holiday, tapas, Lisbon" /></label>
