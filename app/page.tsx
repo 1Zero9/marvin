@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireHousehold } from "@/lib/auth";
 import { visibleTo } from "@/lib/privacy";
 import { getHealthSummary } from "@/lib/healthSummary";
+import Icon from "@/components/Icon";
 import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
@@ -108,7 +109,7 @@ export default async function Home({
         )}
         <form className={styles.searchForm} action="/" method="get">
           <div className={styles.searchBox}>
-            <span className={styles.searchIcon} aria-hidden="true">🔍</span>
+            <Icon name="search" className={styles.searchIcon} />
             <input
               className={styles.searchInput}
               type="search"
@@ -123,13 +124,13 @@ export default async function Home({
               Search
             </button>
             <Link href="/decide" className={styles.inspireBtn}>
-              ✨ Inspire me
+              <Icon name="sparkle" className={styles.btnIcon} /> Inspire me
             </Link>
           </div>
         </form>
         {!query && (
           <Link href="/snap" className={styles.snapPill}>
-            📷 Snap what you cooked
+            <Icon name="camera" className={styles.btnIcon} /> Snap what you cooked
           </Link>
         )}
       </section>
@@ -137,14 +138,15 @@ export default async function Home({
       {!query && (
         <section className={styles.health}>
           <div className={styles.healthHeader}>
-            <h2 className={styles.healthTitle}>
-              Welcome back, {firstName} <span className={styles.healthLock}>🔒 only you can see this</span>
-            </h2>
+            <h2 className={styles.healthTitle}>Your health</h2>
+            <span className={styles.healthLock}>
+              <Icon name="lock" className={styles.lockIcon} /> Private to you
+            </span>
           </div>
           <div className={styles.healthGrid}>
             {healthTiles.map((tile) => (
               <Link key={tile.href} href={tile.href} className={styles.healthTile}>
-                <span className={styles.healthIcon}>{tile.icon}</span>
+                <Icon name={tile.icon} className={styles.healthIcon} />
                 <span className={styles.healthLabel}>{tile.title}</span>
                 <span className={styles.healthStat}>{tile.stat ?? "Not logged yet"}</span>
               </Link>

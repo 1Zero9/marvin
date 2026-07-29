@@ -84,8 +84,10 @@
 }
 
 .searchIcon {
-  font-size: 1.05rem;
-  opacity: 0.55;
+  width: 20px;
+  height: 20px;
+  color: var(--plum-300);
+  flex-shrink: 0;
 }
 
 .searchInput {
@@ -169,6 +171,12 @@
   color: var(--marvin-orange);
 }
 
+.btnIcon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
 .health {
   display: flex;
   flex-direction: column;
@@ -191,12 +199,22 @@
 }
 
 .healthLock {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   font-family: var(--font-body);
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: none;
   letter-spacing: normal;
   color: var(--plum-300);
+  white-space: nowrap;
+}
+
+.lockIcon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
 }
 
 .healthGrid {
@@ -222,7 +240,9 @@
 }
 
 .healthIcon {
-  font-size: 1.5rem;
+  width: 26px;
+  height: 26px;
+  color: var(--marvin-orange);
 }
 
 .healthLabel {

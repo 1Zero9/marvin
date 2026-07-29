@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { requireHousehold } from "@/lib/auth";
 import { getHealthSummary } from "@/lib/healthSummary";
+import Icon from "@/components/Icon";
 import styles from "./health.module.css";
 
 export const dynamic = "force-dynamic";
@@ -19,7 +20,7 @@ export default async function HealthHubPage() {
         {tiles.map((tile) => (
           <Link key={tile.href} href={tile.href} className={`card ${styles.tile}`}>
             <div className={styles.tileTop}>
-              <span className={styles.icon}>{tile.icon}</span>
+              <Icon name={tile.icon} className={styles.icon} />
               <h2 className={styles.tileTitle}>{tile.title}</h2>
             </div>
             <p className={styles.tileDesc}>{tile.desc}</p>
