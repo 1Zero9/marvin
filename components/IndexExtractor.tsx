@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import styles from "./IndexExtractor.module.css";
+import ScanningDisclosure from "./ScanningDisclosure";
 
 export type IndexEntry = { ingredient: string; dish: string; page: number };
 
@@ -212,6 +213,7 @@ export default function IndexExtractor({
           >
             {images.length === 0 ? "Take photo" : "Add another photo"}
           </button>
+          <ScanningDisclosure kind="book-index" />
           {images.length > 0 && (
             <div className={styles.thumbs}>
               {images.map((img, i) => (

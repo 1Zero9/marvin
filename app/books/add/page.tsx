@@ -4,6 +4,7 @@ import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
 import BarcodeScanner from "@/components/BarcodeScanner";
 import IndexExtractor from "@/components/IndexExtractor";
+import ScanningDisclosure from "@/components/ScanningDisclosure";
 import styles from "./add.module.css";
 
 type Meta = {
@@ -90,6 +91,7 @@ export default function AddBookPage() {
           <p className={styles.hint}>
             Point the camera at the barcode on the back of the book.
           </p>
+          <ScanningDisclosure kind="isbn" />
           <BarcodeScanner onDetected={onIsbn} />
           {busy && <p className={styles.hint}>Looking up ISBN…</p>}
         </section>
