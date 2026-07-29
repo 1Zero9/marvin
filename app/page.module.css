@@ -177,27 +177,6 @@
   flex-shrink: 0;
 }
 
-.health {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.healthHeader {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-}
-
-.healthTitle {
-  display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: 8px;
-  font-size: 1.1rem;
-}
-
 .healthLock {
   display: inline-flex;
   align-items: center;
@@ -209,6 +188,7 @@
   letter-spacing: normal;
   color: var(--plum-300);
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .lockIcon {
@@ -217,46 +197,75 @@
   flex-shrink: 0;
 }
 
-.healthGrid {
+.healthCard {
   display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
-}
-
-.healthTile {
-  display: flex;
-  flex-direction: column;
   align-items: center;
-  text-align: center;
-  gap: 4px;
-  padding: 14px 8px;
+  gap: 14px;
+  padding: 16px 18px;
   border-radius: var(--radius-md);
   background: var(--surface);
   box-shadow: var(--shadow-card);
-  width: 104px;
-  flex: 0 0 auto;
+  transition: transform 0.15s ease;
 }
 
-.healthTile:hover {
+.healthCard:hover {
   transform: translateY(-1px);
 }
 
-.healthIcon {
-  width: 26px;
-  height: 26px;
+.healthCardIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--marvin-peach);
+  flex-shrink: 0;
+}
+
+.healthCardIconSvg {
+  width: 22px;
+  height: 22px;
   color: var(--marvin-orange);
 }
 
-.healthLabel {
+.healthCardText {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  flex: 1;
+}
+
+.healthCardTitleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.healthCardTitle {
+  font-family: var(--font-heading), Georgia, serif;
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
   color: var(--marvin-plum);
 }
 
-.healthStat {
-  font-size: 0.72rem;
+.healthCardStat {
+  font-size: 0.82rem;
   color: var(--plum-500);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.healthCardArrow {
+  width: 18px;
+  height: 18px;
+  color: var(--plum-300);
+  flex-shrink: 0;
 }
 
 .empty {

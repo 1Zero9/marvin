@@ -7,7 +7,9 @@ export type IconName =
   | "alcohol"
   | "workouts"
   | "checklist"
-  | "rating";
+  | "rating"
+  | "heart"
+  | "chevron";
 
 const paths: Record<IconName, React.ReactNode> = {
   search: (
@@ -73,6 +75,10 @@ const paths: Record<IconName, React.ReactNode> = {
       <path d="M8 15c1.4 1.4 6.6 1.4 8 0" />
     </>
   ),
+  heart: (
+    <path d="M12 20.2s-7.8-4.7-10-9.4C.4 7.2 2.6 4 6 4c2 0 3.5 1 6 3.5C14.5 5 16 4 18 4c3.4 0 5.6 3.2 4 6.8-2.2 4.7-10 9.4-10 9.4Z" />
+  ),
+  chevron: <path d="m9 5 7 7-7 7" />,
 };
 
 export default function Icon({ name, className }: { name: IconName; className?: string }) {
