@@ -133,6 +133,7 @@ model User {
   recipeSwapSuggestions RecipeSwapSuggestion[]
   recipeVariants        RecipeVariant[]
   recoveryCodes         AccountRecoveryCode[]
+  passwordResetTokens   PasswordResetToken[]
 }
 
 // A user-held recovery code. The raw value is shown exactly once and only a
@@ -146,6 +147,19 @@ model AccountRecoveryCode {
   usedAt    DateTime?
 
   @@index([userId, usedAt])
+}
+
+// A short-lived, one-time password reset token. Only its hash is persisted.
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash String   @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId, expiresAt])
 }
 
 model Household {
