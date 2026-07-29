@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireHousehold } from "@/lib/auth";
 import { visibleTo } from "@/lib/privacy";
+import { photoMediaUrl } from "@/lib/media";
 import styles from "./log.module.css";
 
 export const dynamic = "force-dynamic";
@@ -161,7 +162,7 @@ export default async function LogPage({
               <li key={log.id} className={`card ${styles.entry}`}>
                 {photo ? (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={photo.url} alt="" className={styles.photo} />
+                  <img src={photoMediaUrl(photo)} alt="" className={styles.photo} />
                 ) : <div className={styles.photoFallback}>🍽</div>}
                 <div className={styles.entryBody}>
                   <div className={styles.entryTop}>

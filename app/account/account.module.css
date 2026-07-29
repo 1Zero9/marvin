@@ -1,0 +1,10 @@
+.wrap { display: flex; flex-direction: column; gap: 18px; margin: 0 auto; max-width: 680px; }
+.header { align-items: flex-start; display: flex; gap: 16px; justify-content: space-between; padding-top: 12px; }
+.header h1 { font-size: clamp(2rem, 8vw, 2.65rem); margin: 4px 0; }
+.header p, .section p { color: var(--plum-500); }
+.eyebrow { color: var(--marvin-orange); font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+.back { color: var(--plum-500); font-size: 0.9rem; font-weight: 700; white-space: nowrap; }
+.section { display: flex; flex-direction: column; gap: 11px; }
+.section h2 { font-size: 1.15rem; }
+.section .btn { align-self: flex-start; }
+@media (max-width: 520px) { .header { flex-direction: column; gap: 8px; } .section .btn { width: 100%; } }

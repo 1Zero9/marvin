@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireHousehold } from "@/lib/auth";
 import { visibleTo } from "@/lib/privacy";
+import { photoMediaUrl } from "@/lib/media";
 import styles from "./moments.module.css";
 
 export const dynamic = "force-dynamic";
@@ -20,7 +21,7 @@ export default async function MomentsPage() {
   return <div className={styles.wrap}>
     <div className={styles.header}><div><h1>Food memories</h1><p>The great things you ate out, ready to bring home.</p></div><Link className="btn btn-primary" href="/log/add">＋ Add a memory</Link></div>
     {logs.length === 0 ? <section className={`card ${styles.empty}`}><span>🍽</span><h2>No food memories yet</h2><p>At a restaurant, on holiday, or at a market — save a photo and the details here.</p><Link className="btn btn-primary" href="/log/add">Save your first one</Link></section> : <section className={styles.grid}>{logs.map((log) => <article key={log.id} className={`card ${styles.card}`}>
-      {log.photos[0] ? <img src={log.photos[0].url} alt={log.recipe.title} /> : <div className={styles.noPhoto}>🍽</div>}
+      {log.photos[0] ? <img src={photoMediaUrl(log.photos[0])} alt={log.recipe.title} /> : <div className={styles.noPhoto}>🍽</div>}
       <div className={styles.body}><div><h2>{log.recipe.title}</h2><p>{[log.venue, dateLabel(log.cookedAt)].filter(Boolean).join(" · ")}</p></div>{log.rating && <span className={styles.rating}>{"★".repeat(log.rating)}</span>}</div>
       {log.notes && <p className={styles.notes}>{log.notes}</p>}
       {log.tags.length > 0 && <div className={styles.tags}>{log.tags.map((tag) => <span key={tag}>#{tag}</span>)}</div>}

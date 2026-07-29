@@ -56,6 +56,7 @@ model Recipe {
   links           String[]
   instagramUrl    String?
   shareSlug       String?                @unique
+  shareEnabled    Boolean                @default(false)
   householdId     String
   household       Household              @relation(fields: [householdId], references: [id], onDelete: Cascade)
   createdById     String?
@@ -103,29 +104,33 @@ model Photo {
 }
 
 model User {
-  id                String             @id @default(cuid())
-  email             String             @unique
-  displayName       String
-  passwordHash      String
-  createdAt         DateTime           @default(now())
-  updatedAt         DateTime           @updatedAt
-  memberships       Membership[]
-  sessions          Session[]
-  cookedLogs        CookLog[]          @relation("CookedBy")
-  mealRatings       MealRating[]
-  invitesSent       Invite[]           @relation("InvitedBy")
-  createdBooks      Book[]             @relation("BookCreatedBy")
-  createdRecipes    Recipe[]           @relation("RecipeCreatedBy")
-  weightLogs        WeightLog[]
-  goal              UserGoal?
-  alcoholLogs       AlcoholLog[]
-  alcoholPhases     AlcoholPhase[]
-  workoutSessions   WorkoutSession[]
-  dailyChecklists   DailyChecklist[]
-  checklistSettings ChecklistSettings?
-  dailyRatings      DailyRating[]
-  mealPlanEntries   MealPlanEntry[]
-  shoppingListItems ShoppingListItem[]
+  id                    String                 @id @default(cuid())
+  email                 String                 @unique
+  displayName           String
+  passwordHash          String
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  memberships           Membership[]
+  sessions              Session[]
+  cookedLogs            CookLog[]              @relation("CookedBy")
+  mealRatings           MealRating[]
+  invitesSent           Invite[]               @relation("InvitedBy")
+  createdBooks          Book[]                 @relation("BookCreatedBy")
+  createdRecipes        Recipe[]               @relation("RecipeCreatedBy")
+  weightLogs            WeightLog[]
+  goal                  UserGoal?
+  alcoholLogs           AlcoholLog[]
+  alcoholPhases         AlcoholPhase[]
+  workoutSessions       WorkoutSession[]
+  dailyChecklists       DailyChecklist[]
+  checklistSettings     ChecklistSettings?
+  dailyRatings          DailyRating[]
+  dailyCompanions       DailyCompanion[]
+  weeklyReflections     WeeklyReflection[]
+  mealPlanEntries       MealPlanEntry[]
+  shoppingListItems     ShoppingListItem[]
+  recipeSwapSuggestions RecipeSwapSuggestion[]
+  recipeVariants        RecipeVariant[]
 }
 
 model Household {
@@ -309,6 +314,38 @@ model DailyRating {
   @@index([userId, date])
 }
 
+// A private daily check-in. This never belongs to a household or a shareable record.
+model DailyCompanion {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  date         DateTime @db.Date
+  intention    String?
+  waterGlasses Int      @default(0)
+  reflection   String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@unique([userId, date])
+  @@index([userId, date])
+}
+
+// A private weekly review and one self-chosen experiment. It is never shared.
+model WeeklyReflection {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  weekStart  DateTime @db.Date
+  win        String?
+  lesson     String?
+  experiment String?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@unique([userId, weekStart])
+  @@index([userId, weekStart])
+}
+
 // --- Health module, pass 2 (schema stable now, UI built later) ---
 
 model MealPlanEntry {
@@ -316,12 +353,13 @@ model MealPlanEntry {
   userId       String
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   date         DateTime @db.Date
-  mealType     String // "breakfast" | "lunch"
+  mealType     String // "breakfast" | "lunch" — a personal plan, never household-visible
   recipeId     String?
   recipe       Recipe?  @relation(fields: [recipeId], references: [id], onDelete: SetNull)
   freeformText String? // quick entry, if not using an indexed recipe
   createdAt    DateTime @default(now())
 
+  @@unique([userId, date, mealType])
   @@index([userId, date])
 }
 
@@ -341,16 +379,22 @@ model ShoppingListItem {
 
 model RecipeSwapSuggestion {
   id          String   @id @default(cuid())
+  userId      String?
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   recipeId    String
   recipe      Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   suggestions Json // [{original, swap, reason, impactLevel}]
   generatedAt DateTime @default(now())
 
+  @@unique([userId, recipeId])
+  @@index([userId])
   @@index([recipeId])
 }
 
 model RecipeVariant {
   id               String   @id @default(cuid())
+  userId           String?
+  user             User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
   originalRecipeId String
   originalRecipe   Recipe   @relation(fields: [originalRecipeId], references: [id], onDelete: Cascade)
   name             String // e.g. "Lightened version"
@@ -358,5 +402,7 @@ model RecipeVariant {
   notes            String?
   createdAt        DateTime @default(now())
 
+  @@unique([userId, originalRecipeId])
+  @@index([userId])
   @@index([originalRecipeId])
 }

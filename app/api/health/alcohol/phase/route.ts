@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { currentMembership } from "@/lib/auth";
-import { addDays, startOfDay } from "@/lib/dates";
+import { addDays, fromDateInput, startOfDay } from "@/lib/dates";
 
 export async function POST(req: Request) {
   const identity = await currentMembership();
@@ -11,7 +11,7 @@ export async function POST(req: Request) {
   const type = body?.type === "zero" || body?.type === "moderate" ? body.type : null;
   if (!type) return NextResponse.json({ error: "Invalid phase type" }, { status: 400 });
 
-  const startDate = startOfDay(body?.startDate ? new Date(body.startDate) : new Date());
+  const startDate = startOfDay(body?.startDate ? fromDateInput(body.startDate) : new Date());
   if (Number.isNaN(startDate.getTime())) {
     return NextResponse.json({ error: "Invalid date" }, { status: 400 });
   }

@@ -1,0 +1,14 @@
+.card { display: flex; flex-direction: column; gap: 13px; }
+.heading { align-items: flex-start; display: flex; gap: 12px; justify-content: space-between; }
+.eyebrow { color: var(--plum-500); font-size: 0.75rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+.title { font-size: 1.18rem; margin-top: 2px; }
+.private { background: var(--plum-100); border-radius: var(--radius-pill); color: var(--marvin-plum); font-size: 0.76rem; font-weight: 800; padding: 4px 8px; white-space: nowrap; }
+.copy, .reason { color: var(--plum-500); font-size: 0.92rem; }
+.list { display: grid; gap: 10px; list-style: none; }
+.swap { background: var(--marvin-cream); border-radius: var(--radius-md); display: grid; gap: 4px; padding: 12px; }
+.impact { align-self: start; border-radius: var(--radius-pill); font-size: 0.7rem; font-weight: 800; padding: 3px 7px; text-transform: uppercase; }
+.impactlow { background: var(--plum-100); color: var(--plum-500); }
+.impactmedium { background: var(--orange-100); color: var(--orange-700); }
+.impacthigh { background: #f8d7d7; color: #9c2828; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.message { color: var(--plum-500); font-size: 0.88rem; font-weight: 700; }

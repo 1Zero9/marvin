@@ -3,6 +3,7 @@
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./BookCover.module.css";
+import { bookCoverMediaUrl } from "@/lib/media";
 
 async function resizeImage(file: File): Promise<{ data: string; mimeType: string }> {
   const url = URL.createObjectURL(file);
@@ -35,6 +36,7 @@ export default function BookCover({
   title: string;
 }) {
   const router = useRouter();
+  const mediaUrl = bookCoverMediaUrl({ id: bookId, coverUrl });
   const fileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
 
@@ -58,9 +60,9 @@ export default function BookCover({
 
   return (
     <div className={styles.wrap}>
-      {coverUrl ? (
+      {mediaUrl ? (
         /* eslint-disable-next-line @next/next/no-img-element */
-        <img src={coverUrl} alt="" className={styles.cover} />
+        <img src={mediaUrl} alt="" className={styles.cover} />
       ) : (
         <div className={styles.fallback}>{title.slice(0, 1)}</div>
       )}

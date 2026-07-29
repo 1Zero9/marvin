@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { currentMembership } from "@/lib/auth";
+import { fromDateInput, startOfDay } from "@/lib/dates";
 
 const STUCK_VALUES = ["yes", "partial", "no"];
 
@@ -15,7 +16,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid energy/mood value" }, { status: 400 });
   }
   const note = typeof body?.note === "string" && body.note.trim() ? body.note.trim().slice(0, 500) : null;
-  const date = body?.date ? new Date(body.date) : new Date();
+  const date = startOfDay(body?.date ? fromDateInput(body.date) : new Date());
   if (Number.isNaN(date.getTime())) {
     return NextResponse.json({ error: "Invalid date" }, { status: 400 });
   }

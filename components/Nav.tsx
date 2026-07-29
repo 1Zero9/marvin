@@ -8,9 +8,9 @@ import styles from "./Nav.module.css";
 type IconName = "home" | "books" | "cook" | "log" | "more";
 
 const links: { href: string; label: string; icon: IconName }[] = [
-  { href: "/", label: "Home", icon: "home" },
+  { href: "/", label: "Today", icon: "home" },
   { href: "/books", label: "Books", icon: "books" },
-  { href: "/decide", label: "Cook", icon: "cook" },
+  { href: "/cook", label: "Cook", icon: "cook" },
   { href: "/log", label: "Log", icon: "log" },
   { href: "/household", label: "More", icon: "more" },
 ];

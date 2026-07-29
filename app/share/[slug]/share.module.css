@@ -1,0 +1,15 @@
+.wrap { display: flex; flex-direction: column; gap: 20px; max-width: 760px; margin: 0 auto; padding: 24px 0; }
+.brand { color: var(--marvin-plum); font-family: var(--font-heading), Georgia, serif; font-size: 1.1rem; font-weight: 700; text-transform: uppercase; }
+.hero { display: flex; flex-direction: column; gap: 10px; }
+.hero h1 { font-size: clamp(2rem, 8vw, 3.5rem); }
+.eyebrow { color: var(--marvin-orange); font-size: 0.8rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+.tags { display: flex; flex-wrap: wrap; gap: 8px; }
+.photos { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; }
+.photo { aspect-ratio: 4 / 3; border-radius: var(--radius-md); object-fit: cover; width: 100%; }
+.columns { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
+.section { display: flex; flex-direction: column; gap: 12px; }
+.section h2 { font-size: 1.1rem; }
+.pre { white-space: pre-wrap; }
+.links { padding-left: 20px; }
+.links a { color: var(--marvin-plum); text-decoration: underline; text-underline-offset: 3px; }
+.footer { color: var(--plum-500); font-size: 0.8rem; text-align: center; }

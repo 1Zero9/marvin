@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { currentMembership } from "@/lib/auth";
+import { fromDateInput, startOfDay } from "@/lib/dates";
 
 export async function POST(req: Request) {
   const identity = await currentMembership();
@@ -15,7 +16,7 @@ export async function POST(req: Request) {
   if (!Number.isFinite(durationMin) || durationMin <= 0 || durationMin > 180) {
     return NextResponse.json({ error: "Enter a valid duration" }, { status: 400 });
   }
-  const date = body?.date ? new Date(body.date) : new Date();
+  const date = startOfDay(body?.date ? fromDateInput(body.date) : new Date());
   if (Number.isNaN(date.getTime())) {
     return NextResponse.json({ error: "Invalid date" }, { status: 400 });
   }

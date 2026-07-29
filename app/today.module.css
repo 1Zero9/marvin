@@ -1,0 +1,66 @@
+.wrap { display: flex; flex-direction: column; gap: 18px; max-width: 680px; margin: 0 auto; }
+.hero { display: flex; flex-direction: column; gap: 7px; padding: 18px 2px 6px; }
+.hero h1 { font-size: clamp(2rem, 8vw, 2.7rem); }
+.date, .eyebrow { color: var(--plum-500); font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+.intro { color: var(--plum-500); font-size: 1.04rem; max-width: 520px; }
+.actionStack { display: flex; flex-direction: column; gap: 14px; }
+.intentionCard, .waterCard, .checklistCard, .reflectionCard, .nextCard { display: flex; flex-direction: column; gap: 12px; }
+.intentionCard { background: linear-gradient(135deg, #fff 45%, var(--orange-100)); }
+.sectionTitle { font-size: 1.13rem; }
+.inlineForm { display: flex; gap: 10px; align-items: center; }
+.inlineForm .input { flex: 1; }
+.waterCard { flex-direction: row; align-items: center; justify-content: space-between; gap: 18px; }
+.waterHint { color: var(--plum-500); font-size: 0.88rem; max-width: 300px; }
+.waterControl { display: grid; grid-template-columns: 40px auto auto 40px; gap: 8px; align-items: center; }
+.waterButton { width: 40px; height: 40px; border: 2px solid var(--plum-100); color: var(--marvin-plum); background: var(--surface); border-radius: 50%; font-size: 1.45rem; line-height: 1; }
+.waterButton:disabled { opacity: 0.45; cursor: not-allowed; }
+.waterValue { color: var(--marvin-orange); font-size: 1.6rem; min-width: 20px; text-align: right; }
+.waterUnit { color: var(--plum-500); font-size: 0.82rem; }
+.sectionHeader { display: flex; justify-content: space-between; gap: 12px; align-items: flex-start; }
+.doneCount { color: var(--marvin-orange); font-weight: 800; font-size: 1.1rem; }
+.checklist { display: flex; flex-direction: column; gap: 4px; }
+.checkRow { align-items: center; cursor: pointer; display: flex; gap: 11px; min-height: 40px; font-weight: 700; }
+.checkRow input { accent-color: var(--marvin-orange); height: 20px; width: 20px; }
+.done { color: var(--plum-300); text-decoration: line-through; }
+.ratingCard, .ratingSection { display: flex; flex-direction: column; gap: 10px; }
+.ratingSection > span { color: var(--plum-500); font-size: 0.88rem; font-weight: 700; }
+.ratingHistory { color: var(--marvin-orange); font-size: 0.8rem; font-weight: 800; white-space: nowrap; }
+.planRatingButtons, .energyButtons { display: flex; flex-wrap: wrap; gap: 8px; }
+.planRatingButton, .energyButton { background: var(--surface); border: 2px solid var(--plum-100); color: var(--plum-500); font-weight: 800; min-height: 40px; }
+.planRatingButton { border-radius: var(--radius-pill); padding: 7px 12px; }
+.energyButton { border-radius: 50%; width: 40px; }
+.planRatingButton:disabled, .energyButton:disabled { cursor: not-allowed; opacity: 0.55; }
+.ratingActive { background: var(--orange-100); border-color: var(--marvin-orange); color: var(--orange-700); }
+.reflectionForm { display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+.reflectionForm textarea { min-height: 96px; resize: vertical; }
+.nextCard { background: var(--marvin-plum); color: #fff; }
+.nextCard .eyebrow { color: var(--marvin-peach); }
+.nextCard .sectionTitle { color: #fff; }
+.nextLinks { display: grid; gap: 8px; }
+.nextLink { align-items: center; background: rgba(255,255,255,0.12); border-radius: var(--radius-md); display: flex; font-weight: 800; justify-content: space-between; min-height: 46px; padding: 10px 14px; }
+.nextLink:hover { background: rgba(255,255,255,0.2); }
+.nextLink span { color: var(--marvin-peach); font-size: 1.2rem; }
+.cookingPick { align-items: center; display: flex; gap: 13px; padding: 14px; transition: transform 0.15s ease; }
+.experimentCard { align-items: center; background: var(--orange-100); display: flex; gap: 12px; justify-content: space-between; }
+.experimentCard:hover { background: var(--marvin-peach); }
+.experimentCard > span { color: var(--marvin-orange); font-size: 1.3rem; font-weight: 800; }
+.cookingPick:hover { transform: translateY(-1px); }
+.cookingPhoto, .cookingFallback { border-radius: var(--radius-sm); flex: 0 0 74px; height: 74px; width: 74px; }
+.cookingPhoto { object-fit: cover; }
+.cookingFallback { align-items: center; background: var(--marvin-peach); display: flex; font-size: 1.6rem; justify-content: center; }
+.cookingCopy { display: flex; flex: 1; flex-direction: column; gap: 3px; min-width: 0; }
+.cookingCopy p:last-child { color: var(--plum-500); font-size: 0.86rem; }
+.cookingArrow { color: var(--marvin-orange); font-size: 1.3rem; font-weight: 800; }
+.noCookingPick { display: flex; flex-direction: column; gap: 6px; }
+.noCookingPick span { color: var(--plum-500); font-size: 0.88rem; font-weight: 700; }
+.weekLine, .privateNote { color: var(--plum-500); font-size: 0.86rem; text-align: center; }
+.reflectionLink { color: var(--marvin-orange); font-size: 0.9rem; font-weight: 800; text-align: center; }
+.privateNote { color: var(--plum-300); font-size: 0.78rem; }
+.error { color: var(--danger); font-weight: 700; }
+@media (max-width: 520px) {
+  .hero { padding-top: 8px; }
+  .inlineForm { align-items: stretch; flex-direction: column; }
+  .inlineForm .btn { width: 100%; }
+  .waterCard { align-items: flex-start; flex-direction: column; }
+  .waterControl { align-self: stretch; justify-content: center; }
+}

@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { currentMembership } from "@/lib/auth";
-import { startOfDay } from "@/lib/dates";
+import { fromDateInput, startOfDay } from "@/lib/dates";
 
 export async function POST(req: Request) {
   const identity = await currentMembership();
@@ -9,7 +9,7 @@ export async function POST(req: Request) {
   const body = await req.json();
 
   const hadDrink = Boolean(body?.hadDrink);
-  const date = startOfDay(body?.date ? new Date(body.date) : new Date());
+  const date = startOfDay(body?.date ? fromDateInput(body.date) : new Date());
   if (Number.isNaN(date.getTime())) {
     return NextResponse.json({ error: "Invalid date" }, { status: 400 });
   }
