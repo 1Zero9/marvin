@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { requireHousehold } from "@/lib/auth";
+import { AiProcessingControl, DeleteAccountControl, RecoveryCodeControl } from "@/components/AccountPrivacyControls";
 import styles from "./account.module.css";
 
 export const dynamic = "force-dynamic";
@@ -22,8 +23,21 @@ export default async function AccountPage() {
         <a href="/api/account/export" className="btn btn-primary">Download my data</a>
       </section>
       <section className={`card ${styles.section}`}>
+        <h2>Privacy choices</h2>
+        <p>Marvin has no advertising or behavioural tracking. You can opt out of optional AI processing at any time.</p>
+        <AiProcessingControl enabled={identity.user.aiProcessingEnabled} />
+      </section>
+      <section className={`card ${styles.section}`}>
+        <h2>Keep a way back in</h2>
+        <RecoveryCodeControl />
+      </section>
+      <section className={`card ${styles.section}`}>
         <h2>Sharing boundaries</h2>
         <p>Health data cannot be shared. Recipe links are separate and revocable; they include the recipe only, never your personal history or household details.</p>
+      </section>
+      <section className={`card ${styles.section}`}>
+        <h2>Erase my data</h2>
+        <DeleteAccountControl />
       </section>
     </div>
   );

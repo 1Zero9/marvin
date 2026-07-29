@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { currentMembership } from "@/lib/auth";
+import { aiProcessingAllowed } from "@/lib/privacy";
 
 export const maxDuration = 30;
 
@@ -21,8 +22,10 @@ function fallbackKeywords(title: string, ingredients: string | null): string[] {
 async function extractKeywords(
   title: string,
   ingredients: string | null,
-  instructions: string | null
+  instructions: string | null,
+  useAi: boolean
 ): Promise<string[]> {
+  if (!useAi) return fallbackKeywords(title, ingredients);
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return fallbackKeywords(title, ingredients);
   const model = process.env.GEMINI_MODEL || "gemini-flash-latest";
@@ -100,7 +103,8 @@ export async function POST(req: Request) {
   const keywords = await extractKeywords(
     title.trim(),
     typeof ingredients === "string" ? ingredients : null,
-    typeof instructions === "string" ? instructions : null
+    typeof instructions === "string" ? instructions : null,
+    aiProcessingAllowed(identity)
   );
 
   const recipe = await prisma.recipe.create({

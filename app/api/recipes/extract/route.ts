@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { currentMembership } from "@/lib/auth";
 import { decodeImage } from "@/lib/images";
+import { aiProcessingAllowed } from "@/lib/privacy";
 
 export const maxDuration = 60;
 
@@ -118,6 +119,7 @@ async function extractRecipe(
 export async function POST(req: Request) {
   const identity = await currentMembership();
   if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
+  if (!aiProcessingAllowed(identity)) return NextResponse.json({ error: "AI processing is off in your privacy controls." }, { status: 403 });
   const body = await req.json();
   const text = typeof body?.text === "string" ? body.text.trim() : "";
   const images: { data?: string; mimeType?: string }[] = Array.isArray(body?.images)

@@ -108,6 +108,7 @@ model User {
   email                 String                 @unique
   displayName           String
   passwordHash          String
+  aiProcessingEnabled   Boolean                @default(true)
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @updatedAt
   memberships           Membership[]
@@ -131,6 +132,20 @@ model User {
   shoppingListItems     ShoppingListItem[]
   recipeSwapSuggestions RecipeSwapSuggestion[]
   recipeVariants        RecipeVariant[]
+  recoveryCodes         AccountRecoveryCode[]
+}
+
+// A user-held recovery code. The raw value is shown exactly once and only a
+// hash is kept, so Marvin can support password recovery without a mail provider.
+model AccountRecoveryCode {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  codeHash  String   @unique
+  createdAt DateTime @default(now())
+  usedAt    DateTime?
+
+  @@index([userId, usedAt])
 }
 
 model Household {

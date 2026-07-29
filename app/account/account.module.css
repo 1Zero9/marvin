@@ -7,4 +7,13 @@
 .section { display: flex; flex-direction: column; gap: 11px; }
 .section h2 { font-size: 1.15rem; }
 .section .btn { align-self: flex-start; }
+.control { align-items: flex-start; border-top: 1px solid var(--cream-300); display: grid; gap: 10px; padding-top: 12px; }
+.control p { font-size: 0.92rem; margin: 4px 0 0; }
+.control .btn { justify-self: start; }
+.status { color: var(--plum-500); }
+.error { color: #a33328 !important; font-weight: 700; }
+.code { background: var(--cream-100); border: 1px dashed var(--plum-300); border-radius: 8px; color: var(--plum-700); font-size: 1rem; font-weight: 800; letter-spacing: 0.06em; padding: 12px; }
+.danger strong { color: #8f261f; }
+.deleteForm { display: grid; gap: 9px; max-width: 390px; }
+.deleteForm label { display: grid; font-size: 0.85rem; font-weight: 700; gap: 4px; }
 @media (max-width: 520px) { .header { flex-direction: column; gap: 8px; } .section .btn { width: 100%; } }

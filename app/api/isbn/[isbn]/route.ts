@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { currentMembership } from "@/lib/auth";
+import { aiProcessingAllowed } from "@/lib/privacy";
 
 export const maxDuration = 30;
 
@@ -164,7 +165,7 @@ export async function GET(
       (await fromGoogleBooks(candidate, candidate));
     if (meta) break;
   }
-  meta ??= await fromGemini(clean);
+  if (aiProcessingAllowed(identity)) meta ??= await fromGemini(clean);
   if (!meta) {
     return NextResponse.json({ error: "Book not found" }, { status: 404 });
   }

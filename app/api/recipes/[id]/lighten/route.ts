@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { currentMembership } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import { visibleTo } from "@/lib/privacy";
+import { aiProcessingAllowed, visibleTo } from "@/lib/privacy";
 
 type Swap = { original: string; swap: string; reason: string; impactLevel: "low" | "medium" | "high" };
 
@@ -30,6 +30,7 @@ export async function POST(
 ) {
   const identity = await currentMembership();
   if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
+  if (!aiProcessingAllowed(identity)) return NextResponse.json({ error: "AI processing is off in your privacy controls." }, { status: 403 });
   const { id } = await params;
   const recipe = await prisma.recipe.findFirst({
     where: { id, householdId: identity.membership.householdId, ...visibleTo(identity) },
