@@ -218,8 +218,9 @@
 }
 
 .healthGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
   gap: 10px;
 }
 
@@ -233,6 +234,8 @@
   border-radius: var(--radius-md);
   background: var(--surface);
   box-shadow: var(--shadow-card);
+  width: 104px;
+  flex: 0 0 auto;
 }
 
 .healthTile:hover {
