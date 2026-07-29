@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { currentMembership } from "@/lib/auth";
+import { decodeImage } from "@/lib/images";
 
 export const maxDuration = 60;
 
@@ -110,18 +111,12 @@ export async function POST(req: Request) {
   });
 
   const photo = body?.photo;
-  if (
-    typeof photo?.data === "string" &&
-    typeof photo?.mimeType === "string" &&
-    photo.mimeType.startsWith("image/")
-  ) {
-    const buffer = Buffer.from(photo.data, "base64");
-    if (buffer.length <= 5 * 1024 * 1024) {
-      const ext = photo.mimeType.split("/")[1] === "png" ? "png" : "jpg";
+  const image = decodeImage(photo?.data, photo?.mimeType);
+  if (image) {
       const blob = await put(
-        `recipes/${recipeId}/logs/${Date.now()}.${ext}`,
-        buffer,
-        { access: "public", contentType: photo.mimeType }
+        `recipes/${recipeId}/logs/${Date.now()}.${image.extension}`,
+        image.buffer,
+        { access: "public", contentType: image.mimeType }
       );
       await prisma.photo.create({
         data: {
@@ -130,7 +125,6 @@ export async function POST(req: Request) {
           ...(isNewRecipe ? { recipeId } : {}),
         },
       });
-    }
   }
 
   return NextResponse.json({ recipeId, logId: log.id }, { status: 201 });

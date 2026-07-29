@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { currentMembership } from "@/lib/auth";
+import { decodeImage } from "@/lib/images";
 
 export const maxDuration = 60;
 
@@ -85,16 +86,12 @@ export async function POST(req: Request) {
   const identity = await currentMembership();
   if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
   const body = await req.json();
-  const data: string | undefined = body?.data;
-  const mimeType: string | undefined = body?.mimeType;
-  if (!data || !mimeType?.startsWith("image/")) {
+  const image = decodeImage(body?.data, body?.mimeType);
+  if (!image) {
     return NextResponse.json({ error: "Image required" }, { status: 400 });
   }
-  if (Buffer.from(data, "base64").length > 5 * 1024 * 1024) {
-    return NextResponse.json({ error: "Image too large" }, { status: 400 });
-  }
 
-  const result = await identify(data, mimeType);
+  const result = await identify(body.data, image.mimeType);
   if (!result) {
     return NextResponse.json(
       { error: "Couldn't identify the dish" },

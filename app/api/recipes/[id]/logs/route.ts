@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { put } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { currentMembership } from "@/lib/auth";
+import { decodeImage } from "@/lib/images";
 
 export const maxDuration = 60;
 
@@ -43,13 +44,11 @@ export async function POST(
     ? body.photos.slice(0, 6)
     : [];
   for (const p of photos) {
-    if (!p?.data || !p?.mimeType?.startsWith("image/")) continue;
-    const buffer = Buffer.from(p.data, "base64");
-    if (buffer.length > 5 * 1024 * 1024) continue;
-    const ext = p.mimeType.split("/")[1] === "png" ? "png" : "jpg";
-    const blob = await put(`recipes/${id}/logs/${Date.now()}.${ext}`, buffer, {
+    const image = decodeImage(p?.data, p?.mimeType);
+    if (!image) continue;
+    const blob = await put(`recipes/${id}/logs/${Date.now()}.${image.extension}`, image.buffer, {
       access: "public",
-      contentType: p.mimeType,
+      contentType: image.mimeType,
     });
     await prisma.photo.create({
       data: { url: blob.url, cookLogId: log.id },
