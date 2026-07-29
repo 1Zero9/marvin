@@ -25,6 +25,14 @@ export function createRecoveryCode() {
   return `MRVN-${value.slice(0, 6)}-${value.slice(6, 12)}-${value.slice(12, 18)}`;
 }
 
+export function createPasswordResetToken() {
+  return randomBytes(32).toString("base64url");
+}
+
+export function hashPasswordResetToken(token: string) {
+  return createHash("sha256").update(`marvin-password-reset:${token}`).digest("hex");
+}
+
 export function verifyPassword(password: string, stored: string) {
   const [salt, hash] = stored.split(":");
   if (!salt || !hash) return false;
