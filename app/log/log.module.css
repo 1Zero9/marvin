@@ -4,7 +4,7 @@
 .snapLink { font-weight: 700; color: var(--marvin-orange); font-size: 1rem; white-space: nowrap; }
 .summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .stat { display: flex; flex-direction: column; gap: 4px; color: var(--plum-500); font-size: .9rem; }
-.statValue { color: var(--marvin-plum); font-family: var(--font-heading), Georgia, serif; font-size: 1.2rem; font-weight: 900; line-height: 1.15; }
+.statValue { color: var(--marvin-plum); font-family: var(--font-heading), Georgia, serif; font-size: 1.2rem; font-weight: 700; line-height: 1.15; }
 .filters { display: flex; flex-direction: column; gap: 8px; }
 .filters .input { padding: 10px 12px; }
 .search { border-radius: var(--radius-pill); }
@@ -20,7 +20,7 @@
 .photoFallback { align-items: center; background: var(--marvin-peach); display: flex; font-size: 1.8rem; justify-content: center; }
 .entryBody { display: flex; flex: 1; flex-direction: column; gap: 8px; min-width: 0; }
 .entryTop { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.recipeLink { color: var(--marvin-plum); font-family: var(--font-heading), Georgia, serif; font-size: 1.1rem; font-weight: 900; }
+.recipeLink { color: var(--marvin-plum); font-family: var(--font-heading), Georgia, serif; font-size: 1.1rem; font-weight: 700; }
 .recipeLink:hover { color: var(--marvin-orange); }
 .meta { color: var(--plum-500); font-size: .9rem; }
 .stars { color: var(--marvin-orange); letter-spacing: 1px; white-space: nowrap; }

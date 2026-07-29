@@ -61,6 +61,8 @@ h4 {
   font-family: var(--font-heading), Georgia, serif;
   color: var(--marvin-plum);
   line-height: 1.15;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
 }
 
 a {
