@@ -8,3 +8,7 @@ export function visibleTo(identity: Identity) {
 export function canManage(identity: Identity, createdById: string | null) {
   return identity.membership.role === "owner" || createdById === identity.user.id;
 }
+
+export function aiProcessingAllowed(identity: { user: { aiProcessingEnabled: boolean } }) {
+  return identity.user.aiProcessingEnabled;
+}

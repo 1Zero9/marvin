@@ -37,7 +37,7 @@ export default function AuthForm({ setup = false }: { setup?: boolean }) {
       <label className={styles.label}>Email<input className="input" name="email" type="email" required autoComplete="email" /></label>
       <label className={styles.label}>Password<input className="input" name="password" type="password" required minLength={setup ? 10 : 1} autoComplete={setup ? "new-password" : "current-password"} /></label>
       <button className="btn btn-primary" disabled={busy}>{busy ? "Just a moment…" : setup ? "Create my kitchen" : "Sign in"}</button>
-      <p className={styles.switch}>{setup ? <>Already set up? <Link href="/signin">Sign in</Link></> : <>New to this Marvin? <Link href="/setup">Set up your kitchen</Link></>}</p>
+      <p className={styles.switch}>{setup ? <>Already set up? <Link href="/signin">Sign in</Link></> : <>New to this Marvin? <Link href="/setup">Set up your kitchen</Link> · <Link href="/recover">Use a recovery code</Link></>}</p>
     </form>
   );
 }
