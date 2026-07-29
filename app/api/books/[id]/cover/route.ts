@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
+import { randomUUID } from "crypto";
 import { del, put } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { currentMembership } from "@/lib/auth";
 import { canManage } from "@/lib/privacy";
 import { decodeImage } from "@/lib/images";
+import { isPrivateBlobUrl, privateMediaToken } from "@/lib/media";
 
 export const maxDuration = 30;
 
@@ -26,14 +28,17 @@ export async function POST(
   }
   if (!canManage(identity, book.createdById)) return NextResponse.json({ error: "Only the owner or creator can change this private book." }, { status: 403 });
 
-  const blob = await put(`covers/${id}-${Date.now()}.${image.extension}`, image.buffer, {
-    access: "public",
+  const token = privateMediaToken();
+  if (!token) return NextResponse.json({ error: "Private media is not configured" }, { status: 503 });
+  const blob = await put(`covers/${id}-${Date.now()}-${randomUUID()}.${image.extension}`, image.buffer, {
+    access: "private",
+    token,
     contentType: image.mimeType,
   });
 
   if (book.coverUrl?.includes(".blob.vercel-storage.com/")) {
     try {
-      await del(book.coverUrl);
+      await del(book.coverUrl, isPrivateBlobUrl(book.coverUrl) ? { token } : undefined);
     } catch {}
   }
 

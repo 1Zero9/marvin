@@ -1,286 +1,147 @@
 import Link from "next/link";
-import Image from "next/image";
-import { prisma } from "@/lib/prisma";
 import { requireHousehold } from "@/lib/auth";
+import { addDays, mondayOf, startOfDay, toDateInput } from "@/lib/dates";
+import { prisma } from "@/lib/prisma";
 import { visibleTo } from "@/lib/privacy";
-import { getHealthSummary } from "@/lib/healthSummary";
-import Icon from "@/components/Icon";
-import styles from "./page.module.css";
+import { photoMediaUrl } from "@/lib/media";
+import TodayActions from "./TodayActions";
+import styles from "./today.module.css";
 
 export const dynamic = "force-dynamic";
 
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: Promise<{ q?: string; f?: string }>;
-}) {
-  const { q, f } = await searchParams;
-  const identity = await requireHousehold();
-  const query = q?.trim() ?? "";
-  const filter = f === "books" || f === "personal" ? f : "all";
+const DEFAULT_LABELS = ["No alcohol", "One workout", "Drink water", "Short walk"];
 
-  const [bookCount, entries, matchedRecipes, healthTiles] = await Promise.all([
-    prisma.book.count({ where: { householdId: identity.membership.householdId, ...visibleTo(identity) } }),
-    query && filter !== "personal"
-      ? prisma.indexEntry.findMany({
-          where: {
-            OR: [
-              { ingredient: { contains: query, mode: "insensitive" } },
-              { dish: { contains: query, mode: "insensitive" } },
-            ],
-            book: { archived: false, householdId: identity.membership.householdId, ...visibleTo(identity) },
-          },
-          include: { book: true },
-          orderBy: [{ dish: "asc" }],
-          take: 100,
-        })
-      : Promise.resolve([]),
-    query
-      ? prisma.recipe.findMany({
-          where: {
-            AND: [
-              {
-                OR: [
-                  { title: { contains: query, mode: "insensitive" } },
-                  { keywords: { has: query.toLowerCase() } },
-                  { tags: { has: query.toLowerCase() } },
-                ],
-              },
-              filter === "books"
-                ? { source: "book" }
-                : filter === "personal"
-                  ? { source: "personal" }
-                  : {},
-              { householdId: identity.membership.householdId },
-              visibleTo(identity),
-            ],
-          },
-          include: {
-            book: { select: { id: true, title: true } },
-            photos: { take: 1, orderBy: { createdAt: "asc" } },
-          },
-          orderBy: { title: "asc" },
-          take: 50,
-        })
-      : Promise.resolve([]),
-    getHealthSummary(identity.user.id),
+function greetingFor(date: Date) {
+  const hour = date.getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 18) return "Good afternoon";
+  return "Good evening";
+}
+
+function cookingReason(recipe: { cookLogs: { cookedAt: Date; rating: number | null }[]; tags: string[] }) {
+  const ratings = recipe.cookLogs.filter((log) => log.rating != null);
+  const average = ratings.length
+    ? ratings.reduce((sum, log) => sum + (log.rating ?? 0), 0) / ratings.length
+    : null;
+  const lastCooked = recipe.cookLogs[0]?.cookedAt;
+  if (average && average >= 4) return `${average.toFixed(1)} ★ from past cooks`;
+  if (!lastCooked) return "Ready for its first cook";
+  const months = Math.floor((Date.now() - lastCooked.getTime()) / (30 * 24 * 60 * 60 * 1000));
+  if (months >= 2) return `Not made for ${months} months`;
+  if (recipe.tags.includes("quick")) return "One of your quick recipes";
+  return `Made ${recipe.cookLogs.length} ${recipe.cookLogs.length === 1 ? "time" : "times"}`;
+}
+
+export default async function TodayPage() {
+  const identity = await requireHousehold();
+  const now = new Date();
+  const today = startOfDay(now);
+  const userId = identity.user.id;
+  const weekStart = addDays(today, -6);
+  const currentWeekStart = mondayOf(today);
+
+  const [checkIn, settings, checklist, rating, alcoholLog, workoutCount, weekCheckIns, recipes, weeklyReflection] = await Promise.all([
+    prisma.dailyCompanion.findUnique({ where: { userId_date: { userId, date: today } } }),
+    prisma.checklistSettings.findUnique({ where: { userId } }),
+    prisma.dailyChecklist.findUnique({ where: { userId_date: { userId, date: today } } }),
+    prisma.dailyRating.findUnique({ where: { userId_date: { userId, date: today } } }),
+    prisma.alcoholLog.findUnique({ where: { userId_date: { userId, date: today } } }),
+    prisma.workoutSession.count({ where: { userId, date: { gte: weekStart } } }),
+    prisma.dailyCompanion.count({ where: { userId, date: { gte: weekStart } } }),
+    prisma.recipe.findMany({
+      where: { householdId: identity.membership.householdId, ...visibleTo(identity) },
+      include: {
+        photos: { take: 1, orderBy: { createdAt: "asc" } },
+        cookLogs: { select: { cookedAt: true, rating: true }, orderBy: { cookedAt: "desc" }, take: 50 },
+      },
+      take: 80,
+    }),
+    prisma.weeklyReflection.findUnique({ where: { userId_weekStart: { userId, weekStart: currentWeekStart } } }),
   ]);
 
-  const entryRecipes = query
-    ? await prisma.recipe.findMany({
-        where: {
-          AND: [{ householdId: identity.membership.householdId }, visibleTo(identity), { OR:
-            entries.length > 0
-              ? entries.map((r) => ({ bookId: r.bookId, pageRef: r.page }))
-              : [{ id: "none" }] }],
-        },
-        select: { id: true, bookId: true, pageRef: true },
-      })
-    : [];
-
-  const recipeFor = (bookId: string, page: number) =>
-    entryRecipes.find((r) => r.bookId === bookId && r.pageRef === page);
-
+  const labels = settings?.labels.length ? settings.labels : DEFAULT_LABELS;
+  const checklistItems = (checklist?.items as Record<string, boolean> | undefined) ?? {};
   const firstName = identity.user.displayName.trim().split(/\s+/)[0];
-
-  const total = entries.length + matchedRecipes.length;
-
-  const filterHref = (value: string) =>
-    `/?q=${encodeURIComponent(query)}${value === "all" ? "" : `&f=${value}`}`;
+  const dateLabel = now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
+  const weekLine = [
+    workoutCount ? `${workoutCount} workout${workoutCount === 1 ? "" : "s"} this week` : "No workout logged yet this week",
+    weekCheckIns ? `${weekCheckIns} daily check-in${weekCheckIns === 1 ? "" : "s"}` : "Start with one small check-in",
+  ].join(" · ");
+  const rankedRecipes = recipes
+    .map((recipe) => {
+      const ratings = recipe.cookLogs.filter((log) => log.rating != null);
+      const average = ratings.length ? ratings.reduce((sum, log) => sum + (log.rating ?? 0), 0) / ratings.length : 0;
+      const lastCooked = recipe.cookLogs[0]?.cookedAt.getTime() ?? 0;
+      return { recipe, average, lastCooked };
+    })
+    .sort((a, b) => b.average - a.average || a.lastCooked - b.lastCooked || a.recipe.title.localeCompare(b.recipe.title));
+  const cookingPick = rankedRecipes.length ? rankedRecipes[now.getDate() % rankedRecipes.length].recipe : null;
 
   return (
     <div className={styles.wrap}>
-      <section className={`${styles.hero} ${query ? styles.heroCompact : ""}`}>
-        <div className={styles.logoLockup}>
-          <Image
-            src="/icons/icon-192.png"
-            alt=""
-            width={96}
-            height={96}
-            className={styles.heroLogo}
-            priority
-          />
-          <h1 className={styles.heroName}>Marvin</h1>
-        </div>
-        {!query && (
-          <p className={styles.tagline}>
-            What are we <span className={styles.accent}>making</span>, {firstName}?
-          </p>
-        )}
-        <form className={styles.searchForm} action="/" method="get">
-          <div className={styles.searchBox}>
-            <Icon name="search" className={styles.searchIcon} />
-            <input
-              className={styles.searchInput}
-              type="search"
-              name="q"
-              defaultValue={query}
-              placeholder="Try “aubergine” or “Tuesday curry”…"
-              autoComplete="off"
-            />
-          </div>
-          <div className={styles.searchButtons}>
-            <button type="submit" className={styles.searchBtn}>
-              Search
-            </button>
-            <Link href="/decide" className={styles.inspireBtn}>
-              <Icon name="sparkle" className={styles.btnIcon} /> Inspire me
-            </Link>
-          </div>
-        </form>
-        {!query && (
-          <Link href="/snap" className={styles.snapPill}>
-            <Icon name="camera" className={styles.btnIcon} /> Snap what you cooked
-          </Link>
-        )}
-      </section>
+      <header className={styles.hero}>
+        <p className={styles.date}>{dateLabel}</p>
+        <h1>{greetingFor(now)}, {firstName}</h1>
+        <p className={styles.intro}>One honest day at a time. You don&rsquo;t need to do everything; just notice what helps.</p>
+      </header>
 
-      {!query && (
-        <Link href="/health" className={styles.healthCard}>
-          <span className={styles.healthCardIcon}>
-            <Icon name="heart" className={styles.healthCardIconSvg} />
-          </span>
-          <span className={styles.healthCardText}>
-            <span className={styles.healthCardTitleRow}>
-              <span className={styles.healthCardTitle}>Your health</span>
-              <span className={styles.healthLock}>
-                <Icon name="lock" className={styles.lockIcon} /> Private
-              </span>
-            </span>
-            <span className={styles.healthCardStat}>
-              {healthTiles.map((tile) => tile.stat ?? "Not logged yet").join(" · ")}
-            </span>
-          </span>
-          <Icon name="chevron" className={styles.healthCardArrow} />
+      <TodayActions
+        today={toDateInput(today)}
+        checkIn={{ intention: checkIn?.intention ?? null, waterGlasses: checkIn?.waterGlasses ?? 0, reflection: checkIn?.reflection ?? null }}
+        rating={{ stuckToPlan: rating?.stuckToPlan ?? null, energyMood: rating?.energyMood ?? null }}
+        labels={labels}
+        initialChecklist={checklistItems}
+      />
+
+      {weeklyReflection?.experiment && (
+        <Link href="/reflection" className={`card ${styles.experimentCard}`}>
+          <div>
+            <p className={styles.eyebrow}>This week&rsquo;s experiment</p>
+            <h2 className={styles.sectionTitle}>{weeklyReflection.experiment}</h2>
+          </div>
+          <span>→</span>
         </Link>
       )}
 
-      {query ? (
-        <>
-          <div className={styles.filterRow}>
-            {[
-              { value: "all", label: "All" },
-              { value: "books", label: "From books" },
-              { value: "personal", label: "My recipes" },
-            ].map((opt) => (
-              <Link
-                key={opt.value}
-                href={filterHref(opt.value)}
-                className={`${styles.filterPill} ${
-                  filter === opt.value ? styles.filterActive : ""
-                }`}
-              >
-                {opt.label}
-              </Link>
-            ))}
+      {cookingPick ? (
+        <Link href={`/recipes/${cookingPick.id}`} className={`card ${styles.cookingPick}`}>
+          {cookingPick.photos[0] ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={photoMediaUrl(cookingPick.photos[0])} alt="" className={styles.cookingPhoto} />
+          ) : <div className={styles.cookingFallback}>🍽</div>}
+          <div className={styles.cookingCopy}>
+            <p className={styles.eyebrow}>From your kitchen</p>
+            <h2 className={styles.sectionTitle}>{cookingPick.title}</h2>
+            <p>{cookingReason(cookingPick)}</p>
           </div>
+          <span className={styles.cookingArrow}>→</span>
+        </Link>
+      ) : (
+        <Link href="/recipes/add" className={`card ${styles.noCookingPick}`}>
+          <p className={styles.eyebrow}>From your kitchen</p>
+          <h2 className={styles.sectionTitle}>Add a recipe you&rsquo;d like to remember</h2>
+          <span>Build a useful cooking memory, one dish at a time. →</span>
+        </Link>
+      )}
 
-          {total === 0 ? (
-            <div className={`card ${styles.empty}`}>
-              <h2 className={styles.emptyTitle}>
-                Nothing for &ldquo;{query}&rdquo;
-              </h2>
-              <p className={styles.emptyText}>
-                Try a different ingredient, or index more books.
-              </p>
-            </div>
-          ) : (
-            <section className={styles.results}>
-              <p className={styles.count}>
-                {total} result{total === 1 ? "" : "s"} for &ldquo;{query}&rdquo;
-              </p>
+      <section className={`card ${styles.nextCard}`}>
+        <div>
+          <p className={styles.eyebrow}>Make the next choice easier</p>
+          <h2 className={styles.sectionTitle}>What would help right now?</h2>
+        </div>
+        <div className={styles.nextLinks}>
+          <Link href="/decide" className={styles.nextLink}>Find something to cook <span>→</span></Link>
+          <Link href="/plan" className={styles.nextLink}>Plan a few meals <span>→</span></Link>
+          <Link href="/health/workouts" className={styles.nextLink}>Do a short workout <span>→</span></Link>
+          <Link href="/health/alcohol" className={styles.nextLink}>
+            {alcoholLog ? "Review today’s alcohol log" : "Check in on alcohol"} <span>→</span>
+          </Link>
+        </div>
+      </section>
 
-              {matchedRecipes.map((r) => (
-                <Link
-                  key={`recipe-${r.id}`}
-                  href={`/recipes/${r.id}`}
-                  className={`card ${styles.result}`}
-                >
-                  {r.photos[0] ? (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img
-                      src={r.photos[0].url}
-                      alt=""
-                      className={styles.resultCover}
-                    />
-                  ) : (
-                    <div className={styles.resultCoverFallback}>🍽</div>
-                  )}
-                  <div className={styles.resultInfo}>
-                    <h2 className={styles.resultDish}>{r.title}</h2>
-                    <p className={styles.resultMeta}>
-                      {r.book
-                        ? `${r.book.title}${r.pageRef ? ` · p.${r.pageRef}` : ""}`
-                        : "My own recipe"}
-                    </p>
-                    <div className={styles.resultTags}>
-                      <span className="tag">
-                        {r.source === "book" ? "Book recipe" : "Personal"}
-                      </span>
-                    </div>
-                  </div>
-                </Link>
-              ))}
-
-              {entries.map((r) => {
-                const recipe = recipeFor(r.bookId, r.page);
-                return (
-                  <div key={r.id} className={`card ${styles.result}`}>
-                    {r.book.coverUrl ? (
-                      /* eslint-disable-next-line @next/next/no-img-element */
-                      <img
-                        src={r.book.coverUrl}
-                        alt=""
-                        className={styles.resultCover}
-                      />
-                    ) : (
-                      <div className={styles.resultCoverFallback}>
-                        {r.book.title.slice(0, 1)}
-                      </div>
-                    )}
-                    <div className={styles.resultInfo}>
-                      <h2 className={styles.resultDish}>{r.dish}</h2>
-                      <p className={styles.resultMeta}>
-                        <Link
-                          href={`/books/${r.bookId}`}
-                          className={styles.bookLink}
-                        >
-                          {r.book.title}
-                        </Link>{" "}
-                        · p.{r.page}
-                      </p>
-                      <div className={styles.resultTags}>
-                        <span className="tag">{r.ingredient}</span>
-                        {recipe && (
-                          <Link
-                            href={`/recipes/${recipe.id}`}
-                            className={styles.recipeLink}
-                          >
-                            View recipe log →
-                          </Link>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-            </section>
-          )}
-        </>
-      ) : bookCount === 0 ? (
-        <section>
-          <div className={`card ${styles.empty}`}>
-            <h2 className={styles.emptyTitle}>No books indexed yet</h2>
-            <p className={styles.emptyText}>
-              Scan a cookbook&rsquo;s barcode and photograph its index to make
-              it searchable.
-            </p>
-            <Link href="/books/add" className="btn btn-primary">
-              Add your first book
-            </Link>
-          </div>
-        </section>
-      ) : null}
+      <p className={styles.weekLine}>{weekLine}</p>
+      <Link href="/reflection" className={styles.reflectionLink}>See your weekly reflection →</Link>
+      <p className={styles.privateNote}>Your daily check-in is private to you. It is never part of your household cooking library.</p>
     </div>
   );
 }

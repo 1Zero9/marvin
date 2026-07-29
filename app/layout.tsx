@@ -19,7 +19,7 @@ const body = Nunito_Sans({
 export const metadata: Metadata = {
   title: "Marvin",
   description:
-    "Starvin'? Let's sort dinner. Your personal cookbook index and recipe log.",
+    "A private daily companion and shared household cookbook.",
   manifest: "/manifest.json",
   icons: { icon: "/icons/icon-192.png", apple: "/icons/icon-192.png" },
 };

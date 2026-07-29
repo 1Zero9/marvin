@@ -1,8 +1,11 @@
 import { NextResponse } from "next/server";
+import { randomUUID } from "crypto";
 import { put } from "@vercel/blob";
 import { prisma } from "@/lib/prisma";
 import { currentMembership } from "@/lib/auth";
 import { decodeImage } from "@/lib/images";
+import { privateMediaToken } from "@/lib/media";
+import { visibleTo } from "@/lib/privacy";
 
 export const maxDuration = 60;
 
@@ -61,12 +64,16 @@ export async function POST(req: Request) {
         .filter(Boolean)
         .slice(0, 10)
     : [];
+  const photo = body?.photo;
+  const image = decodeImage(photo?.data, photo?.mimeType);
+  const token = image ? privateMediaToken() : null;
+  if (image && !token) return NextResponse.json({ error: "Private media is not configured" }, { status: 503 });
 
   let recipeId: string;
   let isNewRecipe = false;
   if (recipeIdInput) {
     const recipe = await prisma.recipe.findFirst({
-      where: { id: recipeIdInput, householdId: identity.membership.householdId },
+      where: { id: recipeIdInput, householdId: identity.membership.householdId, ...visibleTo(identity) },
     });
     if (!recipe) {
       return NextResponse.json({ error: "Recipe not found" }, { status: 404 });
@@ -110,13 +117,11 @@ export async function POST(req: Request) {
     },
   });
 
-  const photo = body?.photo;
-  const image = decodeImage(photo?.data, photo?.mimeType);
   if (image) {
       const blob = await put(
-        `recipes/${recipeId}/logs/${Date.now()}.${image.extension}`,
+        `recipes/${recipeId}/logs/${Date.now()}-${randomUUID()}.${image.extension}`,
         image.buffer,
-        { access: "public", contentType: image.mimeType }
+        { access: "private", token: token ?? undefined, contentType: image.mimeType }
       );
       await prisma.photo.create({
         data: {

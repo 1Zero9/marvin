@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireHousehold } from "@/lib/auth";
 import { visibleTo } from "@/lib/privacy";
+import { photoMediaUrl } from "@/lib/media";
 import styles from "./recipes.module.css";
 
 export const dynamic = "force-dynamic";
@@ -46,7 +47,7 @@ export default async function RecipesPage() {
             >
               {r.photos[0] ? (
                 /* eslint-disable-next-line @next/next/no-img-element */
-                <img src={r.photos[0].url} alt="" className={styles.photo} />
+                <img src={photoMediaUrl(r.photos[0])} alt="" className={styles.photo} />
               ) : (
                 <div className={styles.photoFallback}>🍽</div>
               )}

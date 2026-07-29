@@ -1,0 +1,7 @@
+.card { display: flex; flex-direction: column; gap: 12px; background: var(--plum-100); }
+.title { font-size: 1rem; }
+.copy { color: var(--plum-500); font-size: 0.87rem; max-width: 620px; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.stopButton { background: transparent; border: none; color: var(--plum-500); font-size: 0.86rem; font-weight: 700; padding: 8px; }
+.stopButton:hover { color: var(--danger); text-decoration: underline; }
+.message { color: var(--plum-500); font-size: 0.85rem; font-weight: 700; }

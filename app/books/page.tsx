@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireHousehold } from "@/lib/auth";
 import { visibleTo } from "@/lib/privacy";
+import { bookCoverMediaUrl } from "@/lib/media";
 import styles from "./books.module.css";
 
 export const dynamic = "force-dynamic";
@@ -20,7 +21,7 @@ function BookTile({ book }: { book: BookCard }) {
     <Link href={`/books/${book.id}`} className={`card ${styles.book}`}>
       {book.coverUrl ? (
         /* eslint-disable-next-line @next/next/no-img-element */
-        <img src={book.coverUrl} alt="" className={styles.cover} />
+        <img src={bookCoverMediaUrl(book)!} alt="" className={styles.cover} />
       ) : (
         <div className={styles.coverFallback}>{book.title.slice(0, 1)}</div>
       )}

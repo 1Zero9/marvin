@@ -3,8 +3,11 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireHousehold } from "@/lib/auth";
 import { visibleTo } from "@/lib/privacy";
+import { photoMediaUrl } from "@/lib/media";
 import styles from "./recipe.module.css";
 import MealRatingActions from "@/components/MealRatingActions";
+import RecipeLightener from "@/components/RecipeLightener";
+import RecipeShare from "@/components/RecipeShare";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +27,8 @@ export default async function RecipePage({
         orderBy: { cookedAt: "desc" },
         include: { photos: true, cookedBy: { select: { displayName: true } }, ratings: { include: { user: { select: { displayName: true } } } } },
       },
+      swapSuggestions: { where: { userId: identity.user.id }, select: { suggestions: true }, take: 1 },
+      variants: { where: { userId: identity.user.id }, select: { id: true }, take: 1 },
     },
   });
   if (!recipe) notFound();
@@ -39,6 +44,7 @@ export default async function RecipePage({
       ratedLogs.length
     : null;
   const lastCooked = recipe.cookLogs[0]?.cookedAt;
+  const canShare = !recipe.createdById || recipe.createdById === identity.user.id;
 
   return (
     <div className={styles.wrap}>
@@ -80,7 +86,7 @@ export default async function RecipePage({
         <div className={styles.photos}>
           {recipe.photos.map((p) => (
             /* eslint-disable-next-line @next/next/no-img-element */
-            <img key={p.id} src={p.url} alt="" className={styles.photo} />
+            <img key={p.id} src={photoMediaUrl(p)} alt="" className={styles.photo} />
           ))}
         </div>
       )}
@@ -127,6 +133,18 @@ export default async function RecipePage({
         </section>
       )}
 
+      <RecipeLightener
+        recipeId={recipe.id}
+        initialSuggestions={recipe.swapSuggestions[0]?.suggestions ?? null}
+        initialVariant={recipe.variants.length > 0}
+      />
+
+      <RecipeShare
+        recipeId={recipe.id}
+        initialUrl={recipe.shareEnabled && recipe.shareSlug ? `/share/${recipe.shareSlug}` : null}
+        canShare={canShare}
+      />
+
       <section className={`card ${styles.section}`}>
         <div className={styles.logHeader}>
           <h2 className={styles.sectionTitle}>Cook log</h2>
@@ -167,7 +185,7 @@ export default async function RecipePage({
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img
                         key={p.id}
-                        src={p.url}
+                        src={photoMediaUrl(p)}
                         alt=""
                         className={styles.photoSmall}
                       />
