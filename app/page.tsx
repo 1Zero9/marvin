@@ -136,23 +136,23 @@ export default async function Home({
       </section>
 
       {!query && (
-        <section className={styles.health}>
-          <div className={styles.healthHeader}>
-            <h2 className={styles.healthTitle}>Your health</h2>
-            <span className={styles.healthLock}>
-              <Icon name="lock" className={styles.lockIcon} /> Private to you
+        <Link href="/health" className={styles.healthCard}>
+          <span className={styles.healthCardIcon}>
+            <Icon name="heart" className={styles.healthCardIconSvg} />
+          </span>
+          <span className={styles.healthCardText}>
+            <span className={styles.healthCardTitleRow}>
+              <span className={styles.healthCardTitle}>Your health</span>
+              <span className={styles.healthLock}>
+                <Icon name="lock" className={styles.lockIcon} /> Private
+              </span>
             </span>
-          </div>
-          <div className={styles.healthGrid}>
-            {healthTiles.map((tile) => (
-              <Link key={tile.href} href={tile.href} className={styles.healthTile}>
-                <Icon name={tile.icon} className={styles.healthIcon} />
-                <span className={styles.healthLabel}>{tile.title}</span>
-                <span className={styles.healthStat}>{tile.stat ?? "Not logged yet"}</span>
-              </Link>
-            ))}
-          </div>
-        </section>
+            <span className={styles.healthCardStat}>
+              {healthTiles.map((tile) => tile.stat ?? "Not logged yet").join(" · ")}
+            </span>
+          </span>
+          <Icon name="chevron" className={styles.healthCardArrow} />
+        </Link>
       )}
 
       {query ? (
