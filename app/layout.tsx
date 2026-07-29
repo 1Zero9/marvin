@@ -1,13 +1,13 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Nunito_Sans } from "next/font/google";
+import { Space_Grotesk, Nunito_Sans } from "next/font/google";
 import "./globals.css";
 import AppShell from "@/components/AppShell";
 import SwRegister from "@/components/SwRegister";
 
-const heading = Fraunces({
+const heading = Space_Grotesk({
   variable: "--font-heading",
   subsets: ["latin"],
-  weight: ["600", "700", "900"],
+  weight: ["500", "600", "700"],
 });
 
 const body = Nunito_Sans({

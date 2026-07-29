@@ -40,7 +40,7 @@
   color: var(--marvin-plum);
   font-family: var(--font-heading), Georgia, serif;
   font-size: 2.8rem;
-  font-weight: 900;
+  font-weight: 700;
   line-height: 1;
 }
 
@@ -169,6 +169,73 @@
   color: var(--marvin-orange);
 }
 
+.health {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.healthHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.healthTitle {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 1.1rem;
+}
+
+.healthLock {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: normal;
+  color: var(--plum-300);
+}
+
+.healthGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+  gap: 10px;
+}
+
+.healthTile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 4px;
+  padding: 14px 8px;
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-card);
+}
+
+.healthTile:hover {
+  transform: translateY(-1px);
+}
+
+.healthIcon {
+  font-size: 1.5rem;
+}
+
+.healthLabel {
+  font-weight: 700;
+  font-size: 0.85rem;
+  color: var(--marvin-plum);
+}
+
+.healthStat {
+  font-size: 0.72rem;
+  color: var(--plum-500);
+}
+
 .empty {
   text-align: center;
   display: flex;
@@ -244,7 +311,7 @@
   justify-content: center;
   font-family: var(--font-heading), Georgia, serif;
   font-size: 1.6rem;
-  font-weight: 900;
+  font-weight: 700;
   flex-shrink: 0;
 }
 

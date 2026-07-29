@@ -3,6 +3,7 @@ import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { requireHousehold } from "@/lib/auth";
 import { visibleTo } from "@/lib/privacy";
+import { getHealthSummary } from "@/lib/healthSummary";
 import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
@@ -17,7 +18,7 @@ export default async function Home({
   const query = q?.trim() ?? "";
   const filter = f === "books" || f === "personal" ? f : "all";
 
-  const [bookCount, entries, matchedRecipes] = await Promise.all([
+  const [bookCount, entries, matchedRecipes, healthTiles] = await Promise.all([
     prisma.book.count({ where: { householdId: identity.membership.householdId, ...visibleTo(identity) } }),
     query && filter !== "personal"
       ? prisma.indexEntry.findMany({
@@ -61,6 +62,7 @@ export default async function Home({
           take: 50,
         })
       : Promise.resolve([]),
+    getHealthSummary(identity.user.id),
   ]);
 
   const entryRecipes = query
@@ -131,6 +133,25 @@ export default async function Home({
           </Link>
         )}
       </section>
+
+      {!query && (
+        <section className={styles.health}>
+          <div className={styles.healthHeader}>
+            <h2 className={styles.healthTitle}>
+              Welcome back, {firstName} <span className={styles.healthLock}>🔒 only you can see this</span>
+            </h2>
+          </div>
+          <div className={styles.healthGrid}>
+            {healthTiles.map((tile) => (
+              <Link key={tile.href} href={tile.href} className={styles.healthTile}>
+                <span className={styles.healthIcon}>{tile.icon}</span>
+                <span className={styles.healthLabel}>{tile.title}</span>
+                <span className={styles.healthStat}>{tile.stat ?? "Not logged yet"}</span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      )}
 
       {query ? (
         <>

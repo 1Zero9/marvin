@@ -1,5 +1,5 @@
 .form { background: transparent; box-shadow: none; display: flex; flex-direction: column; gap: 14px; margin: 0 auto; max-width: 390px; padding: 0; width: 100%; }
-.brand { align-items: center; color: var(--marvin-plum); display: flex; font-family: var(--font-heading), Georgia, serif; font-size: 1.7rem; font-weight: 900; gap: 9px; justify-content: center; margin-bottom: 14px; }
+.brand { align-items: center; color: var(--marvin-plum); display: flex; font-family: var(--font-heading), Georgia, serif; font-size: 1.7rem; font-weight: 700; gap: 9px; justify-content: center; margin-bottom: 14px; }
 .brand img { border-radius: 12px; }
 .title { font-size: 2rem; }
 .sub { color: var(--plum-500); margin-bottom: 4px; }
