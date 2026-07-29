@@ -7,4 +7,5 @@
 .error { background: #FBE3E3; border-radius: var(--radius-md); color: var(--danger); font-weight: 700; padding: 10px 12px; }
 .switch { color: var(--plum-500); font-size: .9rem; text-align: center; }
 .switch a { color: var(--marvin-orange); font-weight: 800; }
+.version { color: var(--plum-500); font-size: .78rem; margin: -4px 0 0; text-align: center; }
 @media (max-width: 480px) { .form { gap: 16px; }.title { font-size: 2rem; text-align: center; }.sub { text-align: center; }.brand { margin-bottom: 20px; } }
