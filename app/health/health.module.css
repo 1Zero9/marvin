@@ -5,7 +5,7 @@
 .tile { display: flex; flex-direction: column; gap: 6px; transition: transform 0.1s ease; }
 .tile:hover { transform: translateY(-2px); }
 .tileTop { display: flex; align-items: center; gap: 10px; }
-.icon { font-size: 1.6rem; }
+.icon { width: 26px; height: 26px; color: var(--marvin-orange); flex-shrink: 0; }
 .tileTitle { font-size: 1.1rem; }
 .tileDesc { color: var(--plum-500); font-size: 0.85rem; }
 .stat { font-weight: 700; color: var(--marvin-orange); font-size: 0.9rem; }

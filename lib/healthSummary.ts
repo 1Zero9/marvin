@@ -1,9 +1,10 @@
 import { prisma } from "@/lib/prisma";
 import { startOfDay, daysBetween } from "@/lib/dates";
+import type { IconName } from "@/components/Icon";
 
 export type HealthTile = {
   href: string;
-  icon: string;
+  icon: IconName;
   title: string;
   desc: string;
   stat: string | null;
@@ -33,35 +34,35 @@ export async function getHealthSummary(userId: string): Promise<HealthTile[]> {
   return [
     {
       href: "/health/weight",
-      icon: "⚖️",
+      icon: "weight",
       title: "Weight",
       desc: "Log your weight and see the trend",
       stat: kgToGo == null ? null : kgToGo <= 0 ? "Goal reached" : `${kgToGo} kg to go`,
     },
     {
       href: "/health/alcohol",
-      icon: "🥂",
+      icon: "alcohol",
       title: "Alcohol",
       desc: "Zero and moderate phases, logged daily",
       stat: streak == null ? "Start tracking" : `${streak} ${streak === 1 ? "day" : "days"} since last drink`,
     },
     {
       href: "/health/workouts",
-      icon: "🤸",
+      icon: "workouts",
       title: "Workouts",
       desc: "10-15 min bodyweight sessions, ankle & back safe",
       stat: `${weekSessions} session${weekSessions === 1 ? "" : "s"} this week`,
     },
     {
       href: "/health/checklist",
-      icon: "✅",
+      icon: "checklist",
       title: "Daily checklist",
       desc: "Your non-negotiables, ticked off",
       stat: checklistTotal > 0 ? `${checklistDone}/${checklistTotal} today` : "Set up your list",
     },
     {
       href: "/health/rating",
-      icon: "🙂",
+      icon: "rating",
       title: "Daily rating",
       desc: "Stuck to plan? How's your energy?",
       stat: todayRating ? "Logged today" : "Not logged today",
