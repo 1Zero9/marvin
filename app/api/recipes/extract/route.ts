@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { currentMembership } from "@/lib/auth";
+import { decodeImage } from "@/lib/images";
 
 export const maxDuration = 60;
 
@@ -122,10 +123,12 @@ export async function POST(req: Request) {
   const images: { data?: string; mimeType?: string }[] = Array.isArray(body?.images)
     ? body.images.slice(0, 6)
     : [];
-  const valid = images.filter(
-    (img): img is { data: string; mimeType: string } =>
-      typeof img?.data === "string" && !!img?.mimeType?.startsWith("image/")
-  );
+  const valid = images.flatMap((img) => {
+    const decoded = decodeImage(img?.data, img?.mimeType);
+    return decoded && typeof img.data === "string"
+      ? [{ data: img.data, mimeType: decoded.mimeType, bytes: decoded.buffer.length }]
+      : [];
+  });
   if (valid.length === 0 && text.length < 20) {
     return NextResponse.json(
       { error: "Paste some recipe text or add a photo" },
@@ -135,10 +138,7 @@ export async function POST(req: Request) {
   if (text.length > 40000) {
     return NextResponse.json({ error: "Text too long" }, { status: 400 });
   }
-  const totalBytes = valid.reduce(
-    (sum, img) => sum + Buffer.from(img.data, "base64").length,
-    0
-  );
+  const totalBytes = valid.reduce((sum, img) => sum + img.bytes, 0);
   if (totalBytes > 15 * 1024 * 1024) {
     return NextResponse.json({ error: "Images too large" }, { status: 400 });
   }

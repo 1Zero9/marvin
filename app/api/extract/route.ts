@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { currentMembership } from "@/lib/auth";
+import { decodeImage } from "@/lib/images";
 
 export const maxDuration = 120;
 
@@ -80,17 +81,28 @@ export async function POST(req: Request) {
   }
 
   const body = await req.json();
-  const images: { data: string; mimeType: string }[] = body?.images ?? [];
+  const images: { data?: string; mimeType?: string }[] = Array.isArray(body?.images)
+    ? body.images
+    : [];
   if (!Array.isArray(images) || images.length === 0) {
     return NextResponse.json({ error: "No images provided" }, { status: 400 });
   }
   if (images.length > 10) {
     return NextResponse.json({ error: "Max 10 images" }, { status: 400 });
   }
+  const validImages = images.flatMap((image) => {
+    const decoded = decodeImage(image?.data, image?.mimeType);
+    return decoded && typeof image.data === "string"
+      ? [{ data: image.data, mimeType: decoded.mimeType }]
+      : [];
+  });
+  if (validImages.length !== images.length) {
+    return NextResponse.json({ error: "Images must be valid JPEG, PNG, or WebP files under 5 MB." }, { status: 400 });
+  }
 
   const parts: Part[] = [
     { text: PROMPT },
-    ...images.map((img) => ({
+    ...validImages.map((img) => ({
       inline_data: { mime_type: img.mimeType || "image/jpeg", data: img.data },
     })),
   ];
