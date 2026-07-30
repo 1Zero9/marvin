@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireHousehold } from "@/lib/auth";
 import { visibleTo } from "@/lib/privacy";
 import { photoMediaUrl } from "@/lib/media";
+import { matchesFoodExclusions, recipeIsExcluded } from "@/lib/foodPreferences";
 import styles from "./decide.module.css";
 
 export const dynamic = "force-dynamic";
@@ -77,6 +78,7 @@ export default async function DecidePage({
   }), prisma.recipe.findMany({ where: { householdId: identity.membership.householdId, ...visibleTo(identity), bookId: { not: null }, pageRef: { not: null } }, select: { bookId: true, pageRef: true } })]);
 
   const scored = recipes
+    .filter((recipe) => !recipeIsExcluded(recipe, identity.user.foodExclusions))
     .map((recipe) => {
       const ratings = recipe.cookLogs.filter((log) => log.rating != null);
       const average = ratings.length
@@ -98,7 +100,7 @@ export default async function DecidePage({
     ? scored[new Date().getDate() % scored.length].recipe
     : null;
   const triedPages = new Set(bookRecipeRefs.map((recipe) => `${recipe.bookId}:${recipe.pageRef}`));
-  const shelfPick = shelfEntries.find((entry) => !triedPages.has(`${entry.bookId}:${entry.page}`));
+  const shelfPick = shelfEntries.find((entry) => !triedPages.has(`${entry.bookId}:${entry.page}`) && !matchesFoodExclusions([entry.ingredient, entry.dish], identity.user.foodExclusions));
 
   return (
     <div className={styles.wrap}>

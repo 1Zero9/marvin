@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireHousehold } from "@/lib/auth";
-import { AiProcessingControl, DeleteAccountControl, RecoveryCodeControl } from "@/components/AccountPrivacyControls";
+import { AiProcessingControl, DeleteAccountControl, FoodPreferencesControl, RecoveryCodeControl } from "@/components/AccountPrivacyControls";
 import styles from "./account.module.css";
 
 export const dynamic = "force-dynamic";
@@ -26,6 +26,11 @@ export default async function AccountPage() {
         <h2>Privacy choices</h2>
         <p>Marvin has no advertising or behavioural tracking. You can opt out of optional AI processing at any time.</p>
         <AiProcessingControl enabled={identity.user.aiProcessingEnabled} />
+      </section>
+      <section className={`card ${styles.section}`}>
+        <h2>Food preferences</h2>
+        <p>These are personal to you. Marvin uses them to leave unsuitable meals out of your suggestions and recipe searches; they do not change anyone else&rsquo;s kitchen.</p>
+        <FoodPreferencesControl exclusions={identity.user.foodExclusions} />
       </section>
       <section className={`card ${styles.section}`}>
         <h2>Keep a way back in</h2>

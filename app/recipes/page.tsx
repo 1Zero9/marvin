@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireHousehold } from "@/lib/auth";
 import { visibleTo } from "@/lib/privacy";
 import { photoMediaUrl } from "@/lib/media";
+import { recipeIsExcluded } from "@/lib/foodPreferences";
 import KitchenTabs from "@/components/KitchenTabs";
 import styles from "./recipes.module.css";
 
@@ -10,7 +11,7 @@ export const dynamic = "force-dynamic";
 
 export default async function RecipesPage() {
   const identity = await requireHousehold();
-  const recipes = await prisma.recipe.findMany({
+  const allRecipes = await prisma.recipe.findMany({
     where: { householdId: identity.membership.householdId, ...visibleTo(identity) },
     orderBy: { createdAt: "desc" },
     include: {
@@ -19,6 +20,7 @@ export default async function RecipesPage() {
       _count: { select: { cookLogs: true } },
     },
   });
+  const recipes = allRecipes.filter((recipe) => !recipeIsExcluded(recipe, identity.user.foodExclusions));
 
   return (
     <div className={styles.wrap}>
