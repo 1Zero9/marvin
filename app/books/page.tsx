@@ -52,17 +52,23 @@ export default async function BooksPage() {
   const archived = books.filter((b) => b.archived);
 
   return (
-    <div>
+    <div className={styles.wrap}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Books</h1>
+        <div className={styles.heading}>
+          <p className={styles.eyebrow}>Shared kitchen</p>
+          <h1 className={styles.title}>Kitchen library</h1>
+          <p className={styles.sub}>Cookbooks and recipe memories, ready when you need an idea.</p>
+        </div>
         <Link href="/books/add" className={styles.addLink}>
-          + Add
+          + Add a book
         </Link>
       </div>
 
       {active.length === 0 && archived.length === 0 ? (
         <div className={`card ${styles.empty}`}>
-          <p>No books yet. Scan a barcode to add your first cookbook.</p>
+          <h2>Your first shelf is waiting</h2>
+          <p>Scan a barcode or add a cookbook to make its recipes easy to find.</p>
+          <Link href="/books/add" className="btn btn-primary">Add a book</Link>
         </div>
       ) : (
         <div className={styles.grid}>

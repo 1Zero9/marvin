@@ -1,9 +1,10 @@
 .wrap { display: flex; flex-direction: column; gap: 20px; max-width: 840px; margin: 0 auto; }
-.header { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-.title { font-size: 2rem; }
-.snapLink { font-weight: 700; color: var(--marvin-orange); font-size: 1rem; white-space: nowrap; }
+.header { align-items: flex-start; display: flex; gap: 16px; justify-content: space-between; padding: 10px 2px 2px; }
+.heading { display: flex; flex-direction: column; gap: 7px; }.eyebrow { color: var(--plum-500); font-size: .73rem; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+.title { font-size: clamp(2rem, 7vw, 2.7rem); letter-spacing: -.04em; text-transform: none; }.sub { color: var(--plum-500); max-width: 520px; }
+.snapLink { background: var(--marvin-orange); border-radius: var(--radius-pill); color: #fff; font-size: .9rem; font-weight: 800; padding: 10px 14px; white-space: nowrap; }.snapLink:hover { background: var(--orange-700); }
 .summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-.stat { display: flex; flex-direction: column; gap: 4px; color: var(--plum-500); font-size: .9rem; }
+.stat { border: 1px solid var(--border); box-shadow: none; display: flex; flex-direction: column; gap: 4px; color: var(--plum-500); font-size: .9rem; }
 .statValue { color: var(--marvin-plum); font-family: var(--font-heading), Georgia, serif; font-size: 1.2rem; font-weight: 700; line-height: 1.15; }
 .filters { display: flex; flex-direction: column; gap: 8px; }
 .filters .input { padding: 10px 12px; }
@@ -26,5 +27,5 @@
 .stars { color: var(--marvin-orange); letter-spacing: 1px; white-space: nowrap; }
 .notes { white-space: pre-wrap; }
 @media (max-width: 700px) { .summary { grid-template-columns: 1fr; } .moreRow { grid-template-columns: 1fr 1fr; } .moreRow button { grid-column: 1 / -1; } }
-@media (max-width: 480px) { .title { font-size: 1.65rem; } }
+@media (max-width: 480px) { .header { align-items: stretch; flex-direction: column; }.snapLink { align-self: flex-start; } }
 @media (max-width: 420px) { .entry { align-items: flex-start; } .photo, .photoFallback { flex-basis: 64px; width: 64px; height: 64px; } .entryTop { flex-direction: column; gap: 4px; } }

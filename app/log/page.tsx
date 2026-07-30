@@ -55,7 +55,7 @@ export default async function LogPage({
       orderBy: { cookedAt: "desc" },
     }),
     prisma.book.findMany({
-      where: { archived: false },
+      where: { archived: false, householdId: identity.membership.householdId, ...visibleTo(identity) },
       select: { id: true, title: true },
       orderBy: { title: "asc" },
     }),
@@ -91,7 +91,11 @@ export default async function LogPage({
   return (
     <div className={styles.wrap}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Log</h1>
+        <div className={styles.heading}>
+          <p className={styles.eyebrow}>Shared cooking</p>
+          <h1 className={styles.title}>Kitchen history</h1>
+          <p className={styles.sub}>The meals you made, the ones everyone loved, and the ones worth changing next time.</p>
+        </div>
         <Link href="/log/add" className={styles.snapLink}>＋ Add a meal</Link>
       </div>
 
