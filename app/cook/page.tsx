@@ -134,6 +134,11 @@ export default async function Home({
             <Icon name="camera" className={styles.btnIcon} /> Snap what you cooked
           </Link>
         )}
+        {!query && bookCount > 0 && (
+          <Link href="/books" className={styles.libraryLink}>
+            Browse your kitchen library <span aria-hidden="true">→</span>
+          </Link>
+        )}
       </section>
 
       {!query && (

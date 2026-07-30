@@ -1,2 +1,15 @@
 .wrap { display: flex; flex-direction: column; gap: 18px; margin: 0 auto; max-width: 680px; }
-.title { font-size: 2rem; }.sub { color: var(--plum-500); }.members { display: flex; flex-direction: column; gap: 12px; }.members h2 { font-size: 1.2rem; }.members ul { display: flex; flex-direction: column; gap: 10px; list-style: none; }.members li { align-items: baseline; border-top: 1px solid var(--border); display: flex; flex-wrap: wrap; font-weight: 700; gap: 8px; justify-content: space-between; padding-top: 10px; }.meta { color: var(--plum-500); font-size: .85rem; font-weight: 600; }
+.hero { display: flex; flex-direction: column; gap: 7px; padding: 10px 2px 2px; }
+.eyebrow { color: var(--plum-500); font-size: .73rem; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+.title { font-size: clamp(2rem, 7vw, 2.7rem); letter-spacing: -.04em; text-transform: none; }
+.sub { color: var(--plum-500); max-width: 520px; }
+.shortcuts { display: grid; gap: 9px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.shortcut { align-items: center; background: var(--surface); border: 1px solid var(--border); border-radius: 16px; display: flex; gap: 10px; min-height: 78px; padding: 12px; transition: border-color .15s ease, transform .15s ease; }
+.shortcut:hover { border-color: var(--orange-300); transform: translateY(-1px); }
+.shortcut > span:first-child { align-items: center; background: var(--marvin-cream); border-radius: 11px; color: var(--marvin-orange); display: flex; flex: 0 0 32px; font-size: 1.05rem; height: 32px; justify-content: center; }
+.shortcut > span:nth-child(2) { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.shortcut strong { font-size: .85rem; }
+.shortcut small { color: var(--plum-500); font-size: .71rem; line-height: 1.18; }
+.shortcut b { color: var(--marvin-orange); margin-left: auto; }
+.members { display: flex; flex-direction: column; gap: 12px; }.members h2 { font-size: 1.2rem; text-transform: none; }.members ul { display: flex; flex-direction: column; gap: 10px; list-style: none; }.members li { align-items: baseline; border-top: 1px solid var(--border); display: flex; flex-wrap: wrap; font-weight: 700; gap: 8px; justify-content: space-between; padding-top: 10px; }.meta { color: var(--plum-500); font-size: .85rem; font-weight: 600; }
+@media (max-width: 540px) { .shortcuts { grid-template-columns: 1fr; } }

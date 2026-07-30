@@ -5,7 +5,7 @@ import Footer from "@/components/Footer";
 import Nav from "@/components/Nav";
 import styles from "./AppShell.module.css";
 
-const publicPaths = ["/setup", "/signin", "/join", "/share"];
+const publicPaths = ["/setup", "/signin", "/join", "/share", "/recover", "/reset"];
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
