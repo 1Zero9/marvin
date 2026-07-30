@@ -40,12 +40,11 @@ export default async function TodayPage() {
   const weekStart = addDays(today, -6);
   const currentWeekStart = mondayOf(today);
 
-  const [checkIn, settings, checklist, rating, alcoholLog, workoutCount, weekCheckIns, recipes, weeklyReflection] = await Promise.all([
+  const [checkIn, settings, checklist, rating, workoutCount, weekCheckIns, recipes, weeklyReflection] = await Promise.all([
     prisma.dailyCompanion.findUnique({ where: { userId_date: { userId, date: today } } }),
     prisma.checklistSettings.findUnique({ where: { userId } }),
     prisma.dailyChecklist.findUnique({ where: { userId_date: { userId, date: today } } }),
     prisma.dailyRating.findUnique({ where: { userId_date: { userId, date: today } } }),
-    prisma.alcoholLog.findUnique({ where: { userId_date: { userId, date: today } } }),
     prisma.workoutSession.count({ where: { userId, date: { gte: weekStart } } }),
     prisma.dailyCompanion.count({ where: { userId, date: { gte: weekStart } } }),
     prisma.recipe.findMany({
@@ -63,10 +62,9 @@ export default async function TodayPage() {
   const checklistItems = (checklist?.items as Record<string, boolean> | undefined) ?? {};
   const firstName = identity.user.displayName.trim().split(/\s+/)[0];
   const dateLabel = now.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long" });
-  const weekLine = [
-    workoutCount ? `${workoutCount} workout${workoutCount === 1 ? "" : "s"} this week` : "No workout logged yet this week",
-    weekCheckIns ? `${weekCheckIns} daily check-in${weekCheckIns === 1 ? "" : "s"}` : "Start with one small check-in",
-  ].join(" · ");
+  const weekLine = workoutCount || weekCheckIns
+    ? `${workoutCount} movement${workoutCount === 1 ? " session" : " sessions"} · ${weekCheckIns} check-in${weekCheckIns === 1 ? "" : "s"} this week`
+    : "There is no score to catch up on — start with today.";
   const rankedRecipes = recipes
     .map((recipe) => {
       const ratings = recipe.cookLogs.filter((log) => log.rating != null);
@@ -80,9 +78,9 @@ export default async function TodayPage() {
   return (
     <div className={styles.wrap}>
       <header className={styles.hero}>
-        <p className={styles.date}>{dateLabel}</p>
-        <h1>{greetingFor(now)}, {firstName}</h1>
-        <p className={styles.intro}>One honest day at a time. You don&rsquo;t need to do everything; just notice what helps.</p>
+        <div className={styles.heroTop}><p className={styles.date}>{dateLabel}</p><span className={styles.privatePill}>Private to you</span></div>
+        <h1>{greetingFor(now)}, {firstName}.</h1>
+        <p className={styles.intro}>A little attention for the day ahead. Nothing to win, nothing to make up for.</p>
       </header>
 
       <TodayActions
@@ -94,7 +92,7 @@ export default async function TodayPage() {
       />
 
       {weeklyReflection?.experiment && (
-        <Link href="/reflection" className={`card ${styles.experimentCard}`}>
+        <Link href="/reflection" className={styles.experimentCard}>
           <div>
             <p className={styles.eyebrow}>This week&rsquo;s experiment</p>
             <h2 className={styles.sectionTitle}>{weeklyReflection.experiment}</h2>
@@ -102,6 +100,15 @@ export default async function TodayPage() {
           <span>→</span>
         </Link>
       )}
+
+      <section className={styles.chooseSection}>
+        <div className={styles.sectionHeading}><p className={styles.eyebrow}>Choose one thing</p><h2>What would feel useful?</h2></div>
+        <div className={styles.choiceGrid}>
+          <Link href="/decide" className={styles.choiceCard}><span className={styles.choiceIcon}>🍳</span><span><strong>Make something</strong><small>Find a good dinner</small></span><b>→</b></Link>
+          <Link href="/health/workouts" className={styles.choiceCard}><span className={styles.choiceIcon}>↗</span><span><strong>Move a little</strong><small>Start a short session</small></span><b>→</b></Link>
+          <Link href="/plan" className={styles.choiceCard}><span className={styles.choiceIcon}>☰</span><span><strong>Lighten later</strong><small>Plan a meal or two</small></span><b>→</b></Link>
+        </div>
+      </section>
 
       {cookingPick ? (
         <Link href={`/recipes/${cookingPick.id}`} className={`card ${styles.cookingPick}`}>
@@ -124,24 +131,8 @@ export default async function TodayPage() {
         </Link>
       )}
 
-      <section className={`card ${styles.nextCard}`}>
-        <div>
-          <p className={styles.eyebrow}>Make the next choice easier</p>
-          <h2 className={styles.sectionTitle}>What would help right now?</h2>
-        </div>
-        <div className={styles.nextLinks}>
-          <Link href="/decide" className={styles.nextLink}>Find something to cook <span>→</span></Link>
-          <Link href="/plan" className={styles.nextLink}>Plan a few meals <span>→</span></Link>
-          <Link href="/health/workouts" className={styles.nextLink}>Do a short workout <span>→</span></Link>
-          <Link href="/health/alcohol" className={styles.nextLink}>
-            {alcoholLog ? "Review today’s alcohol log" : "Check in on alcohol"} <span>→</span>
-          </Link>
-        </div>
-      </section>
-
-      <p className={styles.weekLine}>{weekLine}</p>
-      <Link href="/reflection" className={styles.reflectionLink}>See your weekly reflection →</Link>
-      <p className={styles.privateNote}>Your daily check-in is private to you. It is never part of your household cooking library.</p>
+      <div className={styles.footerRow}><p className={styles.weekLine}>{weekLine}</p><Link href="/reflection" className={styles.reflectionLink}>Weekly view →</Link></div>
+      <p className={styles.privateNote}>Your check-ins stay separate from your shared kitchen.</p>
     </div>
   );
 }

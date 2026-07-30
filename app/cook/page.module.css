@@ -171,6 +171,16 @@
   color: var(--marvin-orange);
 }
 
+.libraryLink {
+  color: var(--marvin-orange);
+  font-size: 0.88rem;
+  font-weight: 800;
+}
+
+.libraryLink span {
+  margin-left: 3px;
+}
+
 .btnIcon {
   width: 18px;
   height: 18px;

@@ -175,7 +175,7 @@ export default function TodayActions({
         </div>
       </section>
 
-      <section className={`card ${styles.ratingCard}`}>
+      <section className={`card ${styles.checkInCard}`}>
         <div className={styles.sectionHeader}>
           <div>
             <p className={styles.eyebrow}>A quick check-in</p>
@@ -197,22 +197,26 @@ export default function TodayActions({
             {[1, 2, 3, 4, 5].map((value) => <button key={value} type="button" className={`${styles.energyButton} ${energyMood === value ? styles.ratingActive : ""}`} disabled={saving === "rating"} onClick={() => rateEnergy(value)} aria-label={`Energy or mood ${value} out of 5`}>{value}</button>)}
           </div>
         </div>
-      </section>
-
-      <section className={`card ${styles.reflectionCard}`}>
-        <p className={styles.eyebrow}>When the day is done</p>
-        <h2 className={styles.sectionTitle}>Anything worth remembering?</h2>
-        <form className={styles.reflectionForm} onSubmit={(event) => submit("reflection", event)}>
-          <textarea
-            className="input"
-            value={reflection}
-            maxLength={500}
-            onChange={(event) => setReflection(event.target.value)}
-            placeholder="What helped, what got in the way, or just how it felt."
-            aria-label="Today’s reflection"
-          />
-          <button className="btn btn-secondary" disabled={saving === "reflection"}>Save reflection</button>
-        </form>
+        <details className={styles.reflectionDetails} open={Boolean(reflection)}>
+          <summary>
+            <span>
+              <strong>Leave a note</strong>
+              <small>Optional — a place to be honest with yourself.</small>
+            </span>
+            <span aria-hidden="true">+</span>
+          </summary>
+          <form className={styles.reflectionForm} onSubmit={(event) => submit("reflection", event)}>
+            <textarea
+              className="input"
+              value={reflection}
+              maxLength={500}
+              onChange={(event) => setReflection(event.target.value)}
+              placeholder="What helped, what got in the way, or just how it felt."
+              aria-label="Today’s reflection"
+            />
+            <button className="btn btn-secondary" disabled={saving === "reflection"}>Save note</button>
+          </form>
+        </details>
       </section>
       {error && <p className={styles.error} role="alert">{error}</p>}
     </div>
