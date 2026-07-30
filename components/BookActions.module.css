@@ -5,6 +5,11 @@
   margin-top: 12px;
 }
 
+.renameForm { align-items: center; display: flex; flex: 1 1 100%; flex-wrap: wrap; gap: 8px; }
+.renameForm :global(.input) { flex: 1 1 220px; min-width: 0; }
+.error { color: var(--danger); flex-basis: 100%; font-size: .84rem; font-weight: 700; }
+.srOnly { height: 1px; margin: -1px; overflow: hidden; position: absolute; width: 1px; clip: rect(0, 0, 0, 0); }
+
 .favBtn {
   font-family: inherit;
   font-weight: 700;

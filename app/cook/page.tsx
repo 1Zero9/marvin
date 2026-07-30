@@ -4,7 +4,6 @@ import { prisma } from "@/lib/prisma";
 import { requireHousehold } from "@/lib/auth";
 import { visibleTo } from "@/lib/privacy";
 import { bookCoverMediaUrl, photoMediaUrl } from "@/lib/media";
-import { getHealthSummary } from "@/lib/healthSummary";
 import Icon from "@/components/Icon";
 import styles from "./page.module.css";
 
@@ -20,7 +19,7 @@ export default async function Home({
   const query = q?.trim() ?? "";
   const filter = f === "books" || f === "personal" ? f : "all";
 
-  const [bookCount, entries, matchedRecipes, healthTiles] = await Promise.all([
+  const [bookCount, entries, matchedRecipes] = await Promise.all([
     prisma.book.count({ where: { householdId: identity.membership.householdId, ...visibleTo(identity) } }),
     query && filter !== "personal"
       ? prisma.indexEntry.findMany({
@@ -64,7 +63,6 @@ export default async function Home({
           take: 50,
         })
       : Promise.resolve([]),
-    getHealthSummary(identity.user.id),
   ]);
 
   const entryRecipes = query
@@ -134,31 +132,29 @@ export default async function Home({
             <Icon name="camera" className={styles.btnIcon} /> Snap what you cooked
           </Link>
         )}
-        {!query && bookCount > 0 && (
-          <Link href="/books" className={styles.libraryLink}>
-            Browse your kitchen library <span aria-hidden="true">→</span>
-          </Link>
-        )}
       </section>
 
       {!query && (
-        <Link href="/health" className={styles.healthCard}>
-          <span className={styles.healthCardIcon}>
-            <Icon name="heart" className={styles.healthCardIconSvg} />
-          </span>
-          <span className={styles.healthCardText}>
-            <span className={styles.healthCardTitleRow}>
-              <span className={styles.healthCardTitle}>Your health</span>
-              <span className={styles.healthLock}>
-                <Icon name="lock" className={styles.lockIcon} /> Private
-              </span>
+        <section className={styles.kitchenPaths} aria-label="Kitchen shortcuts">
+          <Link href="/books" className={styles.kitchenPath}>
+            <span className={styles.kitchenPathIcon}>▤</span>
+            <span className={styles.kitchenPathCopy}>
+              <small>Kitchen library</small>
+              <strong>Browse your books</strong>
+              <span>{bookCount === 0 ? "Add your first cookbook" : `${bookCount} ${bookCount === 1 ? "book" : "books"} to explore`}</span>
             </span>
-            <span className={styles.healthCardStat}>
-              {healthTiles.map((tile) => tile.stat ?? "Not logged yet").join(" · ")}
+            <b aria-hidden="true">→</b>
+          </Link>
+          <Link href="/log" className={styles.kitchenPath}>
+            <span className={styles.kitchenPathIcon}>◷</span>
+            <span className={styles.kitchenPathCopy}>
+              <small>Kitchen history</small>
+              <strong>Remember what you made</strong>
+              <span>Meals, notes and favourites</span>
             </span>
-          </span>
-          <Icon name="chevron" className={styles.healthCardArrow} />
-        </Link>
+            <b aria-hidden="true">→</b>
+          </Link>
+        </section>
       )}
 
       {query ? (
