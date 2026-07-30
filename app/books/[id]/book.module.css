@@ -33,6 +33,8 @@
   margin-bottom: 10px;
 }
 
+.sharedNote { color: var(--plum-500); font-size: .84rem; margin-top: 12px; }
+
 .heart {
   color: var(--marvin-orange);
 }

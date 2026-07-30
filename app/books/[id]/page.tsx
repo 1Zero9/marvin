@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireHousehold } from "@/lib/auth";
-import { visibleTo } from "@/lib/privacy";
+import { canManage, visibleTo } from "@/lib/privacy";
 import BookActions from "@/components/BookActions";
 import BookCover from "@/components/BookCover";
 import styles from "./book.module.css";
@@ -51,11 +51,14 @@ export default async function BookPage({
             {book.archived ? " · Archived" : ""}
           </p>
           <span className="tag">{book.indexEntries.length} index entries</span>
-          <BookActions
-            bookId={book.id}
-            favourite={book.favourite}
-            archived={book.archived}
-          />
+          {canManage(identity, book.createdById) ? (
+            <BookActions
+              bookId={book.id}
+              title={book.title}
+              favourite={book.favourite}
+              archived={book.archived}
+            />
+          ) : <p className={styles.sharedNote}>Only the book&rsquo;s creator or a kitchen owner can edit it.</p>}
         </div>
       </div>
 

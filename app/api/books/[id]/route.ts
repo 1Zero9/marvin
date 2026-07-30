@@ -11,7 +11,16 @@ export async function PATCH(
   if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
   const { id } = await params;
   const body = await req.json();
-  const data: { favourite?: boolean; archived?: boolean } = {};
+  const data: { title?: string; favourite?: boolean; archived?: boolean } = {};
+  if (typeof body?.title === "string") {
+    const title = body.title.trim();
+    if (!title || title.length > 160) {
+      return NextResponse.json({ error: "Book names must be between 1 and 160 characters." }, { status: 400 });
+    }
+    data.title = title;
+  } else if (body?.title !== undefined) {
+    return NextResponse.json({ error: "Book name must be text." }, { status: 400 });
+  }
   if (typeof body?.favourite === "boolean") data.favourite = body.favourite;
   if (typeof body?.archived === "boolean") data.archived = body.archived;
   if (Object.keys(data).length === 0) {
