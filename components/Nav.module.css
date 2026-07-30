@@ -23,3 +23,5 @@
   .dockLink .icon { height: 27px; width: 27px; stroke-width: 2; }
   .dockActive { background: var(--marvin-orange); color: #fff; box-shadow: 0 6px 16px rgba(53, 102, 91, .30); }
 }
+
+@media (max-width: 850px) { .dockWithoutDay { grid-template-columns: repeat(4, minmax(0,1fr)); } }

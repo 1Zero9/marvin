@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { requireHousehold } from "@/lib/auth";
-import { AiProcessingControl, DeleteAccountControl, FoodPreferencesControl, RecoveryCodeControl } from "@/components/AccountPrivacyControls";
+import { AiProcessingControl, DailyCompanionControl, DeleteAccountControl, FoodPreferencesControl, RecoveryCodeControl } from "@/components/AccountPrivacyControls";
 import styles from "./account.module.css";
 
 export const dynamic = "force-dynamic";
@@ -31,6 +31,11 @@ export default async function AccountPage() {
         <h2>Food preferences</h2>
         <p>These are personal to you. Marvin uses them to leave unsuitable meals out of your suggestions and recipe searches; they do not change anyone else&rsquo;s kitchen.</p>
         <FoodPreferencesControl exclusions={identity.user.foodExclusions} />
+      </section>
+      <section className={`card ${styles.section}`}>
+        <h2>My Day</h2>
+        <p>My Day is your private companion for check-ins, habits, reflections, and patterns. Turn it off to keep Marvin focused on the shared kitchen; your private data stays safely stored.</p>
+        <DailyCompanionControl enabled={identity.user.showDailyCompanion} />
       </section>
       <section className={`card ${styles.section}`}>
         <h2>Keep a way back in</h2>

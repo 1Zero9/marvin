@@ -48,6 +48,24 @@ export function FoodPreferencesControl({ exclusions }: { exclusions: string[] })
   return <div className={styles.control}><div><strong>Fish and seafood</strong><p>Exclude fish and seafood, including common named varieties, from your personal cooking suggestions.</p></div><button type="button" className={`btn ${value ? "btn-primary" : "btn-secondary"}`} onClick={toggle} disabled={saving}>{saving ? "Saving…" : value ? "Excluded" : "Include"}</button>{message && <p className={styles.status}>{message}</p>}</div>;
 }
 
+export function DailyCompanionControl({ enabled }: { enabled: boolean }) {
+  const [value, setValue] = useState(enabled);
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+  async function toggle() {
+    const next = !value;
+    setSaving(true); setMessage("");
+    const response = await fetch("/api/account/daily-companion", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ showDailyCompanion: next }) });
+    if (response.ok) {
+      setValue(next);
+      window.dispatchEvent(new CustomEvent("marvin:daily-companion", { detail: next }));
+      setMessage(next ? "My Day is back in your navigation." : "My Day is hidden. Your private data has not been deleted.");
+    } else setMessage("That setting could not be saved. Please try again.");
+    setSaving(false);
+  }
+  return <div className={styles.control}><div><strong>Show My Day</strong><p>Turn this off to hide My Day from the app and open Cook instead.</p></div><button type="button" className={`btn ${value ? "btn-primary" : "btn-secondary"}`} onClick={toggle} disabled={saving}>{saving ? "Saving…" : value ? "Shown" : "Hidden"}</button>{message && <p className={styles.status}>{message}</p>}</div>;
+}
+
 export function DeleteAccountControl() {
   const [open, setOpen] = useState(false);
   const [password, setPassword] = useState("");

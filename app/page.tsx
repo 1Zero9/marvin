@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { requireHousehold } from "@/lib/auth";
 import { addDays, mondayOf, startOfDay, toDateInput } from "@/lib/dates";
 import { prisma } from "@/lib/prisma";
@@ -18,6 +19,7 @@ function greetingFor(date: Date) {
 
 export default async function TodayPage() {
   const identity = await requireHousehold();
+  if (!identity.user.showDailyCompanion) redirect("/cook");
   const now = new Date();
   const today = startOfDay(now);
   const userId = identity.user.id;
