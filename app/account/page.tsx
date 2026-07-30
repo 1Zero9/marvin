@@ -29,7 +29,7 @@ export default async function AccountPage() {
       </section>
       <section className={`card ${styles.section}`}>
         <h2>Food preferences</h2>
-        <p>These are personal to you. Marvin uses them to leave unsuitable meals out of your suggestions and recipe searches; they do not change anyone else&rsquo;s kitchen.</p>
+        <p>These are personal to you. Add foods or ingredients you avoid; Marvin leaves matching meals out of your Library, searches, and suggestions without changing anyone else&rsquo;s kitchen.</p>
         <FoodPreferencesControl exclusions={identity.user.foodExclusions} />
       </section>
       <section className={`card ${styles.section}`}>
