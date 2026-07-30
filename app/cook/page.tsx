@@ -5,6 +5,7 @@ import { requireHousehold } from "@/lib/auth";
 import { visibleTo } from "@/lib/privacy";
 import { bookCoverMediaUrl, photoMediaUrl } from "@/lib/media";
 import Icon from "@/components/Icon";
+import { matchesFoodExclusions, recipeIsExcluded } from "@/lib/foodPreferences";
 import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
@@ -19,9 +20,12 @@ export default async function Home({
   const query = q?.trim() ?? "";
   const filter = f === "books" || f === "personal" ? f : "all";
 
-  const [bookCount, recipeCount, entries, matchedRecipes] = await Promise.all([
+  const [bookCount, recipePreferenceRecords, entries, matchedRecipes] = await Promise.all([
     prisma.book.count({ where: { householdId: identity.membership.householdId, ...visibleTo(identity) } }),
-    prisma.recipe.count({ where: { householdId: identity.membership.householdId, ...visibleTo(identity) } }),
+    prisma.recipe.findMany({
+      where: { householdId: identity.membership.householdId, ...visibleTo(identity) },
+      select: { title: true, ingredients: true, tags: true, keywords: true },
+    }),
     query && filter !== "personal"
       ? prisma.indexEntry.findMany({
           where: {
@@ -66,12 +70,16 @@ export default async function Home({
       : Promise.resolve([]),
   ]);
 
+  const suitableEntries = entries.filter((entry) => !matchesFoodExclusions([entry.ingredient, entry.dish], identity.user.foodExclusions));
+  const suitableRecipes = matchedRecipes.filter((recipe) => !recipeIsExcluded(recipe, identity.user.foodExclusions));
+  const recipeCount = recipePreferenceRecords.filter((recipe) => !recipeIsExcluded(recipe, identity.user.foodExclusions)).length;
+
   const entryRecipes = query
     ? await prisma.recipe.findMany({
         where: {
           AND: [{ householdId: identity.membership.householdId }, visibleTo(identity), { OR:
-            entries.length > 0
-              ? entries.map((r) => ({ bookId: r.bookId, pageRef: r.page }))
+            suitableEntries.length > 0
+              ? suitableEntries.map((r) => ({ bookId: r.bookId, pageRef: r.page }))
               : [{ id: "none" }] }],
         },
         select: { id: true, bookId: true, pageRef: true },
@@ -83,7 +91,7 @@ export default async function Home({
 
   const firstName = identity.user.displayName.trim().split(/\s+/)[0];
 
-  const total = entries.length + matchedRecipes.length;
+  const total = suitableEntries.length + suitableRecipes.length;
 
   const filterHref = (value: string) =>
     `/cook?q=${encodeURIComponent(query)}${value === "all" ? "" : `&f=${value}`}`;
@@ -205,7 +213,7 @@ export default async function Home({
                 {total} result{total === 1 ? "" : "s"} for &ldquo;{query}&rdquo;
               </p>
 
-              {matchedRecipes.map((r) => (
+              {suitableRecipes.map((r) => (
                 <Link
                   key={`recipe-${r.id}`}
                   href={`/recipes/${r.id}`}
@@ -237,7 +245,7 @@ export default async function Home({
                 </Link>
               ))}
 
-              {entries.map((r) => {
+              {suitableEntries.map((r) => {
                 const recipe = recipeFor(r.bookId, r.page);
                 return (
                   <div key={r.id} className={`card ${styles.result}`}>

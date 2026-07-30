@@ -3,6 +3,8 @@
 import { useState } from "react";
 import styles from "@/app/account/account.module.css";
 
+const FISH_AND_SEAFOOD = "fish-and-seafood";
+
 export function AiProcessingControl({ enabled }: { enabled: boolean }) {
   const [value, setValue] = useState(enabled);
   const [saving, setSaving] = useState(false);
@@ -29,6 +31,21 @@ export function RecoveryCodeControl() {
     setCode(body.code);
   }
   return <div className={styles.control}><div><strong>Offline recovery code</strong><p>Create one code to reset your password if you are locked out. It is shown once and replaces any old code—save it somewhere secure.</p></div>{code ? <code className={styles.code}>{code}</code> : <button type="button" className="btn btn-secondary" onClick={create}>Create recovery code</button>}{error && <p className={styles.error}>{error}</p>}</div>;
+}
+
+export function FoodPreferencesControl({ exclusions }: { exclusions: string[] }) {
+  const [value, setValue] = useState(exclusions.includes(FISH_AND_SEAFOOD));
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+  async function toggle() {
+    const next = !value;
+    setSaving(true); setMessage("");
+    const response = await fetch("/api/account/food-preferences", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ foodExclusions: next ? [FISH_AND_SEAFOOD] : [] }) });
+    if (response.ok) { setValue(next); setMessage(next ? "Fish and seafood will be left out of your suggestions and searches." : "Fish and seafood can appear in your suggestions again."); }
+    else setMessage("That preference could not be saved. Please try again.");
+    setSaving(false);
+  }
+  return <div className={styles.control}><div><strong>Fish and seafood</strong><p>Exclude fish and seafood, including common named varieties, from your personal cooking suggestions.</p></div><button type="button" className={`btn ${value ? "btn-primary" : "btn-secondary"}`} onClick={toggle} disabled={saving}>{saving ? "Saving…" : value ? "Excluded" : "Include"}</button>{message && <p className={styles.status}>{message}</p>}</div>;
 }
 
 export function DeleteAccountControl() {
