@@ -10,7 +10,7 @@ type IconName = "home" | "books" | "cook" | "log" | "more";
 const links: { href: string; label: string; icon: IconName }[] = [
   { href: "/", label: "My day", icon: "home" },
   { href: "/cook", label: "Cook", icon: "cook" },
-  { href: "/books", label: "Library", icon: "books" },
+  { href: "/recipes", label: "Library", icon: "books" },
   { href: "/log", label: "Log", icon: "log" },
   { href: "/household", label: "More", icon: "more" },
 ];
@@ -32,7 +32,7 @@ function NavLinks({ linkClass, activeClass }: { linkClass: string; activeClass: 
     {links.map((link) => {
       const active = link.href === "/"
         ? pathname === "/"
-        : pathname.startsWith(link.href) || (link.href === "/cook" && (pathname.startsWith("/recipes") || pathname.startsWith("/decide") || pathname.startsWith("/snap")));
+        : pathname.startsWith(link.href) || (link.href === "/recipes" && pathname.startsWith("/books")) || (link.href === "/cook" && (pathname.startsWith("/decide") || pathname.startsWith("/snap")));
       return <Link key={link.href} href={link.href} className={`${linkClass} ${active ? activeClass : ""}`}>
         <TabIcon name={link.icon} /><span>{link.label}</span>
       </Link>;

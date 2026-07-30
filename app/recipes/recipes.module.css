@@ -1,25 +1,6 @@
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.title {
-  font-size: 2rem;
-}
-
-@media (max-width: 480px) {
-  .header {
-    flex-wrap: nowrap;
-  }
-
-  .title {
-    font-size: 1.65rem;
-  }
-}
+.wrap { display: flex; flex-direction: column; gap: 18px; margin: 0 auto; max-width: 840px; }
+.header { align-items: flex-start; display: flex; gap: 12px; justify-content: space-between; padding: 10px 2px 2px; }.heading { display: flex; flex-direction: column; gap: 7px; }.eyebrow { color: var(--plum-500); font-size: .73rem; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }.title { font-size: clamp(2rem, 7vw, 2.7rem); letter-spacing: -.04em; text-transform: none; }.sub { color: var(--plum-500); max-width: 560px; }
+@media (max-width: 480px) { .header { align-items: stretch; flex-direction: column; }.addLink { align-self: flex-start; } }
 
 .empty {
   text-align: center;
@@ -78,9 +59,4 @@
   color: var(--plum-500);
 }
 
-.addLink {
-  font-weight: 700;
-  color: var(--marvin-orange);
-  font-size: 1rem;
-  white-space: nowrap;
-}
+.addLink { background: var(--marvin-orange); border-radius: var(--radius-pill); color: #fff; font-size: .88rem; font-weight: 800; padding: 10px 14px; white-space: nowrap; }.addLink:hover { background: var(--orange-700); }

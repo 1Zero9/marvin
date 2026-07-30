@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireHousehold } from "@/lib/auth";
 import { visibleTo } from "@/lib/privacy";
 import { photoMediaUrl } from "@/lib/media";
+import KitchenTabs from "@/components/KitchenTabs";
 import styles from "./recipes.module.css";
 
 export const dynamic = "force-dynamic";
@@ -20,18 +21,23 @@ export default async function RecipesPage() {
   });
 
   return (
-    <div>
+    <div className={styles.wrap}>
       <div className={styles.header}>
-        <h1 className={styles.title}>Recipes</h1>
+        <div className={styles.heading}>
+          <p className={styles.eyebrow}>Kitchen library</p>
+          <h1 className={styles.title}>Your recipes</h1>
+          <p className={styles.sub}>Everything you&rsquo;ve saved, whether it started as a note, a screenshot, a link, or a cookbook page.</p>
+        </div>
         <Link href="/recipes/add" className={styles.addLink}>
-          + Add
+          + Bring in a recipe
         </Link>
       </div>
+      <KitchenTabs active="recipes" />
 
       {recipes.length === 0 ? (
         <div className={`card ${styles.empty}`}>
           <p style={{ marginBottom: 16 }}>
-            No recipes yet. Add a manual recipe or one adapted from a book.
+            No recipes yet. Bring in a note, photo, screenshot, link, or just the name of something you&rsquo;d like to remember.
           </p>
           <Link href="/recipes/add" className="btn btn-primary">
             Add a recipe
