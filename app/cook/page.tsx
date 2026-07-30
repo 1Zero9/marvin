@@ -128,9 +128,12 @@ export default async function Home({
           </div>
         </form>
         {!query && (
-          <Link href="/snap" className={styles.snapPill}>
-            <Icon name="camera" className={styles.btnIcon} /> Snap what you cooked
-          </Link>
+          <div className={styles.cookActions}>
+            <Link href="/recipes/add" className={styles.addRecipePill}>＋ Bring in a recipe</Link>
+            <Link href="/snap" className={styles.snapPill}>
+              <Icon name="camera" className={styles.btnIcon} /> Snap what you cooked
+            </Link>
+          </div>
         )}
       </section>
 

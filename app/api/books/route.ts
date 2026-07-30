@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { currentMembership } from "@/lib/auth";
+import { visibleTo } from "@/lib/privacy";
 
 export async function GET() {
   const identity = await currentMembership();
   if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
   const books = await prisma.book.findMany({
-    where: { archived: false, householdId: identity.membership.householdId },
+    where: { archived: false, householdId: identity.membership.householdId, ...visibleTo(identity) },
     orderBy: { title: "asc" },
     select: { id: true, title: true, author: true },
   });

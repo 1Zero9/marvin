@@ -154,7 +154,9 @@
   opacity: 0.94;
 }
 
-.snapPill {
+.cookActions { display: flex; flex-wrap: wrap; gap: 9px; justify-content: center; }
+
+.snapPill, .addRecipePill {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -167,9 +169,13 @@
   font-weight: 700;
 }
 
+.addRecipePill { background: var(--marvin-orange); color: #fff; }
+
 .snapPill:hover {
   color: var(--marvin-orange);
 }
+
+.addRecipePill:hover { background: var(--orange-700); }
 
 .btnIcon {
   width: 18px;

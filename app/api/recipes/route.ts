@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { currentMembership } from "@/lib/auth";
-import { aiProcessingAllowed } from "@/lib/privacy";
+import { aiProcessingAllowed, visibleTo } from "@/lib/privacy";
 
 export const maxDuration = 30;
 
@@ -88,6 +88,15 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Title is required" }, { status: 400 });
   }
 
+  const recipeBookId = source === "book" && typeof bookId === "string" ? bookId : null;
+  if (recipeBookId) {
+    const book = await prisma.book.findFirst({
+      where: { id: recipeBookId, householdId: identity.membership.householdId, ...visibleTo(identity) },
+      select: { id: true },
+    });
+    if (!book) return NextResponse.json({ error: "Book not found" }, { status: 404 });
+  }
+
   const cleanLinks = (Array.isArray(links) ? links : [])
     .filter((l): l is string => typeof l === "string")
     .map((l) => l.trim())
@@ -111,7 +120,7 @@ export async function POST(req: Request) {
     data: {
       title: title.trim(),
       source: source === "book" ? "book" : "personal",
-      bookId: source === "book" && typeof bookId === "string" ? bookId : null,
+      bookId: recipeBookId,
       pageRef:
         source === "book" && typeof pageRef === "number" ? pageRef : null,
       ingredients: typeof ingredients === "string" ? ingredients || null : null,
