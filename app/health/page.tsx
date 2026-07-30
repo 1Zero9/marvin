@@ -12,10 +12,11 @@ export default async function HealthHubPage() {
 
   return (
     <div className={styles.wrap}>
-      <div>
-        <h1 className={styles.title}>Health</h1>
-        <p className={styles.sub}>Matter-of-fact tracking. No guilt, no streaks pressure beyond what you want.</p>
-      </div>
+      <header className={styles.hero}>
+        <p className={styles.eyebrow}>Private to you</p>
+        <h1 className={styles.title}>Your health</h1>
+        <p className={styles.sub}>A clear picture, built from honest moments. No guilt and no pressure to keep a perfect streak.</p>
+      </header>
       <div className={styles.grid}>
         {tiles.map((tile) => (
           <Link key={tile.href} href={tile.href} className={`card ${styles.tile}`}>
