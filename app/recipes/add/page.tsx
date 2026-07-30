@@ -1,21 +1,22 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./add.module.css";
 import ScanningDisclosure from "@/components/ScanningDisclosure";
 
 type BookOption = { id: string; title: string; author: string | null };
+type EntryMode = "choose" | "paste" | "photo" | "link" | "quick";
+type RecipePhoto = { data: string; mimeType: string; preview: string };
 
-async function resizeImage(
-  file: File
-): Promise<{ data: string; mimeType: string; preview: string }> {
+async function resizeImage(file: File): Promise<RecipePhoto> {
   const url = URL.createObjectURL(file);
   const img = await new Promise<HTMLImageElement>((resolve, reject) => {
-    const i = new Image();
-    i.onload = () => resolve(i);
-    i.onerror = reject;
-    i.src = url;
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = reject;
+    image.src = url;
   });
   const max = 1600;
   const scale = Math.min(1, max / Math.max(img.width, img.height));
@@ -30,7 +31,10 @@ async function resizeImage(
 
 export default function AddRecipePage() {
   const router = useRouter();
+  const scanRef = useRef<HTMLInputElement>(null);
+  const photoRef = useRef<HTMLInputElement>(null);
   const [books, setBooks] = useState<BookOption[]>([]);
+  const [entryMode, setEntryMode] = useState<EntryMode>("choose");
   const [source, setSource] = useState<"personal" | "book">("personal");
   const [title, setTitle] = useState("");
   const [bookId, setBookId] = useState("");
@@ -40,439 +44,233 @@ export default function AddRecipePage() {
   const [notes, setNotes] = useState("");
   const [tags, setTags] = useState("");
   const [links, setLinks] = useState<string[]>([""]);
-  const [visibility, setVisibility] = useState<"private" | "household">("private");
-  const [photos, setPhotos] = useState<
-    { data: string; mimeType: string; preview: string }[]
-  >([]);
-  const [busy, setBusy] = useState(false);
-  const [scanning, setScanning] = useState(false);
-  const [scanned, setScanned] = useState(false);
-  const [pasteOpen, setPasteOpen] = useState(false);
+  const [visibility, setVisibility] = useState<"private" | "household">("household");
+  const [photos, setPhotos] = useState<RecipePhoto[]>([]);
   const [pasteText, setPasteText] = useState("");
-  const [sorting, setSorting] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [reading, setReading] = useState(false);
+  const [scanned, setScanned] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
-  const scanRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    fetch("/api/books")
-      .then((r) => r.json())
-      .then(setBooks)
-      .catch(() => {});
-
+    fetch("/api/books").then((response) => response.json()).then(setBooks).catch(() => {});
     const raw = sessionStorage.getItem("marvin-snap");
     if (!raw) return;
     sessionStorage.removeItem("marvin-snap");
     try {
       const snap = JSON.parse(raw);
       if (snap?.title) setTitle(snap.title);
-      if (snap?.data && snap?.preview) {
-        setPhotos([
-          { data: snap.data, mimeType: snap.mimeType, preview: snap.preview },
-        ]);
-      }
+      if (snap?.data && snap?.preview) setPhotos([{ data: snap.data, mimeType: snap.mimeType, preview: snap.preview }]);
+      setEntryMode("quick");
     } catch {}
   }, []);
 
-  async function onFiles(files: FileList | null) {
-    if (!files) return;
-    setBusy(true);
-    try {
-      const resized = await Promise.all(Array.from(files).map(resizeImage));
-      setPhotos((prev) => [...prev, ...resized].slice(0, 6));
-    } finally {
-      setBusy(false);
-      if (fileRef.current) fileRef.current.value = "";
-    }
+  function choose(mode: EntryMode) {
+    setEntryMode(mode);
+    setError(null);
   }
 
-  function applyExtracted(extracted: {
-    title?: string | null;
-    ingredients?: string;
-    instructions?: string;
-    notes?: string;
-    tags?: string[];
-  }) {
+  function applyExtracted(extracted: { title?: string | null; ingredients?: string; instructions?: string; notes?: string; tags?: string[] }) {
     if (extracted.title && !title.trim()) setTitle(extracted.title);
     if (extracted.ingredients) setIngredients(extracted.ingredients);
     if (extracted.instructions) setInstructions(extracted.instructions);
-    if (extracted.notes) setNotes((prev) => prev || extracted.notes!);
+    if (extracted.notes) setNotes((current) => current || extracted.notes!);
     if (extracted.tags?.length) {
-      setTags((prev) => {
-        const existing = prev
-          .split(",")
-          .map((t) => t.trim())
-          .filter(Boolean);
-        return Array.from(new Set([...existing, ...extracted.tags!])).join(", ");
-      });
+      setTags((current) => Array.from(new Set([...current.split(",").map((tag) => tag.trim()).filter(Boolean), ...extracted.tags!])).join(", "));
     }
     setScanned(true);
+    setEntryMode("quick");
   }
 
-  async function onScanFiles(files: FileList | null) {
-    if (!files || files.length === 0) return;
-    setScanning(true);
+  async function readPhotos(files: FileList | null) {
+    if (!files?.length) return;
+    setReading(true);
     setError(null);
     try {
-      const resized = await Promise.all(
-        Array.from(files).slice(0, 6).map(resizeImage)
-      );
-      const res = await fetch("/api/recipes/extract", {
+      const resized = await Promise.all(Array.from(files).slice(0, 6).map(resizeImage));
+      setPhotos(resized);
+      const response = await fetch("/api/recipes/extract", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          images: resized.map((r) => ({ data: r.data, mimeType: r.mimeType })),
-        }),
+        body: JSON.stringify({ images: resized.map(({ data, mimeType }) => ({ data, mimeType })) }),
       });
-      if (!res.ok) {
-        const body = await res.json().catch(() => null);
-        setError(body?.error ?? "Couldn't read the recipe from that photo.");
-        return;
+      if (!response.ok) {
+        const body = await response.json().catch(() => null);
+        throw new Error(body?.error ?? "Couldn’t read that recipe.");
       }
-      applyExtracted(await res.json());
-    } catch {
-      setError("Couldn't read the recipe from that photo.");
+      applyExtracted(await response.json());
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Couldn’t read that recipe.");
     } finally {
-      setScanning(false);
+      setReading(false);
       if (scanRef.current) scanRef.current.value = "";
     }
   }
 
   async function sortPastedText() {
     if (pasteText.trim().length < 20) {
-      setError("Paste a bit more of the recipe first.");
+      setError("Paste a little more of the recipe first.");
       return;
     }
-    setSorting(true);
+    setReading(true);
     setError(null);
     try {
-      const res = await fetch("/api/recipes/extract", {
+      const response = await fetch("/api/recipes/extract", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text: pasteText }),
       });
-      if (!res.ok) {
-        const body = await res.json().catch(() => null);
-        setError(body?.error ?? "Couldn't make sense of that text.");
-        return;
+      if (!response.ok) {
+        const body = await response.json().catch(() => null);
+        throw new Error(body?.error ?? "Couldn’t make sense of that text.");
       }
-      applyExtracted(await res.json());
+      applyExtracted(await response.json());
       setPasteText("");
-      setPasteOpen(false);
-    } catch {
-      setError("Couldn't make sense of that text.");
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Couldn’t make sense of that text.");
     } finally {
-      setSorting(false);
+      setReading(false);
+    }
+  }
+
+  async function addPhotos(files: FileList | null) {
+    if (!files?.length) return;
+    setBusy(true);
+    try {
+      const resized = await Promise.all(Array.from(files).map(resizeImage));
+      setPhotos((current) => [...current, ...resized].slice(0, 6));
+    } finally {
+      setBusy(false);
+      if (photoRef.current) photoRef.current.value = "";
     }
   }
 
   async function save() {
     if (!title.trim()) {
-      setError("Title is required.");
+      setError("Give the recipe a name first — the rest can wait.");
+      return;
+    }
+    if (entryMode === "link" && !links[0]?.trim()) {
+      setError("Paste the recipe link, or choose ‘Just the basics’ instead.");
       return;
     }
     setBusy(true);
     setError(null);
     try {
-      const res = await fetch("/api/recipes", {
+      const response = await fetch("/api/recipes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           title,
           source,
           bookId: source === "book" ? bookId || null : null,
-          pageRef:
-            source === "book" && pageRef ? Number(pageRef) || null : null,
+          pageRef: source === "book" && pageRef ? Number(pageRef) || null : null,
           ingredients,
           instructions,
           notes,
-          tags: tags
-            .split(",")
-            .map((t) => t.trim())
-            .filter(Boolean),
-          links: links.map((l) => l.trim()).filter(Boolean),
+          tags: tags.split(",").map((tag) => tag.trim()).filter(Boolean),
+          links: links.map((link) => link.trim()).filter(Boolean),
           visibility,
         }),
       });
-      if (!res.ok) throw new Error();
-      const recipe = await res.json();
-      for (const p of photos) {
-        await fetch(`/api/recipes/${recipe.id}/photos`, {
+      if (!response.ok) {
+        const body = await response.json().catch(() => null);
+        throw new Error(body?.error ?? "Couldn’t save the recipe.");
+      }
+      const recipe = await response.json();
+      for (const photo of photos) {
+        const upload = await fetch(`/api/recipes/${recipe.id}/photos`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ data: p.data, mimeType: p.mimeType }),
+          body: JSON.stringify({ data: photo.data, mimeType: photo.mimeType }),
         });
+        if (!upload.ok) throw new Error("The recipe was saved, but one or more photos could not be added.");
       }
       router.push(`/recipes/${recipe.id}`);
-    } catch {
-      setError("Couldn't save the recipe. Try again.");
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Couldn’t save the recipe.");
       setBusy(false);
     }
   }
 
+  const readyForDetails = entryMode === "quick" || entryMode === "link";
+
   return (
     <div className={styles.wrap}>
-      <h1 className={styles.title}>Add a recipe</h1>
-      {error && <p className={styles.error}>{error}</p>}
+      <header className={styles.hero}>
+        <Link href="/cook" className={styles.back}>← Back to Cook</Link>
+        <p className={styles.eyebrow}>Shared kitchen</p>
+        <h1 className={styles.title}>Bring a recipe in</h1>
+        <p className={styles.sub}>Start with whatever you already have. Marvin can do the sorting, or you can save the name now and fill it in later.</p>
+      </header>
 
-      <section className={styles.scanCard}>
-        <input
-          ref={scanRef}
-          type="file"
-          accept="image/*"
-          multiple
-          className={styles.fileInput}
-          onChange={(e) => onScanFiles(e.target.files)}
-        />
-        <div className={styles.scanActions}>
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={() => scanRef.current?.click()}
-            disabled={scanning || sorting}
-          >
-            {scanning ? "Reading recipe…" : scanned ? "Scan again" : "📷 Scan a recipe"}
-          </button>
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={() => setPasteOpen((v) => !v)}
-            disabled={scanning || sorting}
-          >
-            📋 Paste text
-          </button>
-        </div>
-        <p className={styles.scanHint}>
-          Marvin fills the form in from a photo or pasted text.
-        </p>
-        <ScanningDisclosure kind="recipe" />
-        {pasteOpen && (
-          <div className={styles.pasteBox}>
-            <textarea
-              className={`input ${styles.textarea}`}
-              rows={7}
-              value={pasteText}
-              onChange={(e) => setPasteText(e.target.value)}
-              placeholder="Paste the whole recipe here — title, ingredients, method, the lot. Marvin will sort it out."
-            />
-            <button
-              type="button"
-              className="btn btn-primary"
-              onClick={sortPastedText}
-              disabled={sorting || !pasteText.trim()}
-            >
-              {sorting ? "Sorting it out…" : "✨ Sort it out"}
-            </button>
+      {error && <p className={styles.error} role="alert">{error}</p>}
+
+      {entryMode === "choose" && (
+        <section className={styles.choices} aria-label="How would you like to add a recipe?">
+          <button type="button" className={styles.choice} onClick={() => choose("paste")}><span>▤</span><strong>Paste from somewhere</strong><small>Notes, email, a web page or a message</small><b>→</b></button>
+          <button type="button" className={styles.choice} onClick={() => choose("photo")}><span>▧</span><strong>Use photos or screenshots</strong><small>Marvin reads handwritten pages and recipe images</small><b>→</b></button>
+          <button type="button" className={styles.choice} onClick={() => choose("link")}><span>↗</span><strong>Save a recipe link</strong><small>Keep the source now; add details when you want</small><b>→</b></button>
+          <button type="button" className={styles.choice} onClick={() => choose("quick")}><span>＋</span><strong>Just the basics</strong><small>Give it a name and build it up later</small><b>→</b></button>
+        </section>
+      )}
+
+      {entryMode === "paste" && (
+        <section className={`card ${styles.captureCard}`}>
+          <div className={styles.captureHeader}><div><p className={styles.eyebrow}>Paste a recipe</p><h2>Drop in the whole thing</h2></div><button type="button" className={styles.textButton} onClick={() => choose("choose")}>Choose another way</button></div>
+          <textarea className={`input ${styles.textarea}`} rows={10} value={pasteText} onChange={(event) => setPasteText(event.target.value)} placeholder="Paste from Notes, a message, an email or a recipe page — title, ingredients and method if you have them." autoFocus />
+          <button type="button" className="btn btn-primary" onClick={sortPastedText} disabled={reading || !pasteText.trim()}>{reading ? "Making it usable…" : "Sort this recipe out"}</button>
+          <ScanningDisclosure kind="recipe" />
+        </section>
+      )}
+
+      {entryMode === "photo" && (
+        <section className={`card ${styles.captureCard}`}>
+          <div className={styles.captureHeader}><div><p className={styles.eyebrow}>Photos or screenshots</p><h2>Show Marvin what you have</h2></div><button type="button" className={styles.textButton} onClick={() => choose("choose")}>Choose another way</button></div>
+          <input ref={scanRef} type="file" accept="image/*" multiple className={styles.fileInput} onChange={(event) => readPhotos(event.target.files)} />
+          <button type="button" className={`btn btn-primary ${styles.photoButton}`} onClick={() => scanRef.current?.click()} disabled={reading}>{reading ? "Reading recipe…" : "Choose photos or take a picture"}</button>
+          <p className={styles.captureHint}>You can select up to six images: a page, a screenshot, or handwritten notes.</p>
+          <ScanningDisclosure kind="recipe" />
+        </section>
+      )}
+
+      {readyForDetails && (
+        <section className={`card ${styles.reviewCard}`}>
+          <div className={styles.reviewHeader}>
+            <div><p className={styles.eyebrow}>{scanned ? "Ready to check" : entryMode === "link" ? "Save the source" : "Start simple"}</p><h2>{scanned ? "Marvin has filled in what it could" : "Save what you know"}</h2></div>
+            <button type="button" className={styles.textButton} onClick={() => choose("choose")}>Start another way</button>
           </div>
-        )}
-        {scanned && !scanning && !sorting && (
-          <p className={styles.scanDone}>
-            Filled in below — check it over, then save.
-          </p>
-        )}
-      </section>
+          <label className={styles.label}>Recipe name<input className="input" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="e.g. Mum’s chicken traybake" autoFocus={entryMode !== "quick" || !title} /></label>
 
-      <section className={`card ${styles.form}`}>
-        <div className={styles.sourceRow}>
-          <button
-            className={`${styles.sourcePill} ${source === "personal" ? styles.sourceActive : ""}`}
-            onClick={() => setSource("personal")}
-            type="button"
-          >
-            My own
-          </button>
-          <button
-            className={`${styles.sourcePill} ${source === "book" ? styles.sourceActive : ""}`}
-            onClick={() => setSource("book")}
-            type="button"
-          >
-            From a book
-          </button>
-        </div>
+          {entryMode === "link" && <label className={styles.label}>Recipe link<input className="input" type="url" value={links[0] ?? ""} onChange={(event) => setLinks([event.target.value])} placeholder="https://…" /></label>}
 
-        <label className={styles.label}>
-          Title
-          <input
-            className="input"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="e.g. Weeknight potato gratin"
-          />
-        </label>
+          {photos.length > 0 && <div className={styles.thumbs}>{photos.map((photo, index) => <div key={index} className={styles.thumbBox}><img src={photo.preview} alt="" className={styles.thumb} /><button type="button" className={styles.removeBtn} onClick={() => setPhotos((current) => current.filter((_, photoIndex) => photoIndex !== index))} aria-label="Remove photo">×</button></div>)}</div>}
 
-        {source === "book" && (
-          <div className={styles.bookRow}>
-            <label className={styles.label}>
-              Book
-              <select
-                className="input"
-                value={bookId}
-                onChange={(e) => setBookId(e.target.value)}
-              >
-                <option value="">Choose a book…</option>
-                {books.map((b) => (
-                  <option key={b.id} value={b.id}>
-                    {b.title}
-                    {b.author ? ` — ${b.author}` : ""}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label className={styles.label}>
-              Page
-              <input
-                className="input"
-                inputMode="numeric"
-                value={pageRef}
-                onChange={(e) => setPageRef(e.target.value)}
-                placeholder="e.g. 118"
-              />
-            </label>
-          </div>
-        )}
-
-        <label className={styles.label}>
-          Ingredients
-          <textarea
-            className={`input ${styles.textarea}`}
-            rows={5}
-            value={ingredients}
-            onChange={(e) => setIngredients(e.target.value)}
-            placeholder={"One per line\ne.g. 800g potatoes"}
-          />
-        </label>
-
-        <label className={styles.label}>
-          Instructions
-          <textarea
-            className={`input ${styles.textarea}`}
-            rows={7}
-            value={instructions}
-            onChange={(e) => setInstructions(e.target.value)}
-          />
-        </label>
-
-        <label className={styles.label}>
-          Notes
-          <textarea
-            className={`input ${styles.textarea}`}
-            rows={3}
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            placeholder="Tweaks, serving ideas, who liked it…"
-          />
-        </label>
-
-        <details className={styles.moreOptions} open={Boolean(tags || links.some((l) => l.trim()))}>
-          <summary className={styles.moreSummary}>More options</summary>
-          <div className={styles.moreBody}>
-            <label className={styles.label}>
-              Tags
-              <input
-                className="input"
-                value={tags}
-                onChange={(e) => setTags(e.target.value)}
-                placeholder="comma separated, e.g. quick, winter, veggie"
-              />
-            </label>
-
-            <label className={styles.label}>
-              Who can see this recipe?
-              <select className="input" value={visibility} onChange={(e) => setVisibility(e.target.value as "private" | "household")}>
-                <option value="private">Only me</option>
-                <option value="household">Everyone in my kitchen</option>
-              </select>
-            </label>
-
-            <div className={styles.label}>
-              Links
-              {links.map((l, i) => (
-                <div key={i} className={styles.linkRow}>
-                  <input
-                    className="input"
-                    type="url"
-                    value={l}
-                    onChange={(e) =>
-                      setLinks((prev) =>
-                        prev.map((x, idx) => (idx === i ? e.target.value : x))
-                      )
-                    }
-                    placeholder="https://…"
-                  />
-                  {links.length > 1 && (
-                    <button
-                      type="button"
-                      className={styles.removeBtn}
-                      onClick={() =>
-                        setLinks((prev) => prev.filter((_, idx) => idx !== i))
-                      }
-                      aria-label="Remove link"
-                    >
-                      ×
-                    </button>
-                  )}
-                </div>
-              ))}
-              <button
-                type="button"
-                className={styles.addLinkBtn}
-                onClick={() => setLinks((prev) => [...prev, ""])}
-              >
-                + Add another link
-              </button>
+          <details className={styles.details} open={scanned}>
+            <summary>Ingredients and method <span>Optional</span></summary>
+            <div className={styles.detailsBody}>
+              <label className={styles.label}>Ingredients<textarea className={`input ${styles.textarea}`} rows={5} value={ingredients} onChange={(event) => setIngredients(event.target.value)} placeholder={"One per line\ne.g. 800g potatoes"} /></label>
+              <label className={styles.label}>Method<textarea className={`input ${styles.textarea}`} rows={7} value={instructions} onChange={(event) => setInstructions(event.target.value)} placeholder="Add the steps whenever you have them." /></label>
             </div>
-          </div>
-        </details>
+          </details>
 
-        <div className={styles.label}>
-          Photos
-          <input
-            ref={fileRef}
-            type="file"
-            accept="image/*"
-            capture="environment"
-            multiple
-            className={styles.fileInput}
-            onChange={(e) => onFiles(e.target.files)}
-          />
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={() => fileRef.current?.click()}
-            disabled={busy || photos.length >= 6}
-          >
-            {photos.length === 0 ? "Add photos" : "Add another photo"}
-          </button>
-          {photos.length > 0 && (
-            <div className={styles.thumbs}>
-              {photos.map((p, i) => (
-                <div key={i} className={styles.thumbBox}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={p.preview} alt="" className={styles.thumb} />
-                  <button
-                    type="button"
-                    className={styles.removeBtn}
-                    onClick={() =>
-                      setPhotos((prev) => prev.filter((_, idx) => idx !== i))
-                    }
-                    aria-label="Remove photo"
-                  >
-                    ×
-                  </button>
-                </div>
-              ))}
+          <details className={styles.details}>
+            <summary>Make it yours <span>Optional</span></summary>
+            <div className={styles.detailsBody}>
+              <label className={styles.label}>Notes<textarea className={`input ${styles.textarea}`} rows={3} value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Tweaks, serving ideas, who liked it…" /></label>
+              <label className={styles.label}>Tags<input className="input" value={tags} onChange={(event) => setTags(event.target.value)} placeholder="quick, winter, veggie" /></label>
+              {entryMode !== "link" && <div className={styles.linkField}><label className={styles.label}>Source link<input className="input" type="url" value={links[0] ?? ""} onChange={(event) => setLinks([event.target.value])} placeholder="https://…" /></label></div>}
+              <div className={styles.sourceRow}><button type="button" className={`${styles.sourcePill} ${source === "personal" ? styles.sourceActive : ""}`} onClick={() => setSource("personal")}>My own recipe</button><button type="button" className={`${styles.sourcePill} ${source === "book" ? styles.sourceActive : ""}`} onClick={() => setSource("book")}>From a cookbook</button></div>
+              {source === "book" && <div className={styles.bookRow}><label className={styles.label}>Book<select className="input" value={bookId} onChange={(event) => setBookId(event.target.value)}><option value="">Choose a book…</option>{books.map((book) => <option key={book.id} value={book.id}>{book.title}{book.author ? ` — ${book.author}` : ""}</option>)}</select></label><label className={styles.label}>Page<input className="input" inputMode="numeric" value={pageRef} onChange={(event) => setPageRef(event.target.value)} placeholder="118" /></label></div>}
+              <label className={styles.label}>Who can see this?<select className="input" value={visibility} onChange={(event) => setVisibility(event.target.value as "private" | "household")}><option value="household">Everyone in my kitchen</option><option value="private">Only me</option></select></label>
             </div>
-          )}
-        </div>
+          </details>
 
-        <button
-          className="btn btn-primary"
-          onClick={save}
-          disabled={busy}
-        >
-          {busy ? "Saving…" : "Save recipe"}
-        </button>
-      </section>
+          <input ref={photoRef} type="file" accept="image/*" capture="environment" multiple className={styles.fileInput} onChange={(event) => addPhotos(event.target.files)} />
+          <button type="button" className={styles.addPhotoButton} onClick={() => photoRef.current?.click()} disabled={busy || photos.length >= 6}>{photos.length ? "Add another photo" : "Add a photo"}</button>
+          <button className="btn btn-primary" onClick={save} disabled={busy}>{busy ? "Saving…" : scanned ? "Save recipe" : "Save to kitchen"}</button>
+        </section>
+      )}
     </div>
   );
 }
