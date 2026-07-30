@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { FormEvent, useState } from "react";
 import styles from "@/app/account/account.module.css";
 
 const FISH_AND_SEAFOOD = "fish-and-seafood";
@@ -34,18 +34,31 @@ export function RecoveryCodeControl() {
 }
 
 export function FoodPreferencesControl({ exclusions }: { exclusions: string[] }) {
-  const [value, setValue] = useState(exclusions.includes(FISH_AND_SEAFOOD));
+  const [items, setItems] = useState(exclusions);
+  const [newItem, setNewItem] = useState("");
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState("");
-  async function toggle() {
-    const next = !value;
+  async function save(next: string[]) {
     setSaving(true); setMessage("");
-    const response = await fetch("/api/account/food-preferences", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ foodExclusions: next ? [FISH_AND_SEAFOOD] : [] }) });
-    if (response.ok) { setValue(next); setMessage(next ? "Fish and seafood will be left out of your suggestions and searches." : "Fish and seafood can appear in your suggestions again."); }
+    const response = await fetch("/api/account/food-preferences", { method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ foodExclusions: next }) });
+    const body = await response.json().catch(() => null);
+    if (response.ok) { setItems(body.foodExclusions); setMessage("Your food preferences are saved."); }
     else setMessage("That preference could not be saved. Please try again.");
     setSaving(false);
   }
-  return <div className={styles.control}><div><strong>Fish and seafood</strong><p>Exclude fish and seafood, including common named varieties, from your personal cooking suggestions.</p></div><button type="button" className={`btn ${value ? "btn-primary" : "btn-secondary"}`} onClick={toggle} disabled={saving}>{saving ? "Saving…" : value ? "Excluded" : "Include"}</button>{message && <p className={styles.status}>{message}</p>}</div>;
+  function toggleFish() {
+    save(items.includes(FISH_AND_SEAFOOD) ? items.filter((item) => item !== FISH_AND_SEAFOOD) : [...items, FISH_AND_SEAFOOD]);
+  }
+  function add(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const next = newItem.trim().toLowerCase();
+    if (next.length < 2) { setMessage("Add at least two letters for a food or ingredient."); return; }
+    if (items.some((item) => item.toLowerCase() === next)) { setMessage("That food is already on your list."); return; }
+    setNewItem("");
+    save([...items, next]);
+  }
+  function label(item: string) { return item === FISH_AND_SEAFOOD ? "Fish & seafood" : item; }
+  return <div className={styles.foodControl}><div><strong>Foods to leave out</strong><p>Add anything you don&rsquo;t eat. Marvin filters matching recipes from your personal browsing, search, and suggestions.</p></div><button type="button" className={`btn ${items.includes(FISH_AND_SEAFOOD) ? "btn-primary" : "btn-secondary"}`} onClick={toggleFish} disabled={saving}>{items.includes(FISH_AND_SEAFOOD) ? "Fish & seafood excluded" : "Exclude fish & seafood"}</button>{items.length > 0 && <div className={styles.foodChips}>{items.map((item) => <span key={item} className={styles.foodChip}>{label(item)}<button type="button" onClick={() => save(items.filter((value) => value !== item))} disabled={saving} aria-label={`Include ${label(item)} again`}>×</button></span>)}</div>}<form className={styles.foodForm} onSubmit={add}><label className={styles.srOnly} htmlFor="food-preference">Food or ingredient to avoid</label><input id="food-preference" className="input" value={newItem} maxLength={60} onChange={(event) => setNewItem(event.target.value)} placeholder="e.g. mushrooms, pork, coriander" /><button className="btn btn-secondary" disabled={saving || !newItem.trim()}>Add food</button></form><p className={styles.foodSafety}>This is a personal filtering aid, not an allergy-safety guarantee. Always check ingredients yourself.</p>{message && <p className={styles.status}>{message}</p>}</div>;
 }
 
 export function DailyCompanionControl({ enabled }: { enabled: boolean }) {

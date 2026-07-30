@@ -16,4 +16,6 @@
 .danger strong { color: #8f261f; }
 .deleteForm { display: grid; gap: 9px; max-width: 390px; }
 .deleteForm label { display: grid; font-size: 0.85rem; font-weight: 700; gap: 4px; }
+.foodControl { border-top: 1px solid var(--cream-300); display: flex; flex-direction: column; gap: 10px; padding-top: 12px; }.foodControl > .btn { align-self: flex-start; }.foodControl p { font-size: .92rem; margin: 4px 0 0; }.foodChips { display: flex; flex-wrap: wrap; gap: 7px; }.foodChip { align-items: center; background: var(--marvin-peach); border-radius: var(--radius-pill); color: var(--marvin-plum); display: inline-flex; font-size: .82rem; font-weight: 800; gap: 5px; padding: 5px 8px 5px 10px; }.foodChip button { background: transparent; border: 0; color: var(--marvin-plum); font-size: 1rem; line-height: 1; }.foodForm { align-items: center; display: flex; gap: 8px; max-width: 480px; width: 100%; }.foodForm :global(.input) { flex: 1; }.foodSafety { color: var(--plum-500); font-size: .78rem !important; }.srOnly { clip: rect(0, 0, 0, 0); height: 1px; margin: -1px; overflow: hidden; position: absolute; width: 1px; }
 @media (max-width: 520px) { .header { flex-direction: column; gap: 8px; } .section .btn { width: 100%; } }
+@media (max-width: 520px) { .foodForm { align-items: stretch; flex-direction: column; }.foodForm .btn { width: 100%; } }
