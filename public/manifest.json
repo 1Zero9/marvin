@@ -4,8 +4,8 @@
   "description": "A private daily companion and shared household cookbook.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#FFF7F1",
-  "theme_color": "#FF6A00",
+  "background_color": "#F6F6F1",
+  "theme_color": "#35665B",
   "icons": [
     {
       "src": "/icons/icon-192.png",

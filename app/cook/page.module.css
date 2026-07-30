@@ -80,7 +80,7 @@
 
 .searchBox:focus-within {
   border-color: var(--marvin-orange);
-  box-shadow: 0 8px 22px rgba(255, 106, 0, 0.14);
+  box-shadow: 0 8px 22px rgba(53, 102, 91, 0.14);
 }
 
 .searchIcon {
@@ -124,7 +124,7 @@
   font-size: 1rem;
   padding: 14px 30px;
   min-height: 52px;
-  box-shadow: 0 8px 18px rgba(255, 106, 0, 0.28);
+  box-shadow: 0 8px 18px rgba(53, 102, 91, 0.28);
   transition: background 0.15s ease, transform 0.15s ease;
 }
 
@@ -145,7 +145,7 @@
   font-size: 1rem;
   padding: 14px 30px;
   min-height: 52px;
-  box-shadow: 0 8px 18px rgba(61, 16, 60, 0.24);
+  box-shadow: 0 8px 18px rgba(30, 43, 44, 0.20);
   transition: transform 0.15s ease, opacity 0.15s ease;
 }
 
