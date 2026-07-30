@@ -1,0 +1,1 @@
+ALTER TABLE "User" ADD COLUMN "showDailyCompanion" BOOLEAN NOT NULL DEFAULT true;

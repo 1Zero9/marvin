@@ -110,6 +110,7 @@ model User {
   passwordHash          String
   aiProcessingEnabled   Boolean                @default(true)
   foodExclusions        String[]               @default([])
+  showDailyCompanion    Boolean                @default(true)
   createdAt             DateTime               @default(now())
   updatedAt             DateTime               @updatedAt
   memberships           Membership[]

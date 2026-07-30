@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import styles from "./Nav.module.css";
 
@@ -26,10 +27,10 @@ function TabIcon({ name }: { name: IconName }) {
   return <svg viewBox="0 0 24 24" aria-hidden="true" className={styles.icon}>{paths[name]}</svg>;
 }
 
-function NavLinks({ linkClass, activeClass }: { linkClass: string; activeClass: string }) {
+function NavLinks({ linkClass, activeClass, showMyDay }: { linkClass: string; activeClass: string; showMyDay: boolean }) {
   const pathname = usePathname();
   return <>
-    {links.map((link) => {
+    {links.filter((link) => showMyDay || link.href !== "/").map((link) => {
       const active = link.href === "/"
         ? pathname === "/"
         : pathname.startsWith(link.href) || (link.href === "/recipes" && pathname.startsWith("/books")) || (link.href === "/cook" && (pathname.startsWith("/decide") || pathname.startsWith("/snap")));
@@ -43,6 +44,18 @@ function NavLinks({ linkClass, activeClass }: { linkClass: string; activeClass: 
 export default function Nav() {
   const pathname = usePathname();
   const isHome = pathname === "/";
+  const [showMyDay, setShowMyDay] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/account/daily-companion")
+      .then((response) => response.ok ? response.json() : null)
+      .then((data) => { if (typeof data?.showDailyCompanion === "boolean") setShowMyDay(data.showDailyCompanion); })
+      .catch(() => {});
+    const onChange = (event: Event) => setShowMyDay((event as CustomEvent<boolean>).detail);
+    window.addEventListener("marvin:daily-companion", onChange);
+    return () => window.removeEventListener("marvin:daily-companion", onChange);
+  }, []);
+
   return <>
     <header className={`${styles.header} ${isHome ? styles.headerHome : ""}`}>
       <div className={`container ${styles.inner}`}>
@@ -51,12 +64,12 @@ export default function Nav() {
           <span className={styles.name}>Marvin</span>
         </Link>
         <nav className={styles.nav} aria-label="Main navigation">
-          <NavLinks linkClass={styles.link} activeClass={styles.active} />
+          <NavLinks linkClass={styles.link} activeClass={styles.active} showMyDay={showMyDay} />
         </nav>
       </div>
     </header>
-    <nav className={styles.dock} aria-label="Main navigation">
-      <NavLinks linkClass={styles.dockLink} activeClass={styles.dockActive} />
+    <nav className={`${styles.dock} ${showMyDay ? "" : styles.dockWithoutDay}`} aria-label="Main navigation">
+      <NavLinks linkClass={styles.dockLink} activeClass={styles.dockActive} showMyDay={showMyDay} />
     </nav>
   </>;
 }
