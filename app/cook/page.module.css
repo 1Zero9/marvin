@@ -183,7 +183,7 @@
   flex-shrink: 0;
 }
 
-.kitchenPaths { display: grid; gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.kitchenPaths { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); }
 .kitchenPath { align-items: center; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); display: flex; gap: 11px; min-height: 116px; padding: 15px; transition: border-color .15s ease, transform .15s ease; }
 .kitchenPath:hover { border-color: var(--orange-300); transform: translateY(-2px); }
 .kitchenPathIcon { align-items: center; background: var(--marvin-cream); border-radius: 13px; color: var(--marvin-orange); display: flex; flex: 0 0 38px; font-size: 1.25rem; height: 38px; justify-content: center; }

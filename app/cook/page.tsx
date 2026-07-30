@@ -19,8 +19,9 @@ export default async function Home({
   const query = q?.trim() ?? "";
   const filter = f === "books" || f === "personal" ? f : "all";
 
-  const [bookCount, entries, matchedRecipes] = await Promise.all([
+  const [bookCount, recipeCount, entries, matchedRecipes] = await Promise.all([
     prisma.book.count({ where: { householdId: identity.membership.householdId, ...visibleTo(identity) } }),
+    prisma.recipe.count({ where: { householdId: identity.membership.householdId, ...visibleTo(identity) } }),
     query && filter !== "personal"
       ? prisma.indexEntry.findMany({
           where: {
@@ -139,11 +140,20 @@ export default async function Home({
 
       {!query && (
         <section className={styles.kitchenPaths} aria-label="Kitchen shortcuts">
+          <Link href="/recipes" className={styles.kitchenPath}>
+            <span className={styles.kitchenPathIcon}>🍽</span>
+            <span className={styles.kitchenPathCopy}>
+              <small>Your recipes</small>
+              <strong>Browse what you&rsquo;ve saved</strong>
+              <span>{recipeCount === 0 ? "Bring in your first recipe" : `${recipeCount} ${recipeCount === 1 ? "recipe" : "recipes"} in your kitchen`}</span>
+            </span>
+            <b aria-hidden="true">→</b>
+          </Link>
           <Link href="/books" className={styles.kitchenPath}>
             <span className={styles.kitchenPathIcon}>▤</span>
             <span className={styles.kitchenPathCopy}>
-              <small>Kitchen library</small>
-              <strong>Browse your books</strong>
+              <small>Cookbooks</small>
+              <strong>Browse your book shelf</strong>
               <span>{bookCount === 0 ? "Add your first cookbook" : `${bookCount} ${bookCount === 1 ? "book" : "books"} to explore`}</span>
             </span>
             <b aria-hidden="true">→</b>

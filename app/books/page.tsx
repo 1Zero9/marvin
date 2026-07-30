@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { requireHousehold } from "@/lib/auth";
 import { visibleTo } from "@/lib/privacy";
 import { bookCoverMediaUrl } from "@/lib/media";
+import KitchenTabs from "@/components/KitchenTabs";
 import styles from "./books.module.css";
 
 export const dynamic = "force-dynamic";
@@ -55,14 +56,15 @@ export default async function BooksPage() {
     <div className={styles.wrap}>
       <div className={styles.header}>
         <div className={styles.heading}>
-          <p className={styles.eyebrow}>Shared kitchen</p>
-          <h1 className={styles.title}>Kitchen library</h1>
-          <p className={styles.sub}>Cookbooks and recipe memories, ready when you need an idea.</p>
+          <p className={styles.eyebrow}>Kitchen library</p>
+          <h1 className={styles.title}>Your cookbooks</h1>
+          <p className={styles.sub}>The book shelf that sits alongside your saved recipes.</p>
         </div>
         <Link href="/books/add" className={styles.addLink}>
           + Add a book
         </Link>
       </div>
+      <KitchenTabs active="books" />
 
       {active.length === 0 && archived.length === 0 ? (
         <div className={`card ${styles.empty}`}>
