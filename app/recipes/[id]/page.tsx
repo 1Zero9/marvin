@@ -40,12 +40,13 @@ export default async function RecipePage({
     month: "short",
     year: "numeric",
   });
-  const ratedLogs = recipe.cookLogs.filter((log) => log.rating != null);
+  const cookingLogs = recipe.cookLogs.filter((log) => log.countsAsCooked);
+  const ratedLogs = cookingLogs.filter((log) => log.rating != null);
   const averageRating = ratedLogs.length
     ? ratedLogs.reduce((total, log) => total + (log.rating ?? 0), 0) /
       ratedLogs.length
     : null;
-  const lastCooked = recipe.cookLogs[0]?.cookedAt;
+  const lastCooked = cookingLogs[0]?.cookedAt;
   const canShare = !recipe.createdById || recipe.createdById === identity.user.id;
   const source = recipeSource(recipe.source);
 
@@ -77,9 +78,9 @@ export default async function RecipePage({
             ))}
           </div>
         )}
-        {recipe.cookLogs.length > 0 && (
+        {cookingLogs.length > 0 && (
           <p className={styles.cookSummary}>
-            Cooked {recipe.cookLogs.length} {recipe.cookLogs.length === 1 ? "time" : "times"}
+            Cooked {cookingLogs.length} {cookingLogs.length === 1 ? "time" : "times"}
             {lastCooked ? ` · last cooked ${lastCooked.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}` : ""}
             {averageRating ? ` · ${averageRating.toFixed(1)} ★ average` : ""}
           </p>
@@ -153,7 +154,7 @@ export default async function RecipePage({
 
       <section className={`card ${styles.section}`}>
         <div className={styles.logHeader}>
-          <h2 className={styles.sectionTitle}>Cook log</h2>
+          <h2 className={styles.sectionTitle}>Cooking &amp; food memories</h2>
           <Link href={`/recipes/${recipe.id}/log`} className="btn btn-primary">
             Cook this recipe
           </Link>
@@ -168,11 +169,11 @@ export default async function RecipePage({
               <li key={log.id} className={styles.logItem}>
                 <div className={styles.logTop}>
                   <span className={styles.logDate}>
-                    {log.cookedAt.toLocaleDateString("en-GB", {
+                    {log.countsAsCooked ? log.cookedAt.toLocaleDateString("en-GB", {
                       day: "numeric",
                       month: "short",
                       year: "numeric",
-                    })}
+                    }) : `Saved food memory · ${log.cookedAt.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`}
                   </span>
                   {log.cookedBy && <span className={styles.cookedBy}>Cooked by {log.cookedBy.displayName}</span>}
                   {log.rating != null && (

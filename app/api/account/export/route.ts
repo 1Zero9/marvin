@@ -33,7 +33,7 @@ export async function GET() {
     prisma.cookLog.findMany({
       where: { cookedById: userId },
       orderBy: { cookedAt: "asc" },
-      select: { cookedAt: true, rating: true, notes: true, context: true, venue: true, tags: true, recipe: { select: { title: true } } },
+      select: { cookedAt: true, countsAsCooked: true, rating: true, notes: true, context: true, venue: true, tags: true, recipe: { select: { title: true } } },
     }),
   ]);
 

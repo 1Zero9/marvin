@@ -38,6 +38,7 @@ export default function LogMealForm({ recipes }: { recipes: Recipe[] }) {
   const [rating, setRating] = useState(0);
   const [notes, setNotes] = useState("");
   const [date, setDate] = useState(today);
+  const [countsAsCooked, setCountsAsCooked] = useState(true);
   const [context, setContext] = useState<"home" | "out">("home");
   const [venue, setVenue] = useState("");
   const [link, setLink] = useState("");
@@ -97,7 +98,7 @@ export default function LogMealForm({ recipes }: { recipes: Recipe[] }) {
     try {
       const res = await fetch("/api/logs/quick", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({
         recipeId: recipeId || null, title, ingredients: ingredients.split(/[\n,]/).map((item) => item.trim()).filter(Boolean), instructions,
-        rating: rating || null, notes, cookedAt: date, context, venue, link, tags: tags.split(",").map((tag) => tag.trim()).filter(Boolean), photo,
+        rating: rating || null, notes, cookedAt: date, countsAsCooked, context, venue, link, tags: tags.split(",").map((tag) => tag.trim()).filter(Boolean), photo,
       }) });
       if (!res.ok) throw new Error();
       router.push(context === "out" ? "/moments" : "/log"); router.refresh();
@@ -135,7 +136,8 @@ export default function LogMealForm({ recipes }: { recipes: Recipe[] }) {
       <input ref={cameraPhotoRef} className={styles.hidden} type="file" accept="image/*" capture="environment" onChange={(event) => choosePhoto(event.target.files)} />
       <input ref={libraryPhotoRef} className={styles.hidden} type="file" accept="image/*" onChange={(event) => choosePhoto(event.target.files)} />
       {!recipeId && <ScanningDisclosure kind="recipe" />}
-      <div className={styles.photoAction}><button type="button" className="btn btn-secondary" onClick={() => cameraPhotoRef.current?.click()}>📷 Take a photo</button><button type="button" className="btn btn-secondary" onClick={() => libraryPhotoRef.current?.click()}>🖼 Choose from library</button>{photo && <><img src={photo.preview} alt="Meal preview" /><button type="button" className={styles.remove} onClick={() => setPhoto(null)}>Remove</button></>}{reading && <span className={styles.reading}>🔎 Reading photo…</span>}</div>
+      <div className={styles.photoAction}><button type="button" className="btn btn-secondary" onClick={() => cameraPhotoRef.current?.click()}>📷 Take a photo</button><button type="button" className="btn btn-secondary" onClick={() => libraryPhotoRef.current?.click()}>🖼 Choose from library</button>{photo && <><img src={photo.preview} alt="Meal preview" /><button type="button" className={styles.remove} onClick={() => { setPhoto(null); setCountsAsCooked(true); }}>Remove</button></>}{reading && <span className={styles.reading}>🔎 Reading photo…</span>}</div>
+      {photo && <label className={styles.retrospective}><input type="checkbox" checked={!countsAsCooked} onChange={(event) => setCountsAsCooked(!event.target.checked)} /><span><strong>This is a past meal</strong><small>Save the photo and memory, but don&rsquo;t count it as cooked now.</small></span></label>}
       {photo && !recipeId && <div className={styles.draftAction}><button type="button" className="btn btn-secondary" onClick={createRecipeDraft} disabled={creating}>{creating ? "Creating editable recipe…" : "✨ Create a recipe from this photo"}</button><span>Marvin will make an editable best-guess draft; check every detail before saving.</span></div>}
       {!recipeId && <><label>Link <input className="input" type="url" value={link} onChange={(event) => setLink(event.target.value)} placeholder="Instagram, TikTok, article, or recipe link" /></label><button type="button" className={styles.pasteToggle} onClick={() => setPasteOpen((open) => !open)}>📋 {pasteOpen ? "Hide pasted recipe" : "Paste recipe text"}</button>{pasteOpen && <div className={styles.paste}><textarea className="input" rows={6} value={paste} onChange={(event) => setPaste(event.target.value)} placeholder="Paste a recipe, menu description, or a note from your holiday…" /><button type="button" className="btn btn-secondary" disabled={sorting} onClick={sortPaste}>{sorting ? "Sorting…" : "✨ Fill in details"}</button></div>}<details open={detailsOpen} onToggle={(event) => setDetailsOpen(event.currentTarget.open)}><summary>Recipe details (optional)</summary><label>Ingredients<textarea className="input" rows={3} value={ingredients} onChange={(event) => setIngredients(event.target.value)} /></label><label>Method<textarea className="input" rows={4} value={instructions} onChange={(event) => setInstructions(event.target.value)} /></label></details></>}
       <label>Tags <input className="input" value={tags} onChange={(event) => setTags(event.target.value)} placeholder="holiday, tapas, Lisbon" /></label>
