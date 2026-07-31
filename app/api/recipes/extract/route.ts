@@ -11,12 +11,12 @@ Rules:
 - Return ONLY a JSON object, no prose, no markdown fences.
 - Schema: { "title": string or null, "ingredients": string, "instructions": string, "notes": string, "tags": string[], "isRecipe": boolean }
 - "title" is the recipe name. null if there is no clear name.
-- "ingredients" is the full ingredient list, one ingredient per line, with quantities exactly as written.
-- "instructions" is the method, one step per paragraph, in order, faithful to the original wording. If the photos span multiple pages, merge them in order.
+- "ingredients" is the full ingredient list, one ingredient per line. Use metric quantities only: g, kg, ml, l and °C; teaspoons and tablespoons are fine for small quantities. Convert cups, fluid ounces, ounces, pounds, sticks and Fahrenheit to sensible metric approximations.
+- "instructions" is the method, one step per paragraph, in order, faithful to the original wording. If the photos span multiple pages, merge them in order. Use Celsius for temperatures.
 - "notes" captures any extra tips, serving suggestions, or margin notes. Empty string if none.
 - "tags" is 0-4 short lowercase tags such as "quick", "veggie", "winter", "baking" if evident.
 - "isRecipe" is false if the images do not contain a recipe.
-- Transcribe faithfully; do not invent quantities or steps that are not visible.`;
+- Do not invent quantities or steps that are not visible. If you convert a quantity, keep it a sensible approximation.`;
 
 const TEXT_PROMPT = `You are reading raw pasted text of a recipe. It may be copied from a website, a message, an email, or notes, and may include clutter such as ads, headers, comments, or unrelated text.
 
@@ -24,12 +24,12 @@ Rules:
 - Return ONLY a JSON object, no prose, no markdown fences.
 - Schema: { "title": string or null, "ingredients": string, "instructions": string, "notes": string, "tags": string[], "isRecipe": boolean }
 - "title" is the recipe name. null if there is no clear name.
-- "ingredients" is the full ingredient list, one ingredient per line, with quantities exactly as written.
-- "instructions" is the method, one step per paragraph, in order, faithful to the original wording. Strip step numbers if present.
+- "ingredients" is the full ingredient list, one ingredient per line. Use metric quantities only: g, kg, ml, l and °C; teaspoons and tablespoons are fine for small quantities. Convert cups, fluid ounces, ounces, pounds, sticks and Fahrenheit to sensible metric approximations.
+- "instructions" is the method, one step per paragraph, in order, faithful to the original wording. Strip step numbers if present. Use Celsius for temperatures.
 - "notes" captures any extra tips, serving suggestions, or asides. Empty string if none.
 - "tags" is 0-4 short lowercase tags such as "quick", "veggie", "winter", "baking" if evident.
 - "isRecipe" is false if the text does not contain a recipe.
-- Ignore clutter that is not part of the recipe. Transcribe faithfully; do not invent quantities or steps that are not present.
+- Ignore clutter that is not part of the recipe. Do not invent quantities or steps that are not present. If you convert a quantity, keep it a sensible approximation.
 
 Text follows:
 `;

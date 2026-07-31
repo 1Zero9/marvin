@@ -46,6 +46,7 @@ export default function LogMealForm({ recipes }: { recipes: Recipe[] }) {
   const [reading, setReading] = useState(false);
   const [detailsOpen, setDetailsOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function choosePhoto(files: FileList | null) {
@@ -103,6 +104,26 @@ export default function LogMealForm({ recipes }: { recipes: Recipe[] }) {
     } catch { setError("Couldn't save that meal. Try again."); setSaving(false); }
   }
 
+  async function createRecipeDraft() {
+    if (!photo) return;
+    setCreating(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/recipes/create-from-photo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: photo.data, mimeType: photo.mimeType, titleHint: title.trim() }),
+      });
+      const draft = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(typeof draft?.error === "string" ? draft.error : "Couldn't make a recipe draft from that photo.");
+      sessionStorage.setItem("marvin-snap-recipe", JSON.stringify({ ...photo, ...draft }));
+      router.push("/recipes/add");
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Couldn't make a recipe draft from that photo.");
+      setCreating(false);
+    }
+  }
+
   return <div className={styles.wrap}>
     <div className={styles.header}><div><h1>Add a meal</h1><p>Make a quick memory now — turn it into a full recipe later.</p></div><Link href="/snap" className="btn btn-secondary">📷 Smart Snap</Link></div>
     {error && <p className={styles.error}>{error}</p>}
@@ -115,6 +136,7 @@ export default function LogMealForm({ recipes }: { recipes: Recipe[] }) {
       <input ref={libraryPhotoRef} className={styles.hidden} type="file" accept="image/*" onChange={(event) => choosePhoto(event.target.files)} />
       {!recipeId && <ScanningDisclosure kind="recipe" />}
       <div className={styles.photoAction}><button type="button" className="btn btn-secondary" onClick={() => cameraPhotoRef.current?.click()}>📷 Take a photo</button><button type="button" className="btn btn-secondary" onClick={() => libraryPhotoRef.current?.click()}>🖼 Choose from library</button>{photo && <><img src={photo.preview} alt="Meal preview" /><button type="button" className={styles.remove} onClick={() => setPhoto(null)}>Remove</button></>}{reading && <span className={styles.reading}>🔎 Reading photo…</span>}</div>
+      {photo && !recipeId && <div className={styles.draftAction}><button type="button" className="btn btn-secondary" onClick={createRecipeDraft} disabled={creating}>{creating ? "Creating editable recipe…" : "✨ Create a recipe from this photo"}</button><span>Marvin will make an editable best-guess draft; check every detail before saving.</span></div>}
       {!recipeId && <><label>Link <input className="input" type="url" value={link} onChange={(event) => setLink(event.target.value)} placeholder="Instagram, TikTok, article, or recipe link" /></label><button type="button" className={styles.pasteToggle} onClick={() => setPasteOpen((open) => !open)}>📋 {pasteOpen ? "Hide pasted recipe" : "Paste recipe text"}</button>{pasteOpen && <div className={styles.paste}><textarea className="input" rows={6} value={paste} onChange={(event) => setPaste(event.target.value)} placeholder="Paste a recipe, menu description, or a note from your holiday…" /><button type="button" className="btn btn-secondary" disabled={sorting} onClick={sortPaste}>{sorting ? "Sorting…" : "✨ Fill in details"}</button></div>}<details open={detailsOpen} onToggle={(event) => setDetailsOpen(event.currentTarget.open)}><summary>Recipe details (optional)</summary><label>Ingredients<textarea className="input" rows={3} value={ingredients} onChange={(event) => setIngredients(event.target.value)} /></label><label>Method<textarea className="input" rows={4} value={instructions} onChange={(event) => setInstructions(event.target.value)} /></label></details></>}
       <label>Tags <input className="input" value={tags} onChange={(event) => setTags(event.target.value)} placeholder="holiday, tapas, Lisbon" /></label>
       <div className={styles.bottom}><label>When?<input className="input" type="date" max={today} value={date} onChange={(event) => setDate(event.target.value)} /></label><div><span>How was it?</span><div className={styles.stars}>{[1,2,3,4,5].map((number) => <button type="button" key={number} onClick={() => setRating(rating === number ? 0 : number)}>{number <= rating ? "★" : "☆"}</button>)}</div></div></div>

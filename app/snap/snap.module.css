@@ -97,6 +97,8 @@
   text-align: left;
 }
 
+.draftHint { color: var(--plum-500); font-size: .82rem; line-height: 1.4; margin-top: -6px; }
+
 .chips {
   display: flex;
   gap: 8px;

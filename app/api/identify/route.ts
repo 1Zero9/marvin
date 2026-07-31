@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { currentMembership } from "@/lib/auth";
 import { decodeImage } from "@/lib/images";
-import { aiProcessingAllowed } from "@/lib/privacy";
+import { aiProcessingAllowed, visibleTo } from "@/lib/privacy";
 
 export const maxDuration = 60;
 
@@ -113,6 +113,7 @@ export async function POST(req: Request) {
   const matches = await prisma.recipe.findMany({
     where: {
       householdId: identity.membership.householdId,
+      ...visibleTo(identity),
       OR: [
         { title: { contains: result.dish, mode: "insensitive" } },
         ...dishWords.map((w) => ({
