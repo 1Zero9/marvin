@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { requireHousehold } from "@/lib/auth";
 import { visibleTo } from "@/lib/privacy";
 import { photoMediaUrl } from "@/lib/media";
+import { recipeSource, recipeSourceLabel } from "@/lib/recipeSource";
 import styles from "./recipe.module.css";
 import MealRatingActions from "@/components/MealRatingActions";
 import RecipeLightener from "@/components/RecipeLightener";
@@ -45,22 +46,24 @@ export default async function RecipePage({
     : null;
   const lastCooked = recipe.cookLogs[0]?.cookedAt;
   const canShare = !recipe.createdById || recipe.createdById === identity.user.id;
+  const source = recipeSource(recipe.source);
 
   return (
     <div className={styles.wrap}>
       <div>
         <h1 className={styles.title}>{recipe.title}</h1>
         <p className={styles.meta}>
+          <span className={`${styles.sourceBadge} ${styles[`source${source[0].toUpperCase()}${source.slice(1)}`]}`}>
+            {recipeSourceLabel(source)}
+          </span>
           {recipe.book ? (
             <>
-              <Link href={`/books/${recipe.book.id}`} className={styles.bookLink}>
+              <Link href={`/books/${recipe.book.id}`} className={`${styles.bookLink} ${styles.sourceBookLink}`}>
                 {recipe.book.title}
               </Link>
               {recipe.pageRef ? ` · p.${recipe.pageRef}` : ""}
             </>
-          ) : (
-            "My own recipe"
-          )}
+          ) : source === "hybrid" ? "Cookbook reference not linked" : null}
           {" · Added "}
           {added}
         </p>

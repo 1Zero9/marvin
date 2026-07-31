@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { currentMembership } from "@/lib/auth";
 import { aiProcessingAllowed, visibleTo } from "@/lib/privacy";
+import { recipeSource } from "@/lib/recipeSource";
 
 export const maxDuration = 30;
 
@@ -88,7 +89,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Title is required" }, { status: 400 });
   }
 
-  const recipeBookId = source === "book" && typeof bookId === "string" ? bookId : null;
+  const normalizedSource = recipeSource(typeof source === "string" ? source : null);
+  const recipeBookId = normalizedSource !== "personal" && typeof bookId === "string" ? bookId : null;
   if (recipeBookId) {
     const book = await prisma.book.findFirst({
       where: { id: recipeBookId, householdId: identity.membership.householdId, ...visibleTo(identity) },
@@ -119,10 +121,10 @@ export async function POST(req: Request) {
   const recipe = await prisma.recipe.create({
     data: {
       title: title.trim(),
-      source: source === "book" ? "book" : "personal",
+      source: normalizedSource,
       bookId: recipeBookId,
       pageRef:
-        source === "book" && typeof pageRef === "number" ? pageRef : null,
+        normalizedSource !== "personal" && typeof pageRef === "number" ? pageRef : null,
       ingredients: typeof ingredients === "string" ? ingredients || null : null,
       instructions:
         typeof instructions === "string" ? instructions || null : null,

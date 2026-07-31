@@ -62,8 +62,8 @@ export default async function DecidePage({
       householdId: identity.membership.householdId,
       ...visibleTo(identity),
       ...(filter === "quick" ? { tags: { has: "quick" } } : {}),
-      ...(filter === "book" ? { source: "book" } : {}),
-      ...(filter === "personal" ? { source: "personal" } : {}),
+      ...(filter === "book" ? { source: { in: ["book", "hybrid"] } } : {}),
+      ...(filter === "personal" ? { source: { in: ["personal", "hybrid"] } } : {}),
     },
     include: {
       book: { select: { title: true } },
@@ -159,7 +159,7 @@ export default async function DecidePage({
               ) : <div className={styles.photoFallback}>🍽</div>}
               <div className={styles.recipeInfo}>
                 <h2 className={styles.recipeTitle}>{recipe.title}</h2>
-                <p className={styles.meta}>{recipe.book?.title ?? "My own recipe"}</p>
+                <p className={styles.meta}>{recipe.book?.title ?? (recipe.source === "hybrid" ? "Adapted cookbook recipe" : "My own recipe")}</p>
                 <span className={styles.reason}>{reasonFor(recipe)}</span>
               </div>
             </Link>

@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./add.module.css";
 import ScanningDisclosure from "@/components/ScanningDisclosure";
+import type { RecipeSource } from "@/lib/recipeSource";
 
 type BookOption = { id: string; title: string; author: string | null };
 type EntryMode = "choose" | "paste" | "photo" | "link" | "quick";
@@ -35,7 +36,7 @@ export default function AddRecipePage() {
   const photoRef = useRef<HTMLInputElement>(null);
   const [books, setBooks] = useState<BookOption[]>([]);
   const [entryMode, setEntryMode] = useState<EntryMode>("choose");
-  const [source, setSource] = useState<"personal" | "book">("personal");
+  const [source, setSource] = useState<RecipeSource>("personal");
   const [title, setTitle] = useState("");
   const [bookId, setBookId] = useState("");
   const [pageRef, setPageRef] = useState("");
@@ -163,8 +164,8 @@ export default function AddRecipePage() {
         body: JSON.stringify({
           title,
           source,
-          bookId: source === "book" ? bookId || null : null,
-          pageRef: source === "book" && pageRef ? Number(pageRef) || null : null,
+          bookId: source !== "personal" ? bookId || null : null,
+          pageRef: source !== "personal" && pageRef ? Number(pageRef) || null : null,
           ingredients,
           instructions,
           notes,
@@ -260,8 +261,8 @@ export default function AddRecipePage() {
               <label className={styles.label}>Notes<textarea className={`input ${styles.textarea}`} rows={3} value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Tweaks, serving ideas, who liked it…" /></label>
               <label className={styles.label}>Tags<input className="input" value={tags} onChange={(event) => setTags(event.target.value)} placeholder="quick, winter, veggie" /></label>
               {entryMode !== "link" && <div className={styles.linkField}><label className={styles.label}>Source link<input className="input" type="url" value={links[0] ?? ""} onChange={(event) => setLinks([event.target.value])} placeholder="https://…" /></label></div>}
-              <div className={styles.sourceRow}><button type="button" className={`${styles.sourcePill} ${source === "personal" ? styles.sourceActive : ""}`} onClick={() => setSource("personal")}>My own recipe</button><button type="button" className={`${styles.sourcePill} ${source === "book" ? styles.sourceActive : ""}`} onClick={() => setSource("book")}>From a cookbook</button></div>
-              {source === "book" && <div className={styles.bookRow}><label className={styles.label}>Book<select className="input" value={bookId} onChange={(event) => setBookId(event.target.value)}><option value="">Choose a book…</option>{books.map((book) => <option key={book.id} value={book.id}>{book.title}{book.author ? ` — ${book.author}` : ""}</option>)}</select></label><label className={styles.label}>Page<input className="input" inputMode="numeric" value={pageRef} onChange={(event) => setPageRef(event.target.value)} placeholder="118" /></label></div>}
+              <div className={styles.provenance}><span className={styles.provenanceLabel}>Where did this recipe begin?</span><div className={styles.sourceRow}><button type="button" className={`${styles.sourcePill} ${source === "personal" ? styles.sourceActive : ""}`} onClick={() => setSource("personal")}>My own recipe</button><button type="button" className={`${styles.sourcePill} ${source === "book" ? styles.sourceActive : ""}`} onClick={() => setSource("book")}>From a cookbook</button><button type="button" className={`${styles.sourcePill} ${source === "hybrid" ? styles.sourceActive : ""}`} onClick={() => setSource("hybrid")}>Adapted from a cookbook</button></div></div>
+              {source !== "personal" && <><p className={styles.sourceHelp}>{source === "hybrid" ? "Keep the original book and page, then make the recipe entirely your own." : "Link this recipe to the book page it came from."}</p><div className={styles.bookRow}><label className={styles.label}>Book<select className="input" value={bookId} onChange={(event) => setBookId(event.target.value)}><option value="">Choose a book…</option>{books.map((book) => <option key={book.id} value={book.id}>{book.title}{book.author ? ` — ${book.author}` : ""}</option>)}</select></label><label className={styles.label}>Page<input className="input" inputMode="numeric" value={pageRef} onChange={(event) => setPageRef(event.target.value)} placeholder="118" /></label></div></>}
               <label className={styles.label}>Who can see this?<select className="input" value={visibility} onChange={(event) => setVisibility(event.target.value as "private" | "household")}><option value="household">Everyone in my kitchen</option><option value="private">Only me</option></select></label>
             </div>
           </details>
