@@ -33,7 +33,7 @@ export default async function RecipesPage({
     include: {
       book: { select: { title: true } },
       photos: { take: 1, orderBy: { createdAt: "asc" } },
-      _count: { select: { cookLogs: true } },
+      _count: { select: { cookLogs: { where: { countsAsCooked: true } } } },
     },
   });
   const recipes = allRecipes

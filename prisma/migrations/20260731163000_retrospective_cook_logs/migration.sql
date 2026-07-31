@@ -1,0 +1,1 @@
+ALTER TABLE "CookLog" ADD COLUMN "countsAsCooked" BOOLEAN NOT NULL DEFAULT true;

@@ -79,6 +79,7 @@ model CookLog {
   recipeId   String
   recipe     Recipe       @relation(fields: [recipeId], references: [id], onDelete: Cascade)
   cookedAt   DateTime     @default(now())
+  countsAsCooked Boolean  @default(true)
   rating     Int?
   notes      String?
   context    String       @default("home")

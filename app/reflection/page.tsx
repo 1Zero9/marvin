@@ -27,7 +27,7 @@ export default async function ReflectionPage() {
     prisma.workoutSession.findMany({ where: { userId, date: { gte: weekStart, lte: weekEnd } } }),
     prisma.dailyChecklist.findMany({ where: { userId, date: { gte: weekStart, lte: weekEnd } } }),
     prisma.checklistSettings.findUnique({ where: { userId } }),
-    prisma.cookLog.count({ where: { cookedById: userId, cookedAt: { gte: weekStart, lte: addDays(weekEnd, 1) } } }),
+    prisma.cookLog.count({ where: { cookedById: userId, countsAsCooked: true, cookedAt: { gte: weekStart, lte: addDays(weekEnd, 1) } } }),
   ]);
 
   const labels = settings?.labels.length ? settings.labels : DEFAULT_LABELS;

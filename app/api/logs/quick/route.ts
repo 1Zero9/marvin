@@ -37,6 +37,7 @@ export async function POST(req: Request) {
   const notes =
     typeof body?.notes === "string" && body.notes.trim() ? body.notes.trim() : null;
   const context = body?.context === "out" ? "out" : "home";
+  const countsAsCooked = body?.countsAsCooked !== false;
   const venue = typeof body?.venue === "string" && body.venue.trim()
     ? body.venue.trim().slice(0, 120)
     : null;
@@ -105,6 +106,7 @@ export async function POST(req: Request) {
     data: {
       recipeId,
       cookedAt,
+      countsAsCooked,
       rating,
       notes,
       context,

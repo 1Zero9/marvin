@@ -56,6 +56,7 @@ export default function SnapPage() {
   const [rating, setRating] = useState(0);
   const [notes, setNotes] = useState("");
   const [date, setDate] = useState(today);
+  const [countsAsCooked, setCountsAsCooked] = useState(true);
   const [moreOpen, setMoreOpen] = useState(false);
   const [busy, setBusy] = useState(false);
   const [creating, setCreating] = useState(false);
@@ -71,6 +72,7 @@ export default function SnapPage() {
     setSelectedMatch(null);
     setRating(0);
     setNotes("");
+    setCountsAsCooked(true);
     setMoreOpen(false);
     try {
       const resized = await resizeImage(file);
@@ -110,6 +112,7 @@ export default function SnapPage() {
           rating: rating || null,
           notes,
           cookedAt: date,
+          countsAsCooked,
           ingredients: result?.ingredients ?? [],
           photo: photo ? { data: photo.data, mimeType: photo.mimeType } : null,
         }),
@@ -273,6 +276,11 @@ export default function SnapPage() {
                 onChange={(e) => setNotes(e.target.value)}
                 placeholder="Any notes? Who loved it? (optional)"
               />
+
+              <label className={styles.retrospective}>
+                <input type="checkbox" checked={!countsAsCooked} onChange={(event) => setCountsAsCooked(!event.target.checked)} />
+                <span><strong>This is a past meal</strong><small>Save the photo and memory, but don&rsquo;t count it as cooked now.</small></span>
+              </label>
 
               <button
                 className={`btn btn-primary ${styles.saveBtn}`}

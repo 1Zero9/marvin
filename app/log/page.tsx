@@ -63,11 +63,12 @@ export default async function LogPage({
 
   const now = new Date();
   const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  const cookedThisMonth = logs.filter((log) => log.cookedAt >= monthStart).length;
+  const cookingLogs = logs.filter((log) => log.countsAsCooked);
+  const cookedThisMonth = cookingLogs.filter((log) => log.cookedAt >= monthStart).length;
   const recipeCounts = new Map<string, { title: string; count: number }>();
   const ratings = new Map<string, { total: number; count: number; title: string }>();
 
-  for (const log of logs) {
+  for (const log of cookingLogs) {
     const existing = recipeCounts.get(log.recipeId);
     recipeCounts.set(log.recipeId, {
       title: log.recipe.title,
@@ -172,7 +173,7 @@ export default async function LogPage({
                   <div className={styles.entryTop}>
                     <div>
                       <Link href={`/recipes/${log.recipeId}`} className={styles.recipeLink}>{log.recipe.title}</Link>
-                      <p className={styles.meta}>{formatDate(log.cookedAt)} · {log.recipe.book?.title ?? "My own recipe"}</p>
+                      <p className={styles.meta}>{log.countsAsCooked ? formatDate(log.cookedAt) : `Saved food memory · ${formatDate(log.cookedAt)}`} · {log.recipe.book?.title ?? "My own recipe"}</p>
                     </div>
                     {log.rating != null && <span className={styles.stars} aria-label={`${log.rating} out of 5 stars`}>{"★".repeat(log.rating)}{"☆".repeat(5 - log.rating)}</span>}
                   </div>
