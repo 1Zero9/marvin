@@ -76,7 +76,7 @@ async function createDraft(
           instructions: typeof parsed.instructions === "string" ? parsed.instructions.trim().slice(0, 16000) : "",
           notes: notes.startsWith(requiredNote) ? notes : `${requiredNote}${notes ? `\n\n${notes}` : ""}`,
           tags: Array.isArray(parsed.tags)
-            ? parsed.tags.filter((tag: unknown): tag is string => typeof tag === "string").map((tag) => tag.trim().toLowerCase()).filter(Boolean).slice(0, 4)
+            ? parsed.tags.filter((tag: unknown): tag is string => typeof tag === "string").map((tag: string) => tag.trim().toLowerCase()).filter(Boolean).slice(0, 4)
             : [],
           isFood: parsed.isFood !== false,
         };
