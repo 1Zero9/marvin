@@ -11,6 +11,7 @@ import RecipeLightener from "@/components/RecipeLightener";
 import RecipeShare from "@/components/RecipeShare";
 import RecipeKeepAwake from "@/components/RecipeKeepAwake";
 import RecipeActions from "@/components/RecipeActions";
+import RecipePhotoUploader from "@/components/RecipePhotoUploader";
 
 export const dynamic = "force-dynamic";
 
@@ -107,6 +108,8 @@ export default async function RecipePage({
           ))}
         </div>
       )}
+
+      <RecipePhotoUploader recipeId={recipe.id} />
 
       <div className={styles.columns}>
         {recipe.ingredients && (
