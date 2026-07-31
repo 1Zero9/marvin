@@ -40,6 +40,7 @@ export async function PUT(req: Request) {
       where: {
         id: recipeId,
         householdId: identity.membership.householdId,
+        archived: false,
         ...visibleTo(identity),
       },
       select: { id: true },

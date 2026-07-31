@@ -113,6 +113,7 @@ export async function POST(req: Request) {
   const matches = await prisma.recipe.findMany({
     where: {
       householdId: identity.membership.householdId,
+      archived: false,
       ...visibleTo(identity),
       OR: [
         { title: { contains: result.dish, mode: "insensitive" } },

@@ -20,15 +20,16 @@ const sourceFilters: { value: "all" | RecipeSource; label: string }[] = [
 export default async function RecipesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ source?: string }>;
+  searchParams: Promise<{ source?: string; archived?: string }>;
 }) {
-  const { source: rawSource } = await searchParams;
+  const { source: rawSource, archived: rawArchived } = await searchParams;
   const identity = await requireHousehold();
+  const showArchived = rawArchived === "1";
   const activeSource = sourceFilters.some((filter) => filter.value === rawSource)
     ? (rawSource as "all" | RecipeSource)
     : "all";
   const allRecipes = await prisma.recipe.findMany({
-    where: { householdId: identity.membership.householdId, ...visibleTo(identity) },
+    where: { householdId: identity.membership.householdId, archived: showArchived, ...visibleTo(identity) },
     orderBy: { createdAt: "desc" },
     include: {
       book: { select: { title: true } },
@@ -39,14 +40,21 @@ export default async function RecipesPage({
   const recipes = allRecipes
     .filter((recipe) => !recipeIsExcluded(recipe, identity.user.foodExclusions))
     .filter((recipe) => activeSource === "all" || recipeSource(recipe.source) === activeSource);
+  const filterHref = (value: "all" | RecipeSource) => {
+    const params = new URLSearchParams();
+    if (value !== "all") params.set("source", value);
+    if (showArchived) params.set("archived", "1");
+    const search = params.toString();
+    return search ? `/recipes?${search}` : "/recipes";
+  };
 
   return (
     <div className={styles.wrap}>
       <div className={styles.header}>
         <div className={styles.heading}>
           <p className={styles.eyebrow}>Kitchen library</p>
-          <h1 className={styles.title}>Your recipes</h1>
-          <p className={styles.sub}>Everything you&rsquo;ve saved, whether it started as a note, a screenshot, a link, or a cookbook page.</p>
+          <h1 className={styles.title}>{showArchived ? "Archived recipes" : "Your recipes"}</h1>
+          <p className={styles.sub}>{showArchived ? "Recipes you have set aside. Restore one whenever it earns a place back in your kitchen." : "Everything you&rsquo;ve saved, whether it started as a note, a screenshot, a link, or a cookbook page."}</p>
         </div>
         <Link href="/recipes/add" className={styles.addLink}>
           + Bring in a recipe
@@ -57,18 +65,23 @@ export default async function RecipesPage({
         {sourceFilters.map((filter) => (
           <Link
             key={filter.value}
-            href={filter.value === "all" ? "/recipes" : `/recipes?source=${filter.value}`}
+            href={filterHref(filter.value)}
             className={`${styles.filter} ${activeSource === filter.value ? styles.filterActive : ""}`}
           >
             {filter.label}
           </Link>
         ))}
+        <Link href={showArchived ? "/recipes" : "/recipes?archived=1"} className={`${styles.filter} ${showArchived ? styles.filterActive : ""}`}>
+          {showArchived ? "Back to recipes" : "Archived"}
+        </Link>
       </nav>
 
       {recipes.length === 0 ? (
         <div className={`card ${styles.empty}`}>
           <p style={{ marginBottom: 16 }}>
-            {activeSource === "all"
+            {showArchived
+              ? "No archived recipes. Archive a recipe when you want to keep it without seeing it in everyday cooking."
+              : activeSource === "all"
               ? "No recipes yet. Bring in a note, photo, screenshot, link, or just the name of something you’d like to remember."
               : "Nothing in this part of your kitchen yet. Bring in a recipe and choose where it began."}
           </p>
