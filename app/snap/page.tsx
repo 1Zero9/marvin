@@ -58,6 +58,7 @@ export default function SnapPage() {
   const [date, setDate] = useState(today);
   const [moreOpen, setMoreOpen] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [creating, setCreating] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -135,6 +136,26 @@ export default function SnapPage() {
       );
     }
     router.push("/recipes/add");
+  }
+
+  async function createRecipeDraft() {
+    if (!photo) return;
+    setCreating(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/recipes/create-from-photo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ data: photo.data, mimeType: photo.mimeType, titleHint: dishName.trim() || result?.dish || "" }),
+      });
+      const draft = await res.json().catch(() => null);
+      if (!res.ok) throw new Error(typeof draft?.error === "string" ? draft.error : "Couldn't make a recipe draft from that photo.");
+      sessionStorage.setItem("marvin-snap-recipe", JSON.stringify({ ...photo, ...draft }));
+      router.push("/recipes/add");
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Couldn't make a recipe draft from that photo.");
+      setCreating(false);
+    }
   }
 
   return (
@@ -260,6 +281,11 @@ export default function SnapPage() {
               >
                 {saving ? "Saving…" : "Save to my log"}
               </button>
+
+              <button type="button" className="btn btn-secondary" onClick={createRecipeDraft} disabled={creating}>
+                {creating ? "Creating an editable recipe…" : "✨ Create a recipe from this photo"}
+              </button>
+              <p className={styles.draftHint}>Marvin will make a best-guess draft. You&rsquo;ll review and edit every detail before saving.</p>
 
               <button
                 type="button"

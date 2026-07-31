@@ -53,17 +53,34 @@ export default function AddRecipePage() {
   const [busy, setBusy] = useState(false);
   const [reading, setReading] = useState(false);
   const [scanned, setScanned] = useState(false);
+  const [photoDraft, setPhotoDraft] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/books").then((response) => response.json()).then(setBooks).catch(() => {});
     const raw = sessionStorage.getItem("marvin-snap");
-    if (!raw) return;
-    sessionStorage.removeItem("marvin-snap");
+    if (raw) {
+      sessionStorage.removeItem("marvin-snap");
+      try {
+        const snap = JSON.parse(raw);
+        if (snap?.title) setTitle(snap.title);
+        if (snap?.data && snap?.preview) setPhotos([{ data: snap.data, mimeType: snap.mimeType, preview: snap.preview }]);
+        setEntryMode("quick");
+      } catch {}
+    }
+    const recipeDraft = sessionStorage.getItem("marvin-snap-recipe");
+    if (!recipeDraft) return;
+    sessionStorage.removeItem("marvin-snap-recipe");
     try {
-      const snap = JSON.parse(raw);
-      if (snap?.title) setTitle(snap.title);
-      if (snap?.data && snap?.preview) setPhotos([{ data: snap.data, mimeType: snap.mimeType, preview: snap.preview }]);
+      const draft = JSON.parse(recipeDraft);
+      if (draft?.title) setTitle(draft.title);
+      if (draft?.ingredients) setIngredients(draft.ingredients);
+      if (draft?.instructions) setInstructions(draft.instructions);
+      if (draft?.notes) setNotes(draft.notes);
+      if (Array.isArray(draft?.tags)) setTags(draft.tags.filter((tag: unknown) => typeof tag === "string").join(", "));
+      if (draft?.data && draft?.preview) setPhotos([{ data: draft.data, mimeType: draft.mimeType, preview: draft.preview }]);
+      setPhotoDraft(true);
+      setScanned(true);
       setEntryMode("quick");
     } catch {}
   }, []);
@@ -246,6 +263,7 @@ export default function AddRecipePage() {
             <div><p className={styles.eyebrow}>{scanned ? "Ready to check" : entryMode === "link" ? "Save the source" : "Start simple"}</p><h2>{scanned ? "Marvin has filled in what it could" : "Save what you know"}</h2></div>
             <button type="button" className={styles.textButton} onClick={() => choose("choose")}>Start another way</button>
           </div>
+          {photoDraft && <p className={styles.aiDraft}>AI draft from your photo. Ingredients, amounts and method are estimates — check and edit every detail before cooking or saving.</p>}
           <label className={styles.label}>Recipe name<input className="input" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="e.g. Mum’s chicken traybake" autoFocus={entryMode !== "quick" || !title} /></label>
 
           {entryMode === "link" && <label className={styles.label}>Recipe link<input className="input" type="url" value={links[0] ?? ""} onChange={(event) => setLinks([event.target.value])} placeholder="https://…" /></label>}

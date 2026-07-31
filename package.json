@@ -1,6 +1,6 @@
 {
   "name": "marvin",
-  "version": "0.24.15",
+  "version": "0.24.16",
   "private": true,
   "scripts": {
     "dev": "next dev",
