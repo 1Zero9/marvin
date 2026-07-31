@@ -1,0 +1,6 @@
+.control { align-items: center; background: var(--marvin-cream); border: 1px solid var(--orange-300); border-radius: var(--radius-md); display: flex; flex-wrap: wrap; gap: 10px 14px; justify-content: space-between; padding: 12px 14px; }
+.control strong { color: var(--marvin-plum); font-size: .9rem; }
+.control p { color: var(--plum-500); font-size: .82rem; line-height: 1.35; margin-top: 2px; }
+.unsupported, .message { flex-basis: 100%; }
+.unsupported { color: var(--plum-500); }
+.message { color: var(--danger) !important; font-weight: 700; }

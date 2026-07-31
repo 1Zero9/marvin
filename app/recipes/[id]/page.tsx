@@ -9,6 +9,7 @@ import styles from "./recipe.module.css";
 import MealRatingActions from "@/components/MealRatingActions";
 import RecipeLightener from "@/components/RecipeLightener";
 import RecipeShare from "@/components/RecipeShare";
+import RecipeKeepAwake from "@/components/RecipeKeepAwake";
 
 export const dynamic = "force-dynamic";
 
@@ -84,6 +85,8 @@ export default async function RecipePage({
           </p>
         )}
       </div>
+
+      <RecipeKeepAwake />
 
       {recipe.photos.length > 0 && (
         <div className={styles.photos}>
