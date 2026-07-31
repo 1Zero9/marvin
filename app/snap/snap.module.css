@@ -27,6 +27,9 @@
   padding: 18px 36px;
 }
 
+.photoActions { align-items: center; display: flex; flex-direction: column; gap: 10px; }
+.libraryButton { min-width: 210px; }
+
 .photoBox {
   width: 100%;
 }

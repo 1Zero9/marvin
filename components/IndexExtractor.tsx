@@ -47,7 +47,8 @@ export default function IndexExtractor({
   const [error, setError] = useState<string | null>(null);
   const [extractDone, setExtractDone] = useState(0);
   const [extractTotal, setExtractTotal] = useState(0);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const libraryRef = useRef<HTMLInputElement>(null);
 
   function setMode(m: "photos" | "review") {
     setModeState(m);
@@ -62,7 +63,8 @@ export default function IndexExtractor({
       setImages((prev) => [...prev, ...resized].slice(0, 10));
     } finally {
       setBusy(false);
-      if (fileRef.current) fileRef.current.value = "";
+      if (cameraRef.current) cameraRef.current.value = "";
+      if (libraryRef.current) libraryRef.current.value = "";
     }
   }
 
@@ -198,7 +200,7 @@ export default function IndexExtractor({
             light, text flat and readable.
           </p>
           <input
-            ref={fileRef}
+            ref={cameraRef}
             type="file"
             accept="image/*"
             capture="environment"
@@ -206,13 +208,18 @@ export default function IndexExtractor({
             className={styles.fileInput}
             onChange={(e) => onFiles(e.target.files)}
           />
-          <button
-            className="btn btn-secondary"
-            onClick={() => fileRef.current?.click()}
-            disabled={busy || images.length >= 10}
-          >
-            {images.length === 0 ? "Take photo" : "Add another photo"}
-          </button>
+          <input
+            ref={libraryRef}
+            type="file"
+            accept="image/*"
+            multiple
+            className={styles.fileInput}
+            onChange={(e) => onFiles(e.target.files)}
+          />
+          <div className={styles.photoActions}>
+            <button className="btn btn-secondary" onClick={() => cameraRef.current?.click()} disabled={busy || images.length >= 10}>{images.length === 0 ? "Take photo" : "Take another photo"}</button>
+            <button className="btn btn-secondary" onClick={() => libraryRef.current?.click()} disabled={busy || images.length >= 10}>Choose from library</button>
+          </div>
           <ScanningDisclosure kind="book-index" />
           {images.length > 0 && (
             <div className={styles.thumbs}>
