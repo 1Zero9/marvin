@@ -23,7 +23,7 @@ export default async function Home({
   const [bookCount, recipePreferenceRecords, entries, matchedRecipes] = await Promise.all([
     prisma.book.count({ where: { householdId: identity.membership.householdId, ...visibleTo(identity) } }),
     prisma.recipe.findMany({
-      where: { householdId: identity.membership.householdId, ...visibleTo(identity) },
+      where: { householdId: identity.membership.householdId, archived: false, ...visibleTo(identity) },
       select: { title: true, ingredients: true, tags: true, keywords: true },
     }),
     query && filter !== "personal"
@@ -57,6 +57,7 @@ export default async function Home({
                   ? { source: { in: ["personal", "hybrid"] } }
                   : {},
               { householdId: identity.membership.householdId },
+              { archived: false },
               visibleTo(identity),
             ],
           },
@@ -77,7 +78,7 @@ export default async function Home({
   const entryRecipes = query
     ? await prisma.recipe.findMany({
         where: {
-          AND: [{ householdId: identity.membership.householdId }, visibleTo(identity), { OR:
+          AND: [{ householdId: identity.membership.householdId }, { archived: false }, visibleTo(identity), { OR:
             suitableEntries.length > 0
               ? suitableEntries.map((r) => ({ bookId: r.bookId, pageRef: r.page }))
               : [{ id: "none" }] }],

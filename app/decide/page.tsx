@@ -60,6 +60,7 @@ export default async function DecidePage({
   const [recipes, shelfEntries, bookRecipeRefs] = await Promise.all([prisma.recipe.findMany({
     where: {
       householdId: identity.membership.householdId,
+      archived: false,
       ...visibleTo(identity),
       ...(filter === "quick" ? { tags: { has: "quick" } } : {}),
       ...(filter === "book" ? { source: { in: ["book", "hybrid"] } } : {}),
@@ -75,7 +76,7 @@ export default async function DecidePage({
     include: { book: { select: { id: true, title: true, coverUrl: true } } },
     orderBy: { dish: "asc" },
     take: 100,
-  }), prisma.recipe.findMany({ where: { householdId: identity.membership.householdId, ...visibleTo(identity), bookId: { not: null }, pageRef: { not: null } }, select: { bookId: true, pageRef: true } })]);
+  }), prisma.recipe.findMany({ where: { householdId: identity.membership.householdId, archived: false, ...visibleTo(identity), bookId: { not: null }, pageRef: { not: null } }, select: { bookId: true, pageRef: true } })]);
 
   const scored = recipes
     .filter((recipe) => !recipeIsExcluded(recipe, identity.user.foodExclusions))

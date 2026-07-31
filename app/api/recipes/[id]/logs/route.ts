@@ -20,7 +20,7 @@ export async function POST(
   const { id } = await params;
   const body = await req.json();
 
-  const recipe = await prisma.recipe.findFirst({ where: { id, householdId: identity.membership.householdId, ...visibleTo(identity) } });
+  const recipe = await prisma.recipe.findFirst({ where: { id, householdId: identity.membership.householdId, archived: false, ...visibleTo(identity) } });
   if (!recipe) {
     return NextResponse.json({ error: "Recipe not found" }, { status: 404 });
   }

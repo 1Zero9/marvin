@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { requireHousehold } from "@/lib/auth";
-import { visibleTo } from "@/lib/privacy";
+import { canManage, visibleTo } from "@/lib/privacy";
 import { photoMediaUrl } from "@/lib/media";
 import { recipeSource, recipeSourceLabel } from "@/lib/recipeSource";
 import styles from "./recipe.module.css";
@@ -10,6 +10,7 @@ import MealRatingActions from "@/components/MealRatingActions";
 import RecipeLightener from "@/components/RecipeLightener";
 import RecipeShare from "@/components/RecipeShare";
 import RecipeKeepAwake from "@/components/RecipeKeepAwake";
+import RecipeActions from "@/components/RecipeActions";
 
 export const dynamic = "force-dynamic";
 
@@ -48,6 +49,15 @@ export default async function RecipePage({
     : null;
   const lastCooked = cookingLogs[0]?.cookedAt;
   const canShare = !recipe.createdById || recipe.createdById === identity.user.id;
+  const canManageRecipe = canManage(identity, recipe.createdById);
+  const mergeCandidates = canManageRecipe
+    ? (await prisma.recipe.findMany({
+        where: { householdId: identity.membership.householdId, id: { not: recipe.id }, ...visibleTo(identity) },
+        select: { id: true, title: true, archived: true, createdById: true },
+        orderBy: { title: "asc" },
+        take: 250,
+      })).filter((candidate) => canManage(identity, candidate.createdById))
+    : [];
   const source = recipeSource(recipe.source);
 
   return (
@@ -152,16 +162,16 @@ export default async function RecipePage({
         canShare={canShare}
       />
 
+      {canManageRecipe && <RecipeActions recipe={recipe} mergeCandidates={mergeCandidates} />}
+
       <section className={`card ${styles.section}`}>
         <div className={styles.logHeader}>
           <h2 className={styles.sectionTitle}>Cooking &amp; food memories</h2>
-          <Link href={`/recipes/${recipe.id}/log`} className="btn btn-primary">
-            Cook this recipe
-          </Link>
+          {!recipe.archived && <Link href={`/recipes/${recipe.id}/log`} className="btn btn-primary">Cook this recipe</Link>}
         </div>
         {recipe.cookLogs.length === 0 ? (
           <p className={styles.emptyText}>
-            Not cooked yet — log it the next time you make it.
+            {recipe.archived ? "This recipe is archived. Restore it above if you want to cook it again." : "Not cooked yet — log it the next time you make it."}
           </p>
         ) : (
           <ul className={styles.logList}>

@@ -18,7 +18,7 @@ export default async function PlanPage() {
       select: { date: true, mealType: true, recipeId: true, freeformText: true },
     }),
     prisma.recipe.findMany({
-      where: { householdId: identity.membership.householdId, ...visibleTo(identity) },
+      where: { householdId: identity.membership.householdId, archived: false, ...visibleTo(identity) },
       select: { id: true, title: true },
       orderBy: { title: "asc" },
       take: 250,
