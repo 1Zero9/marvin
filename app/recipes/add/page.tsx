@@ -32,8 +32,10 @@ async function resizeImage(file: File): Promise<RecipePhoto> {
 
 export default function AddRecipePage() {
   const router = useRouter();
-  const scanRef = useRef<HTMLInputElement>(null);
-  const photoRef = useRef<HTMLInputElement>(null);
+  const scanCameraRef = useRef<HTMLInputElement>(null);
+  const scanLibraryRef = useRef<HTMLInputElement>(null);
+  const photoCameraRef = useRef<HTMLInputElement>(null);
+  const photoLibraryRef = useRef<HTMLInputElement>(null);
   const [books, setBooks] = useState<BookOption[]>([]);
   const [entryMode, setEntryMode] = useState<EntryMode>("choose");
   const [source, setSource] = useState<RecipeSource>("personal");
@@ -104,7 +106,8 @@ export default function AddRecipePage() {
       setError(error instanceof Error ? error.message : "Couldn’t read that recipe.");
     } finally {
       setReading(false);
-      if (scanRef.current) scanRef.current.value = "";
+      if (scanCameraRef.current) scanCameraRef.current.value = "";
+      if (scanLibraryRef.current) scanLibraryRef.current.value = "";
     }
   }
 
@@ -142,7 +145,8 @@ export default function AddRecipePage() {
       setPhotos((current) => [...current, ...resized].slice(0, 6));
     } finally {
       setBusy(false);
-      if (photoRef.current) photoRef.current.value = "";
+      if (photoCameraRef.current) photoCameraRef.current.value = "";
+      if (photoLibraryRef.current) photoLibraryRef.current.value = "";
     }
   }
 
@@ -228,9 +232,10 @@ export default function AddRecipePage() {
       {entryMode === "photo" && (
         <section className={`card ${styles.captureCard}`}>
           <div className={styles.captureHeader}><div><p className={styles.eyebrow}>Photos or screenshots</p><h2>Show Marvin what you have</h2></div><button type="button" className={styles.textButton} onClick={() => choose("choose")}>Choose another way</button></div>
-          <input ref={scanRef} type="file" accept="image/*" multiple className={styles.fileInput} onChange={(event) => readPhotos(event.target.files)} />
-          <button type="button" className={`btn btn-primary ${styles.photoButton}`} onClick={() => scanRef.current?.click()} disabled={reading}>{reading ? "Reading recipe…" : "Choose photos or take a picture"}</button>
-          <p className={styles.captureHint}>You can select up to six images: a page, a screenshot, or handwritten notes.</p>
+          <input ref={scanCameraRef} type="file" accept="image/*" capture="environment" multiple className={styles.fileInput} onChange={(event) => readPhotos(event.target.files)} />
+          <input ref={scanLibraryRef} type="file" accept="image/*" multiple className={styles.fileInput} onChange={(event) => readPhotos(event.target.files)} />
+          <div className={styles.photoActions}><button type="button" className={`btn btn-primary ${styles.photoButton}`} onClick={() => scanCameraRef.current?.click()} disabled={reading}>{reading ? "Reading recipe…" : "Take photos"}</button><button type="button" className="btn btn-secondary" onClick={() => scanLibraryRef.current?.click()} disabled={reading}>Choose from library</button></div>
+          <p className={styles.captureHint}>You can select up to six images from your camera or photo library: a page, a screenshot, or handwritten notes.</p>
           <ScanningDisclosure kind="recipe" />
         </section>
       )}
@@ -267,8 +272,9 @@ export default function AddRecipePage() {
             </div>
           </details>
 
-          <input ref={photoRef} type="file" accept="image/*" capture="environment" multiple className={styles.fileInput} onChange={(event) => addPhotos(event.target.files)} />
-          <button type="button" className={styles.addPhotoButton} onClick={() => photoRef.current?.click()} disabled={busy || photos.length >= 6}>{photos.length ? "Add another photo" : "Add a photo"}</button>
+          <input ref={photoCameraRef} type="file" accept="image/*" capture="environment" multiple className={styles.fileInput} onChange={(event) => addPhotos(event.target.files)} />
+          <input ref={photoLibraryRef} type="file" accept="image/*" multiple className={styles.fileInput} onChange={(event) => addPhotos(event.target.files)} />
+          <div className={styles.photoActions}><button type="button" className={styles.addPhotoButton} onClick={() => photoCameraRef.current?.click()} disabled={busy || photos.length >= 6}>📷 {photos.length ? "Take another photo" : "Take a photo"}</button><button type="button" className={styles.addPhotoButton} onClick={() => photoLibraryRef.current?.click()} disabled={busy || photos.length >= 6}>🖼 Choose from library</button></div>
           <button className="btn btn-primary" onClick={save} disabled={busy}>{busy ? "Saving…" : scanned ? "Save recipe" : "Save to kitchen"}</button>
         </section>
       )}

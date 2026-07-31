@@ -25,7 +25,8 @@ async function resizeImage(file: File): Promise<Photo> {
 
 export default function LogMealForm({ recipes }: { recipes: Recipe[] }) {
   const router = useRouter();
-  const photoRef = useRef<HTMLInputElement>(null);
+  const cameraPhotoRef = useRef<HTMLInputElement>(null);
+  const libraryPhotoRef = useRef<HTMLInputElement>(null);
   const today = new Date().toISOString().slice(0, 10);
   const [recipeId, setRecipeId] = useState("");
   const [title, setTitle] = useState("");
@@ -52,7 +53,8 @@ export default function LogMealForm({ recipes }: { recipes: Recipe[] }) {
     setError(null);
     let resized: Photo | null = null;
     try { resized = await resizeImage(files[0]); setPhoto(resized); } catch { setError("That photo couldn't be read. Try another one."); }
-    if (photoRef.current) photoRef.current.value = "";
+    if (cameraPhotoRef.current) cameraPhotoRef.current.value = "";
+    if (libraryPhotoRef.current) libraryPhotoRef.current.value = "";
     if (resized && !recipeId) await readPhoto(resized);
   }
 
@@ -109,9 +111,10 @@ export default function LogMealForm({ recipes }: { recipes: Recipe[] }) {
       <label>Existing recipe <select className="input" value={recipeId} onChange={(event) => setRecipeId(event.target.value)}><option value="">New meal or memory</option>{recipes.map((recipe) => <option key={recipe.id} value={recipe.id}>{recipe.title}</option>)}</select></label>
       {!recipeId && <label>What was it?<input className="input" value={title} onChange={(event) => setTitle(event.target.value)} placeholder={context === "out" ? "e.g. Smoky prawn tacos" : "e.g. Tuesday night curry"} /></label>}
       {context === "out" && <label>Where?<input className="input" value={venue} onChange={(event) => setVenue(event.target.value)} placeholder="Restaurant, city, market…" /></label>}
-      <input ref={photoRef} className={styles.hidden} type="file" accept="image/*" capture="environment" onChange={(event) => choosePhoto(event.target.files)} />
+      <input ref={cameraPhotoRef} className={styles.hidden} type="file" accept="image/*" capture="environment" onChange={(event) => choosePhoto(event.target.files)} />
+      <input ref={libraryPhotoRef} className={styles.hidden} type="file" accept="image/*" onChange={(event) => choosePhoto(event.target.files)} />
       {!recipeId && <ScanningDisclosure kind="recipe" />}
-      <div className={styles.photoAction}><button type="button" className="btn btn-secondary" onClick={() => photoRef.current?.click()}>🖼 Add a photo</button>{photo && <><img src={photo.preview} alt="Meal preview" /><button type="button" className={styles.remove} onClick={() => setPhoto(null)}>Remove</button></>}{reading && <span className={styles.reading}>🔎 Reading photo…</span>}</div>
+      <div className={styles.photoAction}><button type="button" className="btn btn-secondary" onClick={() => cameraPhotoRef.current?.click()}>📷 Take a photo</button><button type="button" className="btn btn-secondary" onClick={() => libraryPhotoRef.current?.click()}>🖼 Choose from library</button>{photo && <><img src={photo.preview} alt="Meal preview" /><button type="button" className={styles.remove} onClick={() => setPhoto(null)}>Remove</button></>}{reading && <span className={styles.reading}>🔎 Reading photo…</span>}</div>
       {!recipeId && <><label>Link <input className="input" type="url" value={link} onChange={(event) => setLink(event.target.value)} placeholder="Instagram, TikTok, article, or recipe link" /></label><button type="button" className={styles.pasteToggle} onClick={() => setPasteOpen((open) => !open)}>📋 {pasteOpen ? "Hide pasted recipe" : "Paste recipe text"}</button>{pasteOpen && <div className={styles.paste}><textarea className="input" rows={6} value={paste} onChange={(event) => setPaste(event.target.value)} placeholder="Paste a recipe, menu description, or a note from your holiday…" /><button type="button" className="btn btn-secondary" disabled={sorting} onClick={sortPaste}>{sorting ? "Sorting…" : "✨ Fill in details"}</button></div>}<details open={detailsOpen} onToggle={(event) => setDetailsOpen(event.currentTarget.open)}><summary>Recipe details (optional)</summary><label>Ingredients<textarea className="input" rows={3} value={ingredients} onChange={(event) => setIngredients(event.target.value)} /></label><label>Method<textarea className="input" rows={4} value={instructions} onChange={(event) => setInstructions(event.target.value)} /></label></details></>}
       <label>Tags <input className="input" value={tags} onChange={(event) => setTags(event.target.value)} placeholder="holiday, tapas, Lisbon" /></label>
       <div className={styles.bottom}><label>When?<input className="input" type="date" max={today} value={date} onChange={(event) => setDate(event.target.value)} /></label><div><span>How was it?</span><div className={styles.stars}>{[1,2,3,4,5].map((number) => <button type="button" key={number} onClick={() => setRating(rating === number ? 0 : number)}>{number <= rating ? "★" : "☆"}</button>)}</div></div></div>

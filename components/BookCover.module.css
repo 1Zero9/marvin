@@ -30,6 +30,8 @@
   display: none;
 }
 
+.photoActions { display: flex; flex-direction: column; gap: 6px; }
+
 .photoBtn {
   font-family: inherit;
   font-size: 0.8rem;

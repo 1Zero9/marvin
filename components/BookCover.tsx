@@ -37,7 +37,8 @@ export default function BookCover({
 }) {
   const router = useRouter();
   const mediaUrl = bookCoverMediaUrl({ id: bookId, coverUrl });
-  const fileRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const libraryRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
 
   async function onFile(files: FileList | null) {
@@ -54,7 +55,8 @@ export default function BookCover({
       router.refresh();
     } finally {
       setBusy(false);
-      if (fileRef.current) fileRef.current.value = "";
+      if (cameraRef.current) cameraRef.current.value = "";
+      if (libraryRef.current) libraryRef.current.value = "";
     }
   }
 
@@ -67,20 +69,24 @@ export default function BookCover({
         <div className={styles.fallback}>{title.slice(0, 1)}</div>
       )}
       <input
-        ref={fileRef}
+        ref={cameraRef}
         type="file"
         accept="image/*"
         capture="environment"
         className={styles.fileInput}
         onChange={(e) => onFile(e.target.files)}
       />
-      <button
-        className={styles.photoBtn}
-        onClick={() => fileRef.current?.click()}
-        disabled={busy}
-      >
-        {busy ? "Uploading…" : coverUrl ? "Replace cover" : "📷 Add cover"}
-      </button>
+      <input
+        ref={libraryRef}
+        type="file"
+        accept="image/*"
+        className={styles.fileInput}
+        onChange={(e) => onFile(e.target.files)}
+      />
+      <div className={styles.photoActions}>
+        <button className={styles.photoBtn} onClick={() => cameraRef.current?.click()} disabled={busy}>{busy ? "Uploading…" : coverUrl ? "📷 Replace cover" : "📷 Take cover photo"}</button>
+        <button className={styles.photoBtn} onClick={() => libraryRef.current?.click()} disabled={busy}>🖼 Choose from library</button>
+      </div>
     </div>
   );
 }

@@ -41,7 +41,8 @@ export default function LogCookPage({
   >([]);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const fileRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const libraryRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const raw = sessionStorage.getItem("marvin-snap");
@@ -65,7 +66,8 @@ export default function LogCookPage({
       setPhotos((prev) => [...prev, ...resized].slice(0, 6));
     } finally {
       setBusy(false);
-      if (fileRef.current) fileRef.current.value = "";
+      if (cameraRef.current) cameraRef.current.value = "";
+      if (libraryRef.current) libraryRef.current.value = "";
     }
   }
 
@@ -140,7 +142,7 @@ export default function LogCookPage({
         <div className={styles.label}>
           Photos
           <input
-            ref={fileRef}
+            ref={cameraRef}
             type="file"
             accept="image/*"
             capture="environment"
@@ -148,14 +150,18 @@ export default function LogCookPage({
             className={styles.fileInput}
             onChange={(e) => onFiles(e.target.files)}
           />
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={() => fileRef.current?.click()}
-            disabled={busy || photos.length >= 6}
-          >
-            {photos.length === 0 ? "Add photos" : "Add another photo"}
-          </button>
+          <input
+            ref={libraryRef}
+            type="file"
+            accept="image/*"
+            multiple
+            className={styles.fileInput}
+            onChange={(e) => onFiles(e.target.files)}
+          />
+          <div className={styles.photoActions}>
+            <button type="button" className="btn btn-secondary" onClick={() => cameraRef.current?.click()} disabled={busy || photos.length >= 6}>📷 {photos.length === 0 ? "Take photos" : "Take another photo"}</button>
+            <button type="button" className="btn btn-secondary" onClick={() => libraryRef.current?.click()} disabled={busy || photos.length >= 6}>🖼 Choose from library</button>
+          </div>
           {photos.length > 0 && (
             <div className={styles.thumbs}>
               {photos.map((p, i) => (

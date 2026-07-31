@@ -42,7 +42,8 @@ async function resizeImage(
 
 export default function SnapPage() {
   const router = useRouter();
-  const fileRef = useRef<HTMLInputElement>(null);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const libraryRef = useRef<HTMLInputElement>(null);
   const today = new Date().toISOString().slice(0, 10);
   const [photo, setPhoto] = useState<{
     data: string;
@@ -86,7 +87,8 @@ export default function SnapPage() {
       setError("Couldn't identify that photo. Try another one.");
     } finally {
       setBusy(false);
-      if (fileRef.current) fileRef.current.value = "";
+      if (cameraRef.current) cameraRef.current.value = "";
+      if (libraryRef.current) libraryRef.current.value = "";
     }
   }
 
@@ -140,27 +142,40 @@ export default function SnapPage() {
       {!result && <h1 className={styles.title}>Snap your dinner</h1>}
       {!result && !busy && (
         <p className={styles.sub}>
-          Take a photo of what you cooked — Marvin works out the rest.
+          Take a photo of what you cooked, or choose one from your photo library — Marvin works out the rest.
         </p>
       )}
 
       <input
-        ref={fileRef}
+        ref={cameraRef}
         type="file"
         accept="image/*"
         capture="environment"
         className={styles.fileInput}
         onChange={(e) => onFile(e.target.files)}
       />
+      <input
+        ref={libraryRef}
+        type="file"
+        accept="image/*"
+        className={styles.fileInput}
+        onChange={(e) => onFile(e.target.files)}
+      />
 
       {!photo && (
-        <><ScanningDisclosure kind="food" /><button
+        <><ScanningDisclosure kind="food" /><div className={styles.photoActions}><button
           className={`btn btn-primary ${styles.bigSnap}`}
-          onClick={() => fileRef.current?.click()}
+          onClick={() => cameraRef.current?.click()}
           disabled={busy}
         >
           📷 Take a photo
-        </button></>
+        </button><button
+          className={`btn btn-secondary ${styles.libraryButton}`}
+          onClick={() => libraryRef.current?.click()}
+          disabled={busy}
+        >
+          🖼 Choose from library
+        </button></div></>
       )}
 
       {photo && (
@@ -276,9 +291,16 @@ export default function SnapPage() {
                   <button
                     type="button"
                     className="btn btn-secondary"
-                    onClick={() => fileRef.current?.click()}
+                    onClick={() => cameraRef.current?.click()}
                   >
-                    Try another photo
+                    Take another photo
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => libraryRef.current?.click()}
+                  >
+                    Choose from library
                   </button>
                 </div>
               )}
@@ -291,9 +313,15 @@ export default function SnapPage() {
               <p className={styles.question}>Try another photo of your plate.</p>
               <button
                 className="btn btn-secondary"
-                onClick={() => fileRef.current?.click()}
+                onClick={() => cameraRef.current?.click()}
               >
-                Try again
+                Take another photo
+              </button>
+              <button
+                className="btn btn-secondary"
+                onClick={() => libraryRef.current?.click()}
+              >
+                Choose from library
               </button>
             </div>
           )}
