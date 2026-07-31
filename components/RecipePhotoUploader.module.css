@@ -1,0 +1,8 @@
+.card { display: flex; flex-direction: column; gap: 10px; }
+.card h2 { font-size: 1.15rem; }
+.card p { color: var(--plum-500); font-size: .9rem; }
+.fileInput { display: none; }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.status { color: var(--marvin-orange) !important; font-weight: 700; }
+.error { color: var(--danger) !important; font-weight: 700; }
+@media (max-width: 480px) { .actions > * { flex: 1 1 calc(50% - 8px); justify-content: center; } }
