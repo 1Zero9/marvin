@@ -52,9 +52,9 @@ export default async function Home({
                 ],
               },
               filter === "books"
-                ? { source: "book" }
+                ? { source: { in: ["book", "hybrid"] } }
                 : filter === "personal"
-                  ? { source: "personal" }
+                  ? { source: { in: ["personal", "hybrid"] } }
                   : {},
               { householdId: identity.membership.householdId },
               visibleTo(identity),
@@ -234,11 +234,11 @@ export default async function Home({
                     <p className={styles.resultMeta}>
                       {r.book
                         ? `${r.book.title}${r.pageRef ? ` · p.${r.pageRef}` : ""}`
-                        : "My own recipe"}
+                        : r.source === "hybrid" ? "Adapted cookbook recipe" : "My own recipe"}
                     </p>
                     <div className={styles.resultTags}>
                       <span className="tag">
-                        {r.source === "book" ? "Book recipe" : "Personal"}
+                        {r.source === "book" ? "Book recipe" : r.source === "hybrid" ? "Adapted" : "Personal"}
                       </span>
                     </div>
                   </div>
