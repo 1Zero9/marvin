@@ -12,6 +12,7 @@ Rules:
 - Schema: { "title": string, "ingredients": string, "instructions": string, "notes": string, "tags": string[], "isFood": boolean }.
 - This is an estimate, not a transcription. Do not claim to know exact ingredients, quantities, cooking times, temperatures, or steps from the image.
 - Suggest a plausible, simple home-cook version of the visible dish. Use practical estimated quantities and put one ingredient per line.
+- Use metric measures only: g, kg, ml, l and °C. Teaspoons and tablespoons are fine for small quantities. Never use cups, fluid ounces, ounces, pounds, sticks, or Fahrenheit.
 - Write 3-7 short method steps, one per paragraph. State sensible assumptions rather than presenting them as facts.
 - In notes, begin exactly: "AI draft from a photo — check every ingredient, amount and step before cooking." Then add any important uncertainty about the dish.
 - Use 0-4 short lowercase tags.
