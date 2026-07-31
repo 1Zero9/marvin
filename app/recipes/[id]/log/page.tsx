@@ -1,8 +1,10 @@
 "use client";
 
 import { use, useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import styles from "./log.module.css";
+import RecipeKeepAwake from "@/components/RecipeKeepAwake";
 
 async function resizeImage(
   file: File
@@ -96,7 +98,13 @@ export default function LogCookPage({
 
   return (
     <div className={styles.wrap}>
-      <h1 className={styles.title}>Log a cook</h1>
+      <header className={styles.header}>
+        <Link href={`/recipes/${id}`} className={styles.back}>← Back to recipe</Link>
+        <p className={styles.eyebrow}>Cooking this recipe</p>
+        <h1 className={styles.title}>Cook &amp; log</h1>
+        <p className={styles.sub}>Keep notes and progress photos with the recipe while you cook, then save them together.</p>
+      </header>
+      <RecipeKeepAwake description="Keep this cook log on screen while you cook." />
       {error && <p className={styles.error}>{error}</p>}
 
       <section className={`card ${styles.form}`}>

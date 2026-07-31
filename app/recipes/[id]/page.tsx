@@ -155,7 +155,7 @@ export default async function RecipePage({
         <div className={styles.logHeader}>
           <h2 className={styles.sectionTitle}>Cook log</h2>
           <Link href={`/recipes/${recipe.id}/log`} className="btn btn-primary">
-            Log a cook
+            Cook this recipe
           </Link>
         </div>
         {recipe.cookLogs.length === 0 ? (

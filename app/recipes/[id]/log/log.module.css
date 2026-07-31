@@ -10,6 +10,11 @@
   font-size: 2rem;
 }
 
+.header { display: flex; flex-direction: column; gap: 5px; }
+.back { color: var(--marvin-orange); font-size: .84rem; font-weight: 800; width: fit-content; }
+.eyebrow { color: var(--plum-500); font-size: .73rem; font-weight: 800; letter-spacing: .11em; margin-top: 5px; text-transform: uppercase; }
+.sub { color: var(--plum-500); font-size: .92rem; line-height: 1.45; max-width: 500px; }
+
 .error {
   background: #FBE3E3;
   color: var(--danger);

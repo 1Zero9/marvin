@@ -11,7 +11,11 @@ type WakeLockNavigator = Navigator & {
   wakeLock?: { request: (type: "screen") => Promise<WakeLockSentinelLike> };
 };
 
-export default function RecipeKeepAwake() {
+export default function RecipeKeepAwake({
+  description = "Keep this recipe on screen while you cook.",
+}: {
+  description?: string;
+}) {
   const sentinelRef = useRef<WakeLockSentinelLike | null>(null);
   const wantedRef = useRef(false);
   const [isPortraitMobile, setIsPortraitMobile] = useState(false);
@@ -99,7 +103,7 @@ export default function RecipeKeepAwake() {
     <aside className={styles.control} aria-live="polite">
       <div>
         <strong>Cooking mode</strong>
-        <p>Keep this recipe on screen while you cook.</p>
+        <p>{description}</p>
       </div>
       {supported === true ? (
         <button type="button" className={`btn ${active ? "btn-primary" : "btn-secondary"}`} onClick={toggle} aria-pressed={active}>
