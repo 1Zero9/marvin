@@ -23,6 +23,11 @@ export default async function AccountPage() {
         <a href="/api/account/export" className="btn btn-primary">Download my data</a>
       </section>
       <section className={`card ${styles.section}`}>
+        <h2>Download everything</h2>
+        <p>Get a full JSON backup that also includes the household&rsquo;s shared recipes, books and cook logs you can see &mdash; useful if you want to keep your own copy of the kitchen.</p>
+        <a href="/api/account/export/full" className="btn btn-secondary">Download everything</a>
+      </section>
+      <section className={`card ${styles.section}`}>
         <h2>Privacy choices</h2>
         <p>Marvin has no advertising or behavioural tracking. You can opt out of optional AI processing at any time.</p>
         <AiProcessingControl enabled={identity.user.aiProcessingEnabled} />
