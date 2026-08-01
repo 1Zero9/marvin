@@ -1,19 +1,5 @@
-const STATIC_CACHE = "marvin-static-v49";
-const RUNTIME_CACHE = "marvin-runtime-v49";
+const STATIC_CACHE = "marvin-static-v50";
 const STATIC_ASSETS = ["/manifest.json", "/icons/icon-192.png", "/icons/icon-512.png"];
-
-const RUNTIME_PATH_PATTERNS = [
-  /^\/recipes(\/|$)/,
-  /^\/books(\/|$)/,
-  /^\/api\/recipes(\/|$|\?)/,
-  /^\/api\/books(\/|$|\?)/,
-  /^\/api\/media\//,
-];
-
-function isRuntimeCacheable(url) {
-  if (url.origin !== self.location.origin) return false;
-  return RUNTIME_PATH_PATTERNS.some((pattern) => pattern.test(url.pathname));
-}
 
 self.addEventListener("install", (event) => {
   event.waitUntil(
@@ -29,7 +15,7 @@ self.addEventListener("activate", (event) => {
       .then((keys) =>
         Promise.all(
           keys
-            .filter((k) => k !== STATIC_CACHE && k !== RUNTIME_CACHE)
+            .filter((k) => k !== STATIC_CACHE)
             .map((k) => caches.delete(k))
         )
       )
@@ -62,22 +48,5 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  if (isRuntimeCacheable(url)) {
-    event.respondWith(
-      fetch(request)
-        .then((res) => {
-          if (res.ok) {
-            const copy = res.clone();
-            caches.open(RUNTIME_CACHE).then((cache) => cache.put(request, copy));
-          }
-          return res;
-        })
-        .catch(() => caches.match(request).then((cached) => cached || Response.error()))
-    );
-    return;
-  }
-
-  event.respondWith(
-    fetch(request).catch(() => caches.match(request).then((c) => c || Response.error()))
-  );
+  event.respondWith(fetch(request));
 });

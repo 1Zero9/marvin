@@ -1,5 +1,5 @@
 .wrap { display: flex; flex-direction: column; gap: 18px; margin: 0 auto; max-width: 840px; }
-.header { align-items: flex-start; display: flex; gap: 12px; justify-content: space-between; padding: 10px 2px 2px; }.heading { display: flex; flex-direction: column; gap: 7px; }.eyebrow { color: var(--plum-500); font-size: .73rem; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }.title { font-size: clamp(2rem, 7vw, 2.7rem); letter-spacing: -.04em; text-transform: none; }.sub { color: var(--plum-500); max-width: 560px; }
+.header { align-items: flex-start; display: flex; gap: 12px; justify-content: space-between; padding: 10px 2px 2px; }.heading { display: flex; flex-direction: column; gap: 7px; }.eyebrow { color: var(--marvin-green); font-size: .73rem; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }.title { color: var(--marvin-text); font-size: clamp(2rem, 7vw, 2.7rem); letter-spacing: -.04em; text-transform: none; }.sub { color: var(--marvin-text-soft); max-width: 560px; }
 @media (max-width: 480px) { .header { align-items: stretch; flex-direction: column; }.addLink { align-self: flex-start; } }
 
 .empty {
@@ -8,8 +8,8 @@
 }
 
 .filters { display: flex; flex-wrap: wrap; gap: 8px; }
-.filter { background: var(--marvin-blush); border-radius: var(--radius-pill); color: var(--marvin-plum); font-size: .83rem; font-weight: 800; padding: 8px 12px; }
-.filterActive { background: var(--marvin-plum); color: #fff; }
+.filter { background: var(--marvin-green-soft); border: 1px solid rgba(46, 107, 87, .16); border-radius: var(--radius-pill); color: var(--marvin-green); font-size: .83rem; font-weight: 800; padding: 8px 12px; }
+.filterActive { background: var(--marvin-orange); border-color: var(--marvin-orange); box-shadow: var(--shadow-orange); color: #fff; }
 
 .grid {
   display: grid;
@@ -24,8 +24,8 @@
   transition: transform 0.1s ease;
 }
 
-.recipePersonal { border-left: 4px solid var(--plum-300); }
-.recipeBook { border-left: 4px solid var(--orange-300); }
+.recipePersonal { border-left: 4px solid var(--marvin-green); }
+.recipeBook { border-left: 4px solid var(--marvin-gold); }
 .recipeHybrid { border-left: 4px solid var(--marvin-orange); }
 
 .recipe:hover {
@@ -59,8 +59,8 @@
 }
 
 .sourceBadge { align-self: flex-start; border-radius: var(--radius-pill); font-size: .71rem; font-weight: 800; letter-spacing: .01em; padding: 4px 8px; }
-.sourcePersonal { background: var(--marvin-blush); color: var(--marvin-plum); }
-.sourceBook { background: var(--marvin-cream); color: var(--orange-700); }
+.sourcePersonal { background: var(--marvin-green-soft); color: var(--marvin-green); }
+.sourceBook { background: var(--marvin-gold-soft); color: #8a6214; }
 .sourceHybrid { background: var(--marvin-orange); color: #fff; }
 
 .recipeTitle {
@@ -72,4 +72,4 @@
   color: var(--plum-500);
 }
 
-.addLink { background: var(--marvin-orange); border-radius: var(--radius-pill); color: #fff; font-size: .88rem; font-weight: 800; padding: 10px 14px; white-space: nowrap; }.addLink:hover { background: var(--orange-700); }
+.addLink { background: linear-gradient(135deg, #e66a32 0%, var(--marvin-orange) 58%, var(--marvin-orange-hover) 100%); border-radius: var(--radius-pill); box-shadow: var(--shadow-orange); color: #fff; font-size: .88rem; font-weight: 800; padding: 10px 14px; white-space: nowrap; }.addLink:hover { background: var(--marvin-orange-hover); }

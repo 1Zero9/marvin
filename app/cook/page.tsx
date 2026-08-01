@@ -24,7 +24,7 @@ export default async function Home({
   const query = q?.trim() ?? "";
   const filter = f === "books" || f === "personal" ? f : "all";
 
-  const [bookCount, recipePreferenceRecords, entries, matchedRecipes] = await Promise.all([
+  const [bookCount, recipePreferenceRecords, entries, matchedRecipes, featuredRecipes] = await Promise.all([
     prisma.book.count({ where: { householdId: identity.membership.householdId, ...visibleTo(identity) } }),
     prisma.recipe.findMany({
       where: { householdId: identity.membership.householdId, archived: false, ...visibleTo(identity) },
@@ -73,6 +73,14 @@ export default async function Home({
           take: 50,
         })
       : Promise.resolve([]),
+    !query
+      ? prisma.recipe.findMany({
+          where: { householdId: identity.membership.householdId, archived: false, ...visibleTo(identity) },
+          include: { photos: { take: 1, orderBy: { createdAt: "desc" } } },
+          orderBy: { updatedAt: "desc" },
+          take: 12,
+        })
+      : Promise.resolve([]),
   ]);
 
   const suitableEntries = entries.filter((entry) => !matchesFoodExclusions([entry.ingredient, entry.dish], identity.user.foodExclusions));
@@ -91,6 +99,7 @@ export default async function Home({
   );
   const suitableRecipes = matchedRecipes.filter((recipe) => !recipeIsExcluded(recipe, identity.user.foodExclusions));
   const recipeCount = recipePreferenceRecords.filter((recipe) => !recipeIsExcluded(recipe, identity.user.foodExclusions)).length;
+  const featuredRecipe = featuredRecipes.find((recipe) => !recipeIsExcluded(recipe, identity.user.foodExclusions));
 
   const entryRecipes = query
     ? await prisma.recipe.findMany({
@@ -116,7 +125,7 @@ export default async function Home({
 
   return (
     <div className={styles.wrap}>
-      <section className={`${styles.hero} ${query ? styles.heroCompact : ""}`}>
+      <section className={`${styles.hero} ${query ? styles.heroCompact : ""} marvin-animate-in`}>
         <div className={styles.logoLockup}>
           <Image
             src="/icons/icon-192.png"
@@ -150,7 +159,7 @@ export default async function Home({
               Search
             </button>
             <Link href="/decide" className={styles.inspireBtn}>
-              <Icon name="sparkle" className={styles.btnIcon} /> Inspire me
+              <Icon name="sparkle" className={`${styles.btnIcon} marvin-inspire-icon`} /> Inspire me
             </Link>
           </div>
         </form>
@@ -165,6 +174,18 @@ export default async function Home({
       </section>
 
       {!query && (
+        <>
+        {featuredRecipe && <Link href={`/recipes/${featuredRecipe.id}`} className={styles.featured}>
+          {featuredRecipe.photos[0] ? (
+            /* eslint-disable-next-line @next/next/no-img-element */
+            <img src={photoMediaUrl(featuredRecipe.photos[0])} alt="" className={styles.featuredImage} />
+          ) : <div className={styles.featuredFallback}>🍲</div>}
+          <div className={styles.featuredContent}>
+            <span className={styles.featuredLabel}>Cook again</span>
+            <h2>{featuredRecipe.title}</h2>
+            <p>A favourite from your kitchen</p>
+          </div>
+        </Link>}
         <section className={styles.kitchenPaths} aria-label="Kitchen shortcuts">
           <Link href="/recipes" className={styles.kitchenPath}>
             <span className={styles.kitchenPathIcon}>🍽</span>
@@ -193,7 +214,17 @@ export default async function Home({
             </span>
             <b aria-hidden="true">→</b>
           </Link>
+          <Link href="/dictionary" className={styles.kitchenPath}>
+            <span className={styles.kitchenPathIcon}>⌘</span>
+            <span className={styles.kitchenPathCopy}>
+              <small>Kitchen help</small>
+              <strong>Cooking dictionary</strong>
+              <span>Clear explanations, from roux to sauté</span>
+            </span>
+            <b aria-hidden="true">→</b>
+          </Link>
         </section>
+        </>
       )}
 
       {query ? (

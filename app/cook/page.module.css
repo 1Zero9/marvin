@@ -303,6 +303,48 @@
 }
 .moreIngredients { color: var(--plum-500); font-size: .78rem; font-weight: 700; }
 
+/* Marvin’s landing surface: warm, food-led and intentionally weighted actions. */
+.wrap { gap: 36px; max-width: 720px; }
+.hero { gap: 20px; padding: 18px 0 0; }
+.heroLogo { background: rgba(255, 255, 255, .82); border-radius: 30px; box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255, 255, 255, .9); height: 128px; padding: 8px; width: 128px; }
+.heroName { color: var(--marvin-text); font-size: clamp(2.7rem, 12vw, 4.25rem); font-weight: 800; letter-spacing: -.065em; }
+.tagline { color: var(--marvin-green); font-size: clamp(1.15rem, 5vw, 1.55rem); }
+.accent { color: var(--marvin-orange); }
+.searchForm { gap: 14px; max-width: 620px; }
+.searchBox { border: 1px solid rgba(207, 199, 184, .75); box-shadow: 0 12px 34px rgba(31, 42, 46, .08), inset 0 1px 0 rgba(255, 255, 255, .9); min-height: 68px; padding: 0 22px; }
+.searchBox:focus-within { border-color: rgba(217, 94, 42, .65); box-shadow: 0 0 0 4px rgba(217, 94, 42, .12), 0 14px 38px rgba(31, 42, 46, .12); transform: translateY(-1px); }
+.searchIcon { color: var(--marvin-green); height: 25px; width: 25px; }
+.searchInput { color: var(--marvin-text); font-size: 1.1rem; padding: 0; }
+.searchInput::placeholder { color: var(--marvin-text-muted); }
+.searchButtons { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.searchBtn, .inspireBtn { min-height: 58px; padding: 0 20px; }
+.searchBtn { background: linear-gradient(135deg, #e66a32 0%, var(--marvin-orange) 58%, var(--marvin-orange-hover) 100%); box-shadow: var(--shadow-orange); }
+.searchBtn:hover { background: linear-gradient(135deg, #ec7440 0%, var(--marvin-orange-hover) 100%); box-shadow: 0 14px 32px rgba(217, 94, 42, .3); }
+.inspireBtn { background: linear-gradient(135deg, #244b43 0%, #1f3434 100%); box-shadow: 0 10px 24px rgba(31, 52, 52, .24); }
+.inspireBtn:hover { background: linear-gradient(135deg, #2a574d 0%, #172b2a 100%); }
+.cookActions { flex-direction: column; align-items: center; gap: 12px; margin-top: 2px; }
+.snapPill, .addRecipePill { justify-content: center; min-height: 52px; padding: 0 24px; }
+.addRecipePill { background: rgba(255, 255, 255, .7); border: 1px solid rgba(46, 107, 87, .45); box-shadow: var(--shadow-xs); color: var(--marvin-green); }
+.addRecipePill:hover { background: var(--marvin-green-soft); border-color: var(--marvin-green); }
+.snapPill { background: rgba(255, 255, 255, .92); box-shadow: var(--shadow-sm); }
+.snapPill:hover { box-shadow: var(--shadow-md); color: var(--marvin-text); }
+.featured { border-radius: var(--radius-xl); box-shadow: var(--shadow-lg); color: #fff; display: block; isolation: isolate; min-height: 270px; overflow: hidden; position: relative; }
+.featured::after { background: linear-gradient(180deg, rgba(15, 24, 24, .03) 20%, rgba(15, 24, 24, .82) 100%); content: ""; inset: 0; position: absolute; z-index: 1; }
+.featuredImage, .featuredFallback { height: 100%; inset: 0; object-fit: cover; position: absolute; transition: transform .4s ease; width: 100%; }
+.featuredFallback { align-items: center; background: linear-gradient(145deg, var(--marvin-green), var(--marvin-orange)); display: flex; font-size: 6rem; justify-content: center; }
+.featured:hover .featuredImage, .featured:hover .featuredFallback { transform: scale(1.035); }
+.featuredContent { bottom: 0; left: 0; padding: 28px; position: absolute; right: 0; z-index: 2; }
+.featuredLabel { background: rgba(244, 185, 66, .92); border-radius: var(--radius-pill); color: #2e2410; display: inline-flex; font-size: .75rem; font-weight: 800; letter-spacing: .08em; margin-bottom: 10px; padding: 7px 11px; text-transform: uppercase; }
+.featuredContent h2 { color: #fff; font-size: clamp(1.65rem, 7vw, 2.5rem); letter-spacing: -.045em; text-transform: none; }
+.featuredContent p { color: rgba(255, 255, 255, .82); margin-top: 8px; }
+.kitchenPaths { gap: 14px; }
+.kitchenPath { background: linear-gradient(145deg, rgba(255, 255, 255, .98), rgba(251, 250, 247, .92)); border-color: rgba(207, 199, 184, .72); box-shadow: var(--shadow-sm); min-height: 132px; padding: 20px; }
+.kitchenPath:hover { border-color: rgba(217, 94, 42, .30); box-shadow: var(--shadow-md); transform: translateY(-3px); }
+.kitchenPathIcon { background: linear-gradient(145deg, var(--marvin-orange-soft), var(--marvin-gold-soft)); color: var(--marvin-orange); flex-basis: 54px; height: 54px; }
+.kitchenPathCopy small { color: var(--marvin-green); }
+.kitchenPathCopy strong { color: var(--marvin-text); font-size: 1rem; }
+.kitchenPath > b { color: var(--marvin-orange); font-size: 1.35rem; }
+
 @media (max-width: 480px) {
   .hero {
     padding-top: 18px;
@@ -321,4 +363,5 @@
   }
 
   .kitchenPaths { grid-template-columns: 1fr; }
+  .heroLogo { height: 112px; width: 112px; }
 }
