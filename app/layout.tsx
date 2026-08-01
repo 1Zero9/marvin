@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Space_Grotesk, Nunito_Sans } from "next/font/google";
+import { Space_Grotesk, Inter } from "next/font/google";
 import "./globals.css";
 import AppShell from "@/components/AppShell";
 import SwRegister from "@/components/SwRegister";
@@ -10,7 +10,7 @@ const heading = Space_Grotesk({
   weight: ["500", "600", "700"],
 });
 
-const body = Nunito_Sans({
+const body = Inter({
   variable: "--font-body",
   subsets: ["latin"],
   weight: ["400", "600", "700", "800"],
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: "#35665B",
+  themeColor: "#f7f4ee",
 };
 
 export default function RootLayout({
@@ -36,7 +36,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${heading.variable} ${body.variable}`}>
       <body>
-        <div className="container"><AppShell>{children}</AppShell></div>
+        <AppShell>{children}</AppShell>
         <SwRegister />
       </body>
     </html>

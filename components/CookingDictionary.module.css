@@ -1,0 +1,10 @@
+.search { display: flex; flex-direction: column; gap: 7px; max-width: 560px; }
+.searchLabel { color: var(--plum-500); font-size: .83rem; font-weight: 800; }
+.terms { display: grid; gap: 12px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.term { display: flex; flex-direction: column; gap: 10px; padding: 18px; }
+.term h2 { font-size: 1.12rem; text-transform: none; }
+.pronunciation { color: var(--marvin-orange); font-size: .8rem; font-weight: 800; margin-top: 2px; }
+.why { border-top: 1px solid var(--border); color: var(--plum-500); font-size: .88rem; padding-top: 10px; }
+.why strong { color: var(--marvin-plum); }
+.empty { grid-column: 1 / -1; text-align: center; }
+@media (max-width: 620px) { .terms { grid-template-columns: 1fr; } }

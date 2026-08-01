@@ -1,0 +1,5 @@
+.wrap { display: flex; flex-direction: column; gap: 22px; margin: 0 auto; max-width: 760px; }
+.hero { display: flex; flex-direction: column; gap: 7px; padding: 10px 2px 2px; }
+.eyebrow { color: var(--marvin-orange); font-size: .73rem; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
+.hero h1 { font-size: clamp(2rem, 7vw, 2.7rem); letter-spacing: -.04em; text-transform: none; }
+.hero p:last-child { color: var(--plum-500); max-width: 590px; }
