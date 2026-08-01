@@ -2,22 +2,31 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { requireHousehold } from "@/lib/auth";
 import { visibleTo } from "@/lib/privacy";
-import { photoMediaUrl } from "@/lib/media";
+import { bookCoverMediaUrl, photoMediaUrl } from "@/lib/media";
 import { matchesFoodExclusions, recipeIsExcluded } from "@/lib/foodPreferences";
 import styles from "./decide.module.css";
 
 export const dynamic = "force-dynamic";
 
 type Filter = "all" | "quick" | "rated" | "return" | "book" | "personal";
+type SourceFilter = "all" | "books" | "personal";
 
 const filters: { value: Filter; label: string }[] = [
-  { value: "all", label: "All ideas" },
+  { value: "all", label: "Any recipe" },
   { value: "quick", label: "Quick" },
   { value: "rated", label: "Highly rated" },
   { value: "return", label: "Not made lately" },
-  { value: "book", label: "From books" },
+];
+
+const sourceFilters: { value: SourceFilter; label: string }[] = [
+  { value: "all", label: "All ideas" },
+  { value: "books", label: "From books" },
   { value: "personal", label: "My recipes" },
 ];
+
+function tidyIndexedDish(dish: string, page: number) {
+  return dish.replace(new RegExp(`\\s+${page}\\s*$`), "").trim();
+}
 
 function seasonalFit(tags: string[]) {
   const month = new Date().getMonth() + 1;
@@ -49,12 +58,15 @@ function reasonFor(recipe: { cookLogs: { cookedAt: Date; rating: number | null }
 export default async function DecidePage({
   searchParams,
 }: {
-  searchParams: Promise<{ filter?: string }>;
+  searchParams: Promise<{ filter?: string; source?: string }>;
 }) {
-  const { filter: rawFilter } = await searchParams;
+  const { filter: rawFilter, source: rawSource } = await searchParams;
   const identity = await requireHousehold();
   const filter = filters.some((item) => item.value === rawFilter)
     ? (rawFilter as Filter)
+    : "all";
+  const source = sourceFilters.some((item) => item.value === rawSource)
+    ? (rawSource as SourceFilter)
     : "all";
 
   const [recipes, shelfEntries, bookRecipeRefs] = await Promise.all([prisma.recipe.findMany({
@@ -63,20 +75,20 @@ export default async function DecidePage({
       archived: false,
       ...visibleTo(identity),
       ...(filter === "quick" ? { tags: { has: "quick" } } : {}),
-      ...(filter === "book" ? { source: { in: ["book", "hybrid"] } } : {}),
-      ...(filter === "personal" ? { source: { in: ["personal", "hybrid"] } } : {}),
+      ...(source === "books" ? { source: "book" } : {}),
+      ...(source === "personal" ? { source: { in: ["personal", "hybrid"] } } : {}),
     },
     include: {
       book: { select: { title: true } },
       photos: { take: 1, orderBy: { createdAt: "asc" } },
       cookLogs: { where: { countsAsCooked: true }, select: { cookedAt: true, rating: true }, orderBy: { cookedAt: "desc" }, take: 50 },
     },
-  }), prisma.indexEntry.findMany({
+  }), source !== "personal" ? prisma.indexEntry.findMany({
     where: { book: { householdId: identity.membership.householdId, archived: false, ...visibleTo(identity) } },
     include: { book: { select: { id: true, title: true, coverUrl: true } } },
     orderBy: { dish: "asc" },
     take: 100,
-  }), prisma.recipe.findMany({ where: { householdId: identity.membership.householdId, archived: false, ...visibleTo(identity), bookId: { not: null }, pageRef: { not: null } }, select: { bookId: true, pageRef: true } })]);
+  }) : Promise.resolve([]), prisma.recipe.findMany({ where: { householdId: identity.membership.householdId, archived: false, ...visibleTo(identity), bookId: { not: null }, pageRef: { not: null } }, select: { bookId: true, pageRef: true } })]);
 
   const scored = recipes
     .filter((recipe) => !recipeIsExcluded(recipe, identity.user.foodExclusions))
@@ -101,7 +113,21 @@ export default async function DecidePage({
     ? scored[new Date().getDate() % scored.length].recipe
     : null;
   const triedPages = new Set(bookRecipeRefs.map((recipe) => `${recipe.bookId}:${recipe.pageRef}`));
-  const shelfPick = shelfEntries.find((entry) => !triedPages.has(`${entry.bookId}:${entry.page}`) && !matchesFoodExclusions([entry.ingredient, entry.dish], identity.user.foodExclusions));
+  const groupedBookIdeas = Array.from(
+    shelfEntries
+      .filter((entry) => !triedPages.has(`${entry.bookId}:${entry.page}`) && !matchesFoodExclusions([entry.ingredient, entry.dish], identity.user.foodExclusions))
+      .reduce((groups, entry) => {
+        const key = `${entry.bookId}:${entry.page}`;
+        const existing = groups.get(key);
+        if (existing) existing.ingredients.add(entry.ingredient);
+        else groups.set(key, { ...entry, dish: tidyIndexedDish(entry.dish, entry.page), ingredients: new Set([entry.ingredient]) });
+        return groups;
+      }, new Map<string, { id: string; bookId: string; book: typeof shelfEntries[number]["book"]; page: number; dish: string; ingredients: Set<string> }>()).values()
+  );
+  const shelfPick = source !== "personal" ? groupedBookIdeas[new Date().getDate() % groupedBookIdeas.length] : null;
+  const totalIdeas = scored.length + groupedBookIdeas.length;
+  const sourceHref = (nextSource: SourceFilter) => `/decide${nextSource === "all" && filter === "all" ? "" : `?${new URLSearchParams({ ...(nextSource === "all" ? {} : { source: nextSource }), ...(filter === "all" ? {} : { filter }) })}`}`;
+  const filterHref = (nextFilter: Filter) => `/decide${source === "all" && nextFilter === "all" ? "" : `?${new URLSearchParams({ ...(source === "all" ? {} : { source }), ...(nextFilter === "all" ? {} : { filter: nextFilter }) })}`}`;
 
   return (
     <div className={styles.wrap}>
@@ -132,11 +158,17 @@ export default async function DecidePage({
         </Link>
       )}
 
+      <nav className={styles.sourceFilters} aria-label="Choose where ideas come from">
+        {sourceFilters.map((item) => (
+          <Link key={item.value} href={sourceHref(item.value)} className={`${styles.sourceFilter} ${source === item.value ? styles.sourceActive : ""}`}>{item.label}</Link>
+        ))}
+      </nav>
+
       <nav className={styles.filters} aria-label="Recipe suggestions">
         {filters.map((item) => (
           <Link
             key={item.value}
-            href={item.value === "all" ? "/decide" : `/decide?filter=${item.value}`}
+            href={filterHref(item.value)}
             className={`${styles.filter} ${filter === item.value ? styles.active : ""}`}
           >
             {item.label}
@@ -144,10 +176,10 @@ export default async function DecidePage({
         ))}
       </nav>
 
-      {scored.length === 0 ? (
+      {totalIdeas === 0 ? (
         <section className={`card ${styles.empty}`}>
           <h2>No suggestions here yet</h2>
-          <p>{filter === "quick" ? "Add the tag “quick” to recipes for an easy weekday shortlist." : "Add a recipe or log a cook and Marvin will start finding patterns."}</p>
+          <p>{source === "books" ? "Index a cookbook to see its recipes here." : filter === "quick" ? "Add the tag “quick” to recipes for an easy weekday shortlist." : "Add a recipe or log a cook and Marvin will start finding patterns."}</p>
           <Link href="/recipes/add" className="btn btn-primary">Add a recipe</Link>
         </section>
       ) : (
@@ -165,6 +197,20 @@ export default async function DecidePage({
               </div>
             </Link>
           ))}
+          {groupedBookIdeas.map((idea) => {
+            const ingredients = [...idea.ingredients];
+            return <Link key={`${idea.bookId}:${idea.page}`} href={`/books/${idea.bookId}`} className={`card ${styles.recipe}`}>
+              {idea.book.coverUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={bookCoverMediaUrl(idea.book)!} alt="" className={styles.photo} />
+              ) : <div className={styles.photoFallback}>{idea.book.title.slice(0, 1)}</div>}
+              <div className={styles.recipeInfo}>
+                <h2 className={styles.recipeTitle}>{idea.dish}</h2>
+                <p className={styles.meta}>{idea.book.title} · p.{idea.page}</p>
+                <span className={styles.reason}>{ingredients.slice(0, 3).join(" · ")}{ingredients.length > 3 ? ` · +${ingredients.length - 3} more` : ""}</span>
+              </div>
+            </Link>;
+          })}
         </section>
       )}
     </div>
