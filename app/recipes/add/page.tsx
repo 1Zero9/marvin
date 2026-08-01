@@ -216,6 +216,11 @@ export default function AddRecipePage() {
   }
 
   const readyForDetails = entryMode === "quick" || entryMode === "link";
+  const captureSteps = [
+    { label: "Name", done: Boolean(title.trim()) },
+    { label: "Recipe", done: Boolean(ingredients.trim() || instructions.trim()) },
+    { label: "Make it yours", done: Boolean(notes.trim() || tags.trim() || photos.length) },
+  ];
 
   return (
     <div className={styles.wrap}>
@@ -263,6 +268,9 @@ export default function AddRecipePage() {
             <div><p className={styles.eyebrow}>{scanned ? "Ready to check" : entryMode === "link" ? "Save the source" : "Start simple"}</p><h2>{scanned ? "Marvin has filled in what it could" : "Save what you know"}</h2></div>
             <button type="button" className={styles.textButton} onClick={() => choose("choose")}>Start another way</button>
           </div>
+          <ol className={styles.captureSteps} aria-label="Recipe progress">
+            {captureSteps.map((step, index) => <li key={step.label} className={step.done ? styles.captureStepDone : ""}><span>{step.done ? "✓" : index + 1}</span>{step.label}</li>)}
+          </ol>
           {photoDraft && <p className={styles.aiDraft}>AI draft from your photo. Ingredients, amounts and method are estimates — check and edit every detail before cooking or saving.</p>}
           <label className={styles.label}>Recipe name<input className="input" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="e.g. Mum’s chicken traybake" autoFocus={entryMode !== "quick" || !title} /></label>
 
