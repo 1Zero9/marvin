@@ -12,7 +12,10 @@
 .pickFallback { align-items: center; background: var(--marvin-peach); display: flex; font-size: 2.4rem; justify-content: center; }
 .pickTitle { font-size: 1.5rem; }
 .pickReason { color: var(--plum-500); margin: 4px 0 12px; }
-.filters { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.sourceFilters, .filters { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+.sourceFilters { background: var(--marvin-blush); border-radius: var(--radius-pill); padding: 4px; align-self: center; }
+.sourceFilter { border-radius: var(--radius-pill); color: var(--plum-500); font-size: .9rem; font-weight: 800; padding: 8px 14px; }
+.sourceActive { background: #fff; color: var(--marvin-plum); box-shadow: 0 1px 5px rgba(67, 35, 59, .12); }
 .filter { background: var(--marvin-blush); border-radius: var(--radius-pill); color: var(--marvin-plum); font-size: .9rem; font-weight: 700; padding: 8px 14px; }
 .active { background: var(--marvin-orange); color: #fff; }
 .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
