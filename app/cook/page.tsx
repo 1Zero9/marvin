@@ -10,6 +10,10 @@ import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
 
+function tidyIndexedDish(dish: string, page: number) {
+  return dish.replace(new RegExp(`\\s+${page}\\s*$`), "").trim();
+}
+
 export default async function Home({
   searchParams,
 }: {
@@ -72,6 +76,19 @@ export default async function Home({
   ]);
 
   const suitableEntries = entries.filter((entry) => !matchesFoodExclusions([entry.ingredient, entry.dish], identity.user.foodExclusions));
+  const groupedEntries = Array.from(
+    suitableEntries.reduce((groups, entry) => {
+      const key = `${entry.bookId}:${entry.page}`;
+      const existing = groups.get(key);
+      const dish = tidyIndexedDish(entry.dish, entry.page);
+      if (existing) {
+        existing.ingredients.add(entry.ingredient);
+      } else {
+        groups.set(key, { ...entry, dish, ingredients: new Set([entry.ingredient]) });
+      }
+      return groups;
+    }, new Map<string, { id: string; bookId: string; book: typeof entries[number]["book"]; page: number; dish: string; ingredients: Set<string> }>()).values()
+  );
   const suitableRecipes = matchedRecipes.filter((recipe) => !recipeIsExcluded(recipe, identity.user.foodExclusions));
   const recipeCount = recipePreferenceRecords.filter((recipe) => !recipeIsExcluded(recipe, identity.user.foodExclusions)).length;
 
@@ -92,7 +109,7 @@ export default async function Home({
 
   const firstName = identity.user.displayName.trim().split(/\s+/)[0];
 
-  const total = suitableEntries.length + suitableRecipes.length;
+  const total = groupedEntries.length + suitableRecipes.length;
 
   const filterHref = (value: string) =>
     `/cook?q=${encodeURIComponent(query)}${value === "all" ? "" : `&f=${value}`}`;
@@ -246,8 +263,9 @@ export default async function Home({
                 </Link>
               ))}
 
-              {suitableEntries.map((r) => {
+              {groupedEntries.map((r) => {
                 const recipe = recipeFor(r.bookId, r.page);
+                const ingredients = [...r.ingredients];
                 return (
                   <div key={r.id} className={`card ${styles.result}`}>
                     {r.book.coverUrl ? (
@@ -274,7 +292,8 @@ export default async function Home({
                         · p.{r.page}
                       </p>
                       <div className={styles.resultTags}>
-                        <span className="tag">{r.ingredient}</span>
+                        {ingredients.slice(0, 3).map((ingredient) => <span className="tag" key={ingredient}>{ingredient}</span>)}
+                        {ingredients.length > 3 && <span className={styles.moreIngredients}>+{ingredients.length - 3} more index entries</span>}
                         {recipe && (
                           <Link
                             href={`/recipes/${recipe.id}`}
