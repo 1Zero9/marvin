@@ -151,6 +151,7 @@ export default function PlanBoard({
 }) {
   const router = useRouter();
   const [items, setItems] = useState<Record<string, PlanItem>>(() => Object.fromEntries(initialItems.map((item) => [itemKey(item.date, item.mealType), item])));
+  const [selectedDate, setSelectedDate] = useState(days[0]?.date ?? "");
 
   async function save(item: PlanItem) {
     setItems((current) => ({ ...current, [itemKey(item.date, item.mealType)]: item }));
@@ -167,14 +168,24 @@ export default function PlanBoard({
   }
 
   return (
-    <section className={styles.days} aria-label="Your weekly meal plan">
+    <>
+      <nav className={styles.daySelector} aria-label="Choose a day">
+        {days.map((day) => {
+          const dayNumber = new Date(`${day.date}T12:00:00`).getDate();
+          const shortDay = new Date(`${day.date}T12:00:00`).toLocaleDateString("en-GB", { weekday: "short" }).slice(0, 1);
+          const hasPlan = Boolean(items[itemKey(day.date, "breakfast")] || items[itemKey(day.date, "lunch")]);
+          return <button key={day.date} type="button" onClick={() => setSelectedDate(day.date)} className={`${styles.dayPick} ${selectedDate === day.date ? styles.dayPickActive : ""}`} aria-pressed={selectedDate === day.date}><span>{shortDay}</span><strong>{dayNumber}</strong>{hasPlan && <i aria-label="Has planned meal" />}</button>;
+        })}
+      </nav>
+      <section className={styles.days} aria-label="Your weekly meal plan">
       {days.map((day) => (
-        <article className={`card ${styles.dayCard}`} key={day.date}>
+        <article className={`card ${styles.dayCard} ${selectedDate === day.date ? styles.dayCardSelected : ""}`} key={day.date}>
           <h2 className={styles.dayTitle}>{day.label}</h2>
           <MealSlot date={day.date} mealType="breakfast" label="Breakfast" item={items[itemKey(day.date, "breakfast")]} recipes={recipes} onSave={save} onRemove={() => remove(day.date, "breakfast")} />
           <MealSlot date={day.date} mealType="lunch" label="Lunch" item={items[itemKey(day.date, "lunch")]} recipes={recipes} onSave={save} onRemove={() => remove(day.date, "lunch")} />
         </article>
       ))}
-    </section>
+      </section>
+    </>
   );
 }

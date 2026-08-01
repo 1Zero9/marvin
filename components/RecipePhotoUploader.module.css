@@ -3,6 +3,10 @@
 .card p { color: var(--plum-500); font-size: .9rem; }
 .fileInput { display: none; }
 .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.previewList { display: flex; flex-wrap: wrap; gap: 9px; }
+.preview { display: flex; flex-direction: column; gap: 4px; max-width: 92px; }
+.preview img { border: 2px solid var(--border); border-radius: var(--radius-sm); height: 76px; object-fit: cover; width: 76px; }
+.preview span { color: var(--plum-500); font-size: .7rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .status { color: var(--marvin-orange) !important; font-weight: 700; }
 .error { color: var(--danger) !important; font-weight: 700; }
 @media (max-width: 480px) { .actions > * { flex: 1 1 calc(50% - 8px); justify-content: center; } }
