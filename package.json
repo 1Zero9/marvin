@@ -1,6 +1,6 @@
 {
   "name": "marvin",
-  "version": "0.24.22",
+  "version": "0.25.0",
   "private": true,
   "scripts": {
     "dev": "next dev",
@@ -12,6 +12,7 @@
     "@prisma/client": "^6.19.3",
     "@vercel/blob": "^2.6.1",
     "@zxing/library": "^0.21.3",
+    "mammoth": "^1.12.0",
     "next": "^15.5.20",
     "prisma": "^6.19.3",
     "react": "^19.0.0",

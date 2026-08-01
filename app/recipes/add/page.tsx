@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import styles from "./add.module.css";
 import ScanningDisclosure from "@/components/ScanningDisclosure";
 import type { RecipeSource } from "@/lib/recipeSource";
+import { stripHtmlToText } from "@/lib/htmlRecipe";
 
 type BookOption = { id: string; title: string; author: string | null };
 type EntryMode = "choose" | "paste" | "photo" | "link" | "quick";
@@ -30,12 +31,22 @@ async function resizeImage(file: File): Promise<RecipePhoto> {
   return { data: dataUrl.split(",")[1], mimeType: "image/jpeg", preview: dataUrl };
 }
 
+function fileToBase64(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve((reader.result as string).split(",")[1] ?? "");
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
+
 export default function AddRecipePage() {
   const router = useRouter();
   const scanCameraRef = useRef<HTMLInputElement>(null);
   const scanLibraryRef = useRef<HTMLInputElement>(null);
   const photoCameraRef = useRef<HTMLInputElement>(null);
   const photoLibraryRef = useRef<HTMLInputElement>(null);
+  const pasteFileRef = useRef<HTMLInputElement>(null);
   const [books, setBooks] = useState<BookOption[]>([]);
   const [entryMode, setEntryMode] = useState<EntryMode>("choose");
   const [source, setSource] = useState<RecipeSource>("personal");
@@ -54,6 +65,7 @@ export default function AddRecipePage() {
   const [reading, setReading] = useState(false);
   const [scanned, setScanned] = useState(false);
   const [photoDraft, setPhotoDraft] = useState(false);
+  const [fetchingLink, setFetchingLink] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -154,6 +166,64 @@ export default function AddRecipePage() {
     }
   }
 
+  async function fetchFromLink() {
+    const url = links[0]?.trim();
+    if (!url) {
+      setError("Paste the recipe link first.");
+      return;
+    }
+    setFetchingLink(true);
+    setError(null);
+    try {
+      const response = await fetch("/api/recipes/import-url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url }),
+      });
+      if (!response.ok) {
+        const body = await response.json().catch(() => null);
+        throw new Error(body?.error ?? "Couldn’t read that link.");
+      }
+      applyExtracted(await response.json());
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Couldn’t read that link.");
+    } finally {
+      setFetchingLink(false);
+    }
+  }
+
+  async function handlePasteFile(files: FileList | null) {
+    const file = files?.[0];
+    if (!file) return;
+    setReading(true);
+    setError(null);
+    try {
+      if (/\.docx$/i.test(file.name)) {
+        const data = await fileToBase64(file);
+        const response = await fetch("/api/recipes/import-file", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ data, filename: file.name }),
+        });
+        if (!response.ok) {
+          const body = await response.json().catch(() => null);
+          throw new Error(body?.error ?? "Couldn’t read that file.");
+        }
+        const { text } = await response.json();
+        setPasteText(text);
+      } else {
+        const raw = await file.text();
+        const looksLikeHtml = /<html|<!doctype html|<body/i.test(raw);
+        setPasteText(looksLikeHtml ? stripHtmlToText(raw) : raw.slice(0, 40000));
+      }
+    } catch (error) {
+      setError(error instanceof Error ? error.message : "Couldn’t read that file.");
+    } finally {
+      setReading(false);
+      if (pasteFileRef.current) pasteFileRef.current.value = "";
+    }
+  }
+
   async function addPhotos(files: FileList | null) {
     if (!files?.length) return;
     setBusy(true);
@@ -246,6 +316,8 @@ export default function AddRecipePage() {
         <section className={`card ${styles.captureCard}`}>
           <div className={styles.captureHeader}><div><p className={styles.eyebrow}>Paste a recipe</p><h2>Drop in the whole thing</h2></div><button type="button" className={styles.textButton} onClick={() => choose("choose")}>Choose another way</button></div>
           <textarea className={`input ${styles.textarea}`} rows={10} value={pasteText} onChange={(event) => setPasteText(event.target.value)} placeholder="Paste from Notes, a message, an email or a recipe page — title, ingredients and method if you have them." autoFocus />
+          <input ref={pasteFileRef} type="file" accept=".txt,.html,.htm,.docx" className={styles.fileInput} onChange={(event) => handlePasteFile(event.target.files)} />
+          <button type="button" className={styles.textButton} onClick={() => pasteFileRef.current?.click()} disabled={reading}>Or import a file (Word .docx, OneNote export, or .html)</button>
           <button type="button" className="btn btn-primary" onClick={sortPastedText} disabled={reading || !pasteText.trim()}>{reading ? "Making it usable…" : "Sort this recipe out"}</button>
           <ScanningDisclosure kind="recipe" />
         </section>
@@ -274,7 +346,12 @@ export default function AddRecipePage() {
           {photoDraft && <p className={styles.aiDraft}>AI draft from your photo. Ingredients, amounts and method are estimates — check and edit every detail before cooking or saving.</p>}
           <label className={styles.label}>Recipe name<input className="input" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="e.g. Mum’s chicken traybake" autoFocus={entryMode !== "quick" || !title} /></label>
 
-          {entryMode === "link" && <label className={styles.label}>Recipe link<input className="input" type="url" value={links[0] ?? ""} onChange={(event) => setLinks([event.target.value])} placeholder="https://…" /></label>}
+          {entryMode === "link" && (
+            <div className={styles.linkField}>
+              <label className={styles.label}>Recipe link<input className="input" type="url" value={links[0] ?? ""} onChange={(event) => setLinks([event.target.value])} placeholder="https://…" /></label>
+              <button type="button" className={styles.textButton} onClick={fetchFromLink} disabled={fetchingLink || !links[0]?.trim()}>{fetchingLink ? "Fetching recipe…" : "Fetch recipe details"}</button>
+            </div>
+          )}
 
           {photos.length > 0 && <div className={styles.thumbs}>{photos.map((photo, index) => <div key={index} className={styles.thumbBox}><img src={photo.preview} alt="" className={styles.thumb} /><button type="button" className={styles.removeBtn} onClick={() => setPhotos((current) => current.filter((_, photoIndex) => photoIndex !== index))} aria-label="Remove photo">×</button></div>)}</div>}
 
