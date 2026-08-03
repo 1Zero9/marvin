@@ -153,7 +153,7 @@ export default async function Home({
             <Link href="/decide" className={`${styles.quickAction} ${styles.quickActionPrimary}`}>
               <Icon name="sparkle" className={`${styles.quickActionIcon} marvin-inspire-icon`} /> Inspire me
             </Link>
-            <Link href="/recipes/add" className={styles.quickAction}>＋ Bring in a recipe</Link>
+            <Link href="/recipes/add" className={styles.quickAction}>Bring in a recipe</Link>
             <Link href="/snap" className={styles.quickAction}>
               <Icon name="camera" className={styles.quickActionIcon} /> Snap what you cooked
             </Link>

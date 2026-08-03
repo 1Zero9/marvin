@@ -10,12 +10,13 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 14px;
-  padding: 4px 0 0;
+  gap: 20px;
+  padding: 12px 0 8px;
 }
 
 .heroCompact {
   gap: 10px;
+  padding: 4px 0 0;
 }
 
 .srOnly {
@@ -126,47 +127,38 @@
 .quickActions {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  column-gap: 22px;
+  row-gap: 8px;
   justify-content: center;
 }
 
 .quickAction {
   align-items: center;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-pill);
-  box-shadow: var(--shadow-xs);
   color: var(--marvin-plum);
   display: inline-flex;
-  font-size: 0.86rem;
+  font-size: 0.88rem;
   font-weight: 700;
   gap: 6px;
-  padding: 9px 16px;
-  transition: border-color 0.15s ease, transform 0.15s ease, color 0.15s ease;
+  padding: 2px;
+  transition: color 0.15s ease;
 }
 
 .quickAction:hover {
-  border-color: var(--marvin-orange);
   color: var(--marvin-orange);
-  transform: translateY(-1px);
 }
 
 .quickActionIcon {
-  width: 15px;
-  height: 15px;
+  width: 14px;
+  height: 14px;
   flex-shrink: 0;
 }
 
 .quickActionPrimary {
-  background: linear-gradient(135deg, #5c1a58 0%, #3a1038 100%);
-  border-color: transparent;
-  box-shadow: 0 10px 24px rgba(42, 14, 40, 0.24);
-  color: #fff;
+  color: var(--marvin-orange);
 }
 
 .quickActionPrimary:hover {
-  background: linear-gradient(135deg, #6d2069 0%, #4a1548 100%);
-  color: #fff;
+  color: var(--marvin-orange-hover);
 }
 
 .featured {
