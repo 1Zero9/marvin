@@ -57,6 +57,7 @@ export default async function BookPage({
               title={book.title}
               favourite={book.favourite}
               archived={book.archived}
+              visibility={book.visibility}
             />
           ) : <p className={styles.sharedNote}>Only the book&rsquo;s creator or a kitchen owner can edit it.</p>}
         </div>

@@ -59,12 +59,18 @@ export default function AddBookPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...meta, visibility }),
       });
-      if (!res.ok) throw new Error();
-      const book = await res.json();
+      const result = await res.json().catch(() => null);
+      if (res.status === 409 && result?.existing?.id) {
+        setError(`“${result.existing.title}” is already in your kitchen. Opening it instead.`);
+        router.replace(`/books/${result.existing.id}`);
+        return;
+      }
+      if (!res.ok) throw new Error(result?.error ?? "Couldn’t save the book.");
+      const book = result;
       setBookId(book.id);
       setStep("photos");
-    } catch {
-      setError("Couldn't save the book. Try again.");
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "Couldn't save the book. Try again.");
     } finally {
       setBusy(false);
     }

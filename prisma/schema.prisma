@@ -9,7 +9,7 @@ datasource db {
 
 model Book {
   id           String       @id @default(cuid())
-  isbn         String?      @unique
+  isbn         String?
   title        String
   author       String?
   coverUrl     String?
@@ -27,6 +27,7 @@ model Book {
 
   @@index([householdId])
   @@index([householdId, visibility])
+  @@unique([householdId, isbn])
 }
 
 model IndexEntry {

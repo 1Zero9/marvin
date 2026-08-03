@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import styles from "./log.module.css";
 import RecipeKeepAwake from "@/components/RecipeKeepAwake";
+import VoiceDictation from "@/components/VoiceDictation";
 
 async function resizeImage(
   file: File
@@ -145,6 +146,7 @@ export default function LogCookPage({
             onChange={(e) => setNotes(e.target.value)}
             placeholder="What worked, what you'd change…"
           />
+          <VoiceDictation onTranscript={(text) => setNotes((current) => `${current}${current ? " " : ""}${text}`)} />
         </label>
 
         <div className={styles.label}>

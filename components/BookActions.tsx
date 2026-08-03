@@ -9,11 +9,13 @@ export default function BookActions({
   title,
   favourite,
   archived,
+  visibility,
 }: {
   bookId: string;
   title: string;
   favourite: boolean;
   archived: boolean;
+  visibility: string;
 }) {
   const router = useRouter();
   const [busy, setBusy] = useState(false);
@@ -21,7 +23,7 @@ export default function BookActions({
   const [name, setName] = useState(title);
   const [error, setError] = useState<string | null>(null);
 
-  async function patch(data: { title?: string; favourite?: boolean; archived?: boolean }) {
+  async function patch(data: { title?: string; favourite?: boolean; archived?: boolean; visibility?: "private" | "household" }) {
     setBusy(true);
     setError(null);
     try {
@@ -97,6 +99,9 @@ export default function BookActions({
         disabled={busy}
       >
         {archived ? "Unarchive" : "Archive"}
+      </button>
+      <button className="btn btn-secondary" onClick={() => patch({ visibility: visibility === "household" ? "private" : "household" })} disabled={busy}>
+        {visibility === "household" ? "Keep private" : "Share with kitchen"}
       </button>
       <button className={styles.deleteBtn} onClick={remove} disabled={busy}>
         Delete
