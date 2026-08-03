@@ -145,13 +145,15 @@ select:focus { border-color: var(--marvin-orange); box-shadow: 0 0 0 4px rgba(21
   font-size: 1rem;
   font-weight: 700;
   min-height: 54px;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, .2);
   transition: transform .16s ease, box-shadow .16s ease, background-color .16s ease, border-color .16s ease, color .16s ease;
 }
 
 .btn-primary {
   background: linear-gradient(135deg, #e66a32 0%, var(--marvin-orange) 58%, var(--marvin-orange-hover) 100%);
   color: #fff;
-  box-shadow: var(--shadow-orange);
+  box-shadow: var(--shadow-orange), inset 0 1px 0 rgba(255, 255, 255, .3);
+  text-shadow: 0 1px 1px rgba(116, 45, 22, .32);
 }
 
 .btn-primary:hover {
@@ -160,15 +162,16 @@ select:focus { border-color: var(--marvin-orange); box-shadow: 0 0 0 4px rgba(21
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, .7);
+  background: linear-gradient(135deg, rgba(220, 235, 229, .96), rgba(244, 249, 246, .94));
   color: var(--marvin-green);
-  border-color: rgba(46, 107, 87, .45);
-  box-shadow: var(--shadow-xs);
+  border-color: rgba(46, 107, 87, .38);
+  box-shadow: 0 3px 10px rgba(46, 107, 87, .10), inset 0 1px 0 rgba(255, 255, 255, .82);
 }
 
 .btn-secondary:hover {
-  background: var(--marvin-green-soft);
+  background: linear-gradient(135deg, #cfe5dc, var(--marvin-green-soft));
   border-color: var(--marvin-green);
+  transform: translateY(-1px);
 }
 
 .card {
