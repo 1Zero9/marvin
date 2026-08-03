@@ -7,6 +7,7 @@ import styles from "./add.module.css";
 import ScanningDisclosure from "@/components/ScanningDisclosure";
 import type { RecipeSource } from "@/lib/recipeSource";
 import { stripHtmlToText } from "@/lib/htmlRecipe";
+import VoiceDictation from "@/components/VoiceDictation";
 
 type BookOption = { id: string; title: string; author: string | null };
 type EntryMode = "choose" | "paste" | "photo" | "link" | "quick";
@@ -358,15 +359,15 @@ export default function AddRecipePage() {
           <details className={styles.details} open={scanned}>
             <summary>Ingredients and method <span>Optional</span></summary>
             <div className={styles.detailsBody}>
-              <label className={styles.label}>Ingredients<textarea className={`input ${styles.textarea}`} rows={5} value={ingredients} onChange={(event) => setIngredients(event.target.value)} placeholder={"One per line\ne.g. 800g potatoes"} /></label>
-              <label className={styles.label}>Method<textarea className={`input ${styles.textarea}`} rows={7} value={instructions} onChange={(event) => setInstructions(event.target.value)} placeholder="Add the steps whenever you have them." /></label>
+              <label className={styles.label}>Ingredients<textarea className={`input ${styles.textarea}`} rows={5} value={ingredients} onChange={(event) => setIngredients(event.target.value)} placeholder={"One per line\ne.g. 800g potatoes"} /><VoiceDictation onTranscript={(text) => setIngredients((current) => `${current}${current ? "\n" : ""}${text}`)} /></label>
+              <label className={styles.label}>Method<textarea className={`input ${styles.textarea}`} rows={7} value={instructions} onChange={(event) => setInstructions(event.target.value)} placeholder="Add the steps whenever you have them." /><VoiceDictation onTranscript={(text) => setInstructions((current) => `${current}${current ? "\n" : ""}${text}`)} /></label>
             </div>
           </details>
 
           <details className={styles.details}>
             <summary>Make it yours <span>Optional</span></summary>
             <div className={styles.detailsBody}>
-              <label className={styles.label}>Notes<textarea className={`input ${styles.textarea}`} rows={3} value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Tweaks, serving ideas, who liked it…" /></label>
+              <label className={styles.label}>Notes<textarea className={`input ${styles.textarea}`} rows={3} value={notes} onChange={(event) => setNotes(event.target.value)} placeholder="Tweaks, serving ideas, who liked it…" /><VoiceDictation onTranscript={(text) => setNotes((current) => `${current}${current ? " " : ""}${text}`)} /></label>
               <label className={styles.label}>Tags<input className="input" value={tags} onChange={(event) => setTags(event.target.value)} placeholder="quick, winter, veggie" /></label>
               {entryMode !== "link" && <div className={styles.linkField}><label className={styles.label}>Source link<input className="input" type="url" value={links[0] ?? ""} onChange={(event) => setLinks([event.target.value])} placeholder="https://…" /></label></div>}
               <div className={styles.provenance}><span className={styles.provenanceLabel}>Where did this recipe begin?</span><div className={styles.sourceRow}><button type="button" className={`${styles.sourcePill} ${source === "personal" ? styles.sourceActive : ""}`} onClick={() => setSource("personal")}>My own recipe</button><button type="button" className={`${styles.sourcePill} ${source === "book" ? styles.sourceActive : ""}`} onClick={() => setSource("book")}>From a cookbook</button><button type="button" className={`${styles.sourcePill} ${source === "hybrid" ? styles.sourceActive : ""}`} onClick={() => setSource("hybrid")}>Adapted from a cookbook</button></div></div>

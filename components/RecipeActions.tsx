@@ -3,6 +3,7 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import styles from "./RecipeActions.module.css";
+import VoiceDictation from "./VoiceDictation";
 
 type Candidate = { id: string; title: string; archived: boolean };
 
@@ -110,9 +111,9 @@ export default function RecipeActions({
       {editing ? (
         <form className={styles.form} onSubmit={save}>
           <label>Recipe name<input className="input" value={title} maxLength={160} onChange={(event) => setTitle(event.target.value)} /></label>
-          <label>Ingredients<textarea className="input" rows={5} value={ingredients} onChange={(event) => setIngredients(event.target.value)} /></label>
-          <label>Method<textarea className="input" rows={7} value={instructions} onChange={(event) => setInstructions(event.target.value)} /></label>
-          <label>Notes<textarea className="input" rows={3} value={notes} onChange={(event) => setNotes(event.target.value)} /></label>
+          <label>Ingredients<textarea className="input" rows={5} value={ingredients} onChange={(event) => setIngredients(event.target.value)} /><VoiceDictation onTranscript={(text) => setIngredients((current) => `${current}${current ? "\n" : ""}${text}`)} /></label>
+          <label>Method<textarea className="input" rows={7} value={instructions} onChange={(event) => setInstructions(event.target.value)} /><VoiceDictation onTranscript={(text) => setInstructions((current) => `${current}${current ? "\n" : ""}${text}`)} /></label>
+          <label>Notes<textarea className="input" rows={3} value={notes} onChange={(event) => setNotes(event.target.value)} /><VoiceDictation onTranscript={(text) => setNotes((current) => `${current}${current ? " " : ""}${text}`)} /></label>
           <label>Tags <span>separate with commas</span><input className="input" value={tags} onChange={(event) => setTags(event.target.value)} /></label>
           <label>Who can see it<select className="input" value={visibility} onChange={(event) => setVisibility(event.target.value)}><option value="private">Only me</option><option value="household">My household</option></select></label>
           <div className={styles.actions}><button className="btn btn-primary" disabled={busy}>Save changes</button><button type="button" className="btn btn-secondary" disabled={busy} onClick={() => setEditing(false)}>Cancel</button></div>

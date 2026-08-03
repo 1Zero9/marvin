@@ -96,6 +96,7 @@ export default async function RecipePage({
             {averageRating ? ` · ${averageRating.toFixed(1)} ★ average` : ""}
           </p>
         )}
+        {!recipe.archived && <p><Link href={`/recipes/${recipe.id}/log`} className="btn btn-primary">Cook now</Link></p>}
       </div>
 
       <RecipeKeepAwake />
@@ -170,7 +171,6 @@ export default async function RecipePage({
       <section className={`card ${styles.section}`}>
         <div className={styles.logHeader}>
           <h2 className={styles.sectionTitle}>Cooking &amp; food memories</h2>
-          {!recipe.archived && <Link href={`/recipes/${recipe.id}/log`} className="btn btn-primary">Cook this recipe</Link>}
         </div>
         {recipe.cookLogs.length === 0 ? (
           <p className={styles.emptyText}>

@@ -11,7 +11,7 @@ export async function PATCH(
   if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
   const { id } = await params;
   const body = await req.json();
-  const data: { title?: string; favourite?: boolean; archived?: boolean } = {};
+  const data: { title?: string; favourite?: boolean; archived?: boolean; visibility?: "private" | "household" } = {};
   if (typeof body?.title === "string") {
     const title = body.title.trim();
     if (!title || title.length > 160) {
@@ -23,6 +23,7 @@ export async function PATCH(
   }
   if (typeof body?.favourite === "boolean") data.favourite = body.favourite;
   if (typeof body?.archived === "boolean") data.archived = body.archived;
+  if (body?.visibility === "private" || body?.visibility === "household") data.visibility = body.visibility;
   if (Object.keys(data).length === 0) {
     return NextResponse.json({ error: "Nothing to update" }, { status: 400 });
   }

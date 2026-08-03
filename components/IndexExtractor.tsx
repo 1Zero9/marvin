@@ -280,9 +280,21 @@ export default function IndexExtractor({
 
       {mode === "review" && (
         <section className={`card ${styles.form}`}>
+          <div className={styles.actions}>
+            <button
+              className="btn btn-primary"
+              onClick={saveEntries}
+              disabled={busy || entries.length === 0}
+            >
+              {busy ? "Saving…" : `Save ${entries.length} entries`}
+            </button>
+            <button className="btn btn-secondary" onClick={() => setMode("photos")} disabled={busy}>
+              Back to photos
+            </button>
+          </div>
           <p className={styles.hint}>
             {entries.length} entries found. Fix anything that looks wrong, then
-            save.
+            save when you&rsquo;re ready.
           </p>
           <div className={styles.tableWrap}>
             <table className={styles.table}>
@@ -336,18 +348,6 @@ export default function IndexExtractor({
                 ))}
               </tbody>
             </table>
-          </div>
-          <div className={styles.actions}>
-            <button className="btn btn-secondary" onClick={() => setMode("photos")}>
-              Back
-            </button>
-            <button
-              className="btn btn-primary"
-              onClick={saveEntries}
-              disabled={busy || entries.length === 0}
-            >
-              {busy ? "Saving…" : `Save ${entries.length} entries`}
-            </button>
           </div>
         </section>
       )}
