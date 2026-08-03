@@ -5,6 +5,7 @@ import { visibleTo } from "@/lib/privacy";
 import { bookCoverMediaUrl, photoMediaUrl } from "@/lib/media";
 import Icon from "@/components/Icon";
 import { matchesFoodExclusions, recipeIsExcluded } from "@/lib/foodPreferences";
+import FeaturedImage from "./FeaturedImage";
 import styles from "./page.module.css";
 
 export const dynamic = "force-dynamic";
@@ -165,8 +166,7 @@ export default async function Home({
         <>
         {featuredRecipe && <Link href={`/recipes/${featuredRecipe.id}`} className={styles.featured}>
           {featuredRecipe.photos[0] ? (
-            /* eslint-disable-next-line @next/next/no-img-element */
-            <img src={photoMediaUrl(featuredRecipe.photos[0])} alt="" className={styles.featuredImage} />
+            <FeaturedImage src={photoMediaUrl(featuredRecipe.photos[0])} />
           ) : <div className={styles.featuredFallback}>🍲</div>}
           <div className={styles.featuredContent}>
             <span className={styles.featuredLabel}>Cook again</span>
