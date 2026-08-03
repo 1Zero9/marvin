@@ -39,7 +39,7 @@ export default async function BookPage({
           coverUrl={book.coverUrl}
           title={book.title}
         />
-        <div>
+        <div className={styles.info}>
           <h1 className={styles.title}>
             {book.title}
             {book.favourite && <span className={styles.heart}> ♥</span>}
@@ -51,17 +51,20 @@ export default async function BookPage({
             {book.archived ? " · Archived" : ""}
           </p>
           <span className="tag">{book.indexEntries.length} index entries</span>
-          {canManage(identity, book.createdById) ? (
-            <BookActions
-              bookId={book.id}
-              title={book.title}
-              favourite={book.favourite}
-              archived={book.archived}
-              visibility={book.visibility}
-            />
-          ) : <p className={styles.sharedNote}>Only the book&rsquo;s creator or a kitchen owner can edit it.</p>}
         </div>
       </div>
+
+      {canManage(identity, book.createdById) ? (
+        <BookActions
+          bookId={book.id}
+          title={book.title}
+          favourite={book.favourite}
+          archived={book.archived}
+          visibility={book.visibility}
+        />
+      ) : (
+        <p className={styles.sharedNote}>Only the book&rsquo;s creator or a kitchen owner can edit it.</p>
+      )}
 
       {book.recipes.length > 0 && (
         <div className={`card ${styles.recipes}`}>

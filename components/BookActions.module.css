@@ -1,27 +1,40 @@
 .actions {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-top: 12px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 8px;
+  align-items: stretch;
 }
 
-.renameForm { align-items: center; display: flex; flex: 1 1 100%; flex-wrap: wrap; gap: 8px; }
+.actions :global(.btn) {
+  min-height: 46px;
+  padding: 0 14px;
+  font-size: 0.88rem;
+}
+
+.renameForm {
+  grid-column: 1 / -1;
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
 .renameForm :global(.input) { flex: 1 1 220px; min-width: 0; }
-.error { color: var(--danger); flex-basis: 100%; font-size: .84rem; font-weight: 700; }
+
+.error { color: var(--danger); grid-column: 1 / -1; font-size: .84rem; font-weight: 700; }
 .srOnly { height: 1px; margin: -1px; overflow: hidden; position: absolute; width: 1px; clip: rect(0, 0, 0, 0); }
 
 .favBtn {
   font-family: inherit;
   font-weight: 700;
-  font-size: 0.95rem;
-  padding: 8px 18px;
+  font-size: 0.88rem;
+  padding: 0 14px;
   border-radius: var(--radius-pill);
   border: 2px solid var(--marvin-orange);
   background: transparent;
   color: var(--marvin-orange);
   cursor: pointer;
-  min-height: 44px;
-  transition: background 0.15s ease;
+  min-height: 46px;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 .favOn {
@@ -30,28 +43,30 @@
 }
 
 .deleteBtn {
+  grid-column: 1 / -1;
   font-family: inherit;
   font-weight: 700;
-  font-size: 0.95rem;
-  padding: 8px 18px;
+  font-size: 0.85rem;
+  padding: 6px 14px;
   border-radius: var(--radius-pill);
-  border: 2px solid #c0392b;
+  border: none;
   background: transparent;
-  color: #c0392b;
+  color: var(--danger);
   cursor: pointer;
-  min-height: 44px;
+  min-height: 40px;
+  margin-top: 4px;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  justify-self: center;
+}
+
+.deleteBtn:hover {
+  color: #942f28;
 }
 
 @media (max-width: 480px) {
   .actions {
-    gap: 8px;
-  }
-
-  .favBtn,
-  .deleteBtn,
-  .actions :global(.btn) {
-    flex: 1 1 calc(50% - 8px);
-    justify-content: center;
+    grid-template-columns: repeat(2, 1fr);
   }
 }
 

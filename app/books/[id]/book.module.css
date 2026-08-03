@@ -10,6 +10,14 @@
   align-items: flex-start;
 }
 
+.info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+}
+
 .cover {
   width: 96px;
   border-radius: var(--radius-sm);
@@ -19,21 +27,18 @@
 
 .title {
   font-size: 1.8rem;
-  margin-bottom: 6px;
 }
 
 .author {
   color: var(--plum-500);
-  margin-bottom: 6px;
 }
 
 .meta {
   color: var(--plum-500);
   font-size: 0.88rem;
-  margin-bottom: 10px;
 }
 
-.sharedNote { color: var(--plum-500); font-size: .84rem; margin-top: 12px; }
+.sharedNote { color: var(--plum-500); font-size: .84rem; }
 
 .heart {
   color: var(--marvin-orange);
