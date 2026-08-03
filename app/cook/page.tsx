@@ -23,12 +23,8 @@ export default async function Home({
   const query = q?.trim() ?? "";
   const filter = f === "books" || f === "personal" ? f : "all";
 
-  const [bookCount, recipePreferenceRecords, entries, matchedRecipes, featuredRecipes] = await Promise.all([
+  const [bookCount, entries, matchedRecipes, featuredRecipes] = await Promise.all([
     prisma.book.count({ where: { householdId: identity.membership.householdId, ...visibleTo(identity) } }),
-    prisma.recipe.findMany({
-      where: { householdId: identity.membership.householdId, archived: false, ...visibleTo(identity) },
-      select: { title: true, ingredients: true, tags: true, keywords: true },
-    }),
     query && filter !== "personal"
       ? prisma.indexEntry.findMany({
           where: {
@@ -97,7 +93,6 @@ export default async function Home({
     }, new Map<string, { id: string; bookId: string; book: typeof entries[number]["book"]; page: number; dish: string; ingredients: Set<string> }>()).values()
   );
   const suitableRecipes = matchedRecipes.filter((recipe) => !recipeIsExcluded(recipe, identity.user.foodExclusions));
-  const recipeCount = recipePreferenceRecords.filter((recipe) => !recipeIsExcluded(recipe, identity.user.foodExclusions)).length;
   const featuredRecipe = featuredRecipes.find((recipe) => !recipeIsExcluded(recipe, identity.user.foodExclusions));
 
   const entryRecipes = query
@@ -115,8 +110,6 @@ export default async function Home({
   const recipeFor = (bookId: string, page: number) =>
     entryRecipes.find((r) => r.bookId === bookId && r.pageRef === page);
 
-  const firstName = identity.user.displayName.trim().split(/\s+/)[0];
-
   const total = groupedEntries.length + suitableRecipes.length;
 
   const filterHref = (value: string) =>
@@ -127,7 +120,7 @@ export default async function Home({
       <section className={`${styles.hero} ${query ? styles.heroCompact : ""} marvin-animate-in`}>
         {!query ? (
           <h1 className={styles.tagline}>
-            What are we <span className={styles.accent}>making</span>, {firstName}?
+            What would you like to <span className={styles.accent}>cook</span>?
           </h1>
         ) : (
           <h1 className={styles.srOnly}>Search results for &ldquo;{query}&rdquo;</h1>
@@ -151,9 +144,9 @@ export default async function Home({
         {!query && (
           <div className={styles.quickActions}>
             <Link href="/decide" className={`${styles.quickAction} ${styles.quickActionPrimary}`}>
-              <Icon name="sparkle" className={`${styles.quickActionIcon} marvin-inspire-icon`} /> Inspire me
+              <Icon name="sparkle" className={`${styles.quickActionIcon} marvin-inspire-icon`} /> Get ideas
             </Link>
-            <Link href="/recipes/add" className={styles.quickAction}>Bring in a recipe</Link>
+            <Link href="/recipes/add" className={styles.quickAction}>Add a recipe</Link>
             <Link href="/snap" className={styles.quickAction}>
               <Icon name="camera" className={styles.quickActionIcon} /> Snap what you cooked
             </Link>
@@ -168,50 +161,8 @@ export default async function Home({
             /* eslint-disable-next-line @next/next/no-img-element */
             <img src={photoMediaUrl(featuredRecipe.photos[0])} alt="" className={styles.featuredImage} />
           ) : <div className={styles.featuredFallback}>🍲</div>}
-          <div className={styles.featuredContent}>
-            <span className={styles.featuredLabel}>Cook again</span>
-            <h2>{featuredRecipe.title}</h2>
-            <p>A favourite from your kitchen</p>
-          </div>
+          <div className={styles.featuredContent}><span className={styles.featuredLabel}>Cook again</span><h2>{featuredRecipe.title}</h2><span className={styles.featuredArrow} aria-hidden="true">→</span></div>
         </Link>}
-        <section className={styles.kitchenPaths} aria-label="Kitchen shortcuts">
-          <Link href="/recipes" className={styles.kitchenPath}>
-            <span className={styles.kitchenPathIcon}>🍽</span>
-            <span className={styles.kitchenPathCopy}>
-              <small>Your recipes</small>
-              <strong>Browse what you&rsquo;ve saved</strong>
-              <span>{recipeCount === 0 ? "Bring in your first recipe" : `${recipeCount} ${recipeCount === 1 ? "recipe" : "recipes"} in your kitchen`}</span>
-            </span>
-            <b aria-hidden="true">→</b>
-          </Link>
-          <Link href="/books" className={styles.kitchenPath}>
-            <span className={styles.kitchenPathIcon}>▤</span>
-            <span className={styles.kitchenPathCopy}>
-              <small>Cookbooks</small>
-              <strong>Browse your book shelf</strong>
-              <span>{bookCount === 0 ? "Add your first cookbook" : `${bookCount} ${bookCount === 1 ? "book" : "books"} to explore`}</span>
-            </span>
-            <b aria-hidden="true">→</b>
-          </Link>
-          <Link href="/log" className={styles.kitchenPath}>
-            <span className={styles.kitchenPathIcon}>◷</span>
-            <span className={styles.kitchenPathCopy}>
-              <small>Kitchen history</small>
-              <strong>Remember what you made</strong>
-              <span>Meals, notes and favourites</span>
-            </span>
-            <b aria-hidden="true">→</b>
-          </Link>
-          <Link href="/dictionary" className={styles.kitchenPath}>
-            <span className={styles.kitchenPathIcon}>⌘</span>
-            <span className={styles.kitchenPathCopy}>
-              <small>Kitchen help</small>
-              <strong>Cooking dictionary</strong>
-              <span>Clear explanations, from roux to sauté</span>
-            </span>
-            <b aria-hidden="true">→</b>
-          </Link>
-        </section>
         </>
       )}
 
