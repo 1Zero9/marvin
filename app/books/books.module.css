@@ -39,7 +39,7 @@
   transition: transform 0.1s ease;
 }
 
-.book:hover { border-color: rgba(217, 94, 42, .30); box-shadow: var(--shadow-md); transform: translateY(-3px); }
+.book:hover { border-color: rgba(238, 90, 30, .30); box-shadow: var(--shadow-md); transform: translateY(-3px); }
 
 .cover {
   width: 72px;
