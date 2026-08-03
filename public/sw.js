@@ -1,4 +1,4 @@
-const STATIC_CACHE = "marvin-static-v52";
+const STATIC_CACHE = "marvin-static-v53";
 const STATIC_ASSETS = ["/manifest.json", "/icons/icon-192.png", "/icons/icon-512.png"];
 
 self.addEventListener("install", (event) => {

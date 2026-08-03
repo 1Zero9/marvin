@@ -1,5 +1,4 @@
 import Link from "next/link";
-import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import { requireHousehold } from "@/lib/auth";
 import { visibleTo } from "@/lib/privacy";
@@ -126,21 +125,12 @@ export default async function Home({
   return (
     <div className={styles.wrap}>
       <section className={`${styles.hero} ${query ? styles.heroCompact : ""} marvin-animate-in`}>
-        <div className={styles.logoLockup}>
-          <Image
-            src="/icons/icon-192.png"
-            alt=""
-            width={96}
-            height={96}
-            className={styles.heroLogo}
-            priority
-          />
-          <h1 className={styles.heroName}>Marvin</h1>
-        </div>
-        {!query && (
-          <p className={styles.tagline}>
+        {!query ? (
+          <h1 className={styles.tagline}>
             What are we <span className={styles.accent}>making</span>, {firstName}?
-          </p>
+          </h1>
+        ) : (
+          <h1 className={styles.srOnly}>Search results for &ldquo;{query}&rdquo;</h1>
         )}
         <form className={styles.searchForm} action="/cook" method="get">
           <div className={styles.searchBox}>
@@ -153,21 +143,19 @@ export default async function Home({
               placeholder="Try “aubergine” or “Tuesday curry”…"
               autoComplete="off"
             />
-          </div>
-          <div className={styles.searchButtons}>
-            <button type="submit" className={styles.searchBtn}>
-              Search
+            <button type="submit" className={styles.searchSubmit} aria-label="Search">
+              <Icon name="search" className={styles.searchSubmitIcon} />
             </button>
-            <Link href="/decide" className={styles.inspireBtn}>
-              <Icon name="sparkle" className={`${styles.btnIcon} marvin-inspire-icon`} /> Inspire me
-            </Link>
           </div>
         </form>
         {!query && (
-          <div className={styles.cookActions}>
-            <Link href="/recipes/add" className={styles.addRecipePill}>＋ Bring in a recipe</Link>
-            <Link href="/snap" className={styles.snapPill}>
-              <Icon name="camera" className={styles.btnIcon} /> Snap what you cooked
+          <div className={styles.quickActions}>
+            <Link href="/decide" className={`${styles.quickAction} ${styles.quickActionPrimary}`}>
+              <Icon name="sparkle" className={`${styles.quickActionIcon} marvin-inspire-icon`} /> Inspire me
+            </Link>
+            <Link href="/recipes/add" className={styles.quickAction}>＋ Bring in a recipe</Link>
+            <Link href="/snap" className={styles.quickAction}>
+              <Icon name="camera" className={styles.quickActionIcon} /> Snap what you cooked
             </Link>
           </div>
         )}
