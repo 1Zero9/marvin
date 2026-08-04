@@ -32,4 +32,11 @@
 
 @media (max-width: 850px) {
   .footer { display: none; }
+
+  .footer.mobileHome {
+    border-top: 0;
+    display: flex;
+    flex-wrap: wrap;
+    padding: 12px 12px calc(108px + env(safe-area-inset-bottom));
+  }
 }

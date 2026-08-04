@@ -2,9 +2,9 @@ import Image from "next/image";
 import pkg from "../package.json";
 import styles from "./Footer.module.css";
 
-export default function Footer() {
+export default function Footer({ showOnMobile = false }: { showOnMobile?: boolean }) {
   return (
-    <footer className={styles.footer}>
+    <footer className={`${styles.footer} ${showOnMobile ? styles.mobileHome : ""}`}>
       <span className={styles.version}>Marvin v{pkg.version}</span>
       <a
         href="https://1zero9.com"
