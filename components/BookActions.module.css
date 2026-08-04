@@ -1,3 +1,9 @@
+.options { margin-top: 10px; width: 100%; }
+.options > summary { align-items: center; color: var(--marvin-orange); cursor: pointer; display: flex; font-size: .88rem; font-weight: 800; justify-content: space-between; list-style: none; min-height: 44px; }
+.options > summary::-webkit-details-marker { display: none; }
+.options > summary span { font-size: 1.3rem; transition: transform .16s ease; }
+.options[open] > summary span { transform: rotate(45deg); }
+
 .actions {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
@@ -53,7 +59,7 @@
   background: transparent;
   color: var(--danger);
   cursor: pointer;
-  min-height: 40px;
+  min-height: 44px;
   margin-top: 4px;
   text-decoration: underline;
   text-underline-offset: 3px;

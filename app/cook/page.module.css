@@ -80,19 +80,24 @@
   flex-shrink: 0;
 }
 
-.searchInput {
+.searchBox .searchInput {
   appearance: none;
   -webkit-appearance: none;
   flex: 1;
   min-width: 0;
   border: none;
   background: transparent;
+  border-radius: 0;
+  box-shadow: none;
   color: var(--marvin-text);
   font-size: 1.05rem;
   padding: 16px 0;
+  min-height: 0;
 }
 
-.searchInput:focus {
+.searchBox .searchInput:focus {
+  border-color: transparent !important;
+  box-shadow: none !important;
   outline: none;
 }
 
@@ -143,16 +148,23 @@
 
 .quickAction {
   align-items: center;
+  background: rgba(255, 255, 255, .72);
+  border: 1px solid var(--marvin-border);
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-xs);
   color: var(--marvin-plum);
   display: inline-flex;
   font-size: 0.9rem;
   font-weight: 700;
   gap: 6px;
-  padding: 4px 2px;
-  transition: color 0.15s ease;
+  min-height: 44px;
+  padding: 8px 14px;
+  transition: background-color 0.15s ease, border-color 0.15s ease, color 0.15s ease;
 }
 
 .quickAction:hover {
+  background: var(--marvin-orange-soft);
+  border-color: rgba(238, 90, 30, .32);
   color: var(--marvin-orange);
 }
 
@@ -163,6 +175,8 @@
 }
 
 .quickActionPrimary {
+  background: var(--marvin-orange-soft);
+  border-color: rgba(238, 90, 30, .32);
   color: var(--marvin-orange);
 }
 
@@ -436,6 +450,14 @@
     gap: 6px 14px;
   }
 
-  .kitchenPaths { grid-template-columns: 1fr; }
+  .hero { gap: 16px; padding-top: 6px; }
+  .quickActions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
+  .quickAction { justify-content: center; text-align: center; }
+  .quickAction:last-child { grid-column: 1 / -1; }
+  .kitchenPaths { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+  .kitchenPath { align-items: flex-start; flex-direction: column; min-height: 122px; padding: 14px; }
+  .kitchenPathIcon { flex-basis: 42px; height: 42px; width: 42px; }
+  .kitchenPathCopy > span { display: none; }
+  .kitchenPath > b { margin-left: 0; margin-top: auto; }
   .featured { min-height: 230px; }
 }

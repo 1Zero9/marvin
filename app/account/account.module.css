@@ -4,9 +4,19 @@
 .header p, .section p { color: var(--plum-500); }
 .eyebrow { color: var(--marvin-orange); font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
 .back { color: var(--plum-500); font-size: 0.9rem; font-weight: 700; white-space: nowrap; }
-.section { display: flex; flex-direction: column; gap: 11px; }
+.section { padding: 0; }
 .section h2 { font-size: 1.15rem; }
 .section .btn { align-self: flex-start; }
+.section summary { align-items: center; cursor: pointer; display: flex; justify-content: space-between; list-style: none; padding: 16px 18px; }
+.section summary::-webkit-details-marker { display: none; }
+.section summary > span { display: flex; flex-direction: column; gap: 2px; }
+.section summary strong { color: var(--marvin-text); font-family: var(--font-heading), Georgia, serif; font-size: 1.02rem; }
+.section summary small { color: var(--marvin-text-soft); font-size: .78rem; font-weight: 600; }
+.section summary > b { color: var(--marvin-orange); font-size: 1.45rem; transition: transform .16s ease; }
+.section[open] summary > b { transform: rotate(45deg); }
+.sectionBody { display: flex; flex-direction: column; gap: 11px; padding: 0 18px 18px; }
+.subsection { border-top: 1px solid var(--marvin-border); display: flex; flex-direction: column; gap: 9px; margin-top: 4px; padding-top: 14px; }
+.danger summary strong { color: var(--danger); }
 .control { align-items: flex-start; border-top: 1px solid var(--cream-300); display: grid; gap: 10px; padding-top: 12px; }
 .control p { font-size: 0.92rem; margin: 4px 0 0; }
 .control .btn { justify-self: start; }

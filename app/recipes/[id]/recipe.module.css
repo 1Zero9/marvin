@@ -146,6 +146,19 @@
 .cookedBy, .ratings { color: var(--plum-500); font-size: .88rem; }
 .ratings { color: var(--marvin-orange); font-weight: 700; }
 
+.toolbox { background: rgba(74, 21, 72, .055); border: 1px solid rgba(74, 21, 72, .14); border-radius: var(--radius-lg); overflow: hidden; }
+.toolboxSummary, .historySummary { align-items: center; cursor: pointer; display: flex; justify-content: space-between; list-style: none; padding: 17px 20px; }
+.toolboxSummary::-webkit-details-marker, .historySummary::-webkit-details-marker { display: none; }
+.toolboxSummary > span, .historySummary > span { display: flex; flex-direction: column; gap: 2px; }
+.toolboxSummary strong, .historySummary strong { color: var(--marvin-text); font-family: var(--font-heading), Georgia, serif; font-size: 1.05rem; }
+.toolboxSummary small, .historySummary small { color: var(--marvin-text-soft); font-size: .78rem; }
+.toolboxSummary b, .historySummary b { color: var(--marvin-orange); font-size: 1.5rem; transition: transform .16s ease; }
+.toolbox[open] .toolboxSummary b, .history[open] .historySummary b { transform: rotate(45deg); }
+.toolboxBody { display: grid; gap: 12px; padding: 0 12px 12px; }
+.toolboxBody :global(.card) { box-shadow: none; }
+.history { padding: 0; }
+.historyBody { padding: 0 20px 20px; }
+
 @media (max-width: 700px) {
   .columns {
     grid-template-columns: 1fr;
@@ -155,4 +168,10 @@
     width: 120px;
     height: 120px;
   }
+
+  .title { font-size: clamp(1.75rem, 8vw, 2.15rem); }
+  .photos { flex-wrap: nowrap; margin-inline: -14px; overflow-x: auto; padding-inline: 14px; scroll-snap-type: x proximity; }
+  .photo { flex: 0 0 min(74vw, 280px); height: 210px; scroll-snap-align: start; width: min(74vw, 280px); }
+  .toolboxSummary, .historySummary { padding: 15px 16px; }
+  .historyBody { padding: 0 16px 16px; }
 }

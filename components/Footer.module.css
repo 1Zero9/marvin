@@ -31,9 +31,5 @@
 }
 
 @media (max-width: 850px) {
-  .footer {
-    border-top: 0;
-    font-size: 0.72rem;
-    padding: 8px 16px calc(118px + env(safe-area-inset-bottom));
-  }
+  .footer { display: none; }
 }

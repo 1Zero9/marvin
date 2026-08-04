@@ -20,6 +20,10 @@
 @media (max-width: 480px) {
   .header { align-items: stretch; flex-direction: column; }
   .addLink { align-self: flex-start; }
+  .title { font-size: 1.9rem; }
+  .grid { gap: 10px; }
+  .book { padding: 14px; }
+  .cover, .coverFallback { height: 92px; width: 64px; }
 }
 
 .empty { align-items: center; display: flex; flex-direction: column; gap: 11px; padding: 40px 24px; text-align: center; }.empty h2 { font-size: 1.35rem; text-transform: none; }.empty p { color: var(--plum-500); max-width: 430px; }

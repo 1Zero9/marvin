@@ -37,5 +37,5 @@
   .pickTitle { font-size: 1.3rem; }
   .filters { flex-wrap: nowrap; justify-content: flex-start; overflow-x: auto; margin: 0 -16px; padding: 2px 16px 8px; scrollbar-width: none; }
   .filters::-webkit-scrollbar { display: none; }
-  .filter { flex-shrink: 0; white-space: nowrap; min-height: 40px; padding: 9px 14px; display: inline-flex; align-items: center; }
+  .filter { flex-shrink: 0; white-space: nowrap; min-height: 44px; padding: 9px 14px; display: inline-flex; align-items: center; }
 }

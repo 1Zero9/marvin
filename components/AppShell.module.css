@@ -10,4 +10,4 @@
   padding: 24px 16px;
 }
 .publicContent { width: 100%; }
-@media (max-width: 850px) { .main { min-height: calc(100vh - 300px); padding-bottom: calc(136px + env(safe-area-inset-bottom)); padding-top: 20px; } .publicMain { min-height: 100vh; padding: 20px 16px; } }
+@media (max-width: 850px) { .main { min-height: calc(100vh - 180px); padding-bottom: calc(108px + env(safe-area-inset-bottom)); padding-top: 14px; } .publicMain { min-height: 100vh; padding: 20px 16px; } }

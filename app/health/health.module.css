@@ -11,3 +11,4 @@
 .tileTitle { font-size: 1.1rem; text-transform: none; }
 .tileDesc { color: var(--plum-500); font-size: 0.85rem; }
 .stat { font-weight: 700; color: var(--marvin-orange); font-size: 0.9rem; }
+@media (max-width: 520px) { .title { font-size: 1.9rem; }.grid { gap: 10px; }.tile { min-height: 112px; padding: 14px; }.tileDesc { line-height: 1.35; } }
