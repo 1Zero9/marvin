@@ -12,6 +12,7 @@ import RecipeShare from "@/components/RecipeShare";
 import RecipeKeepAwake from "@/components/RecipeKeepAwake";
 import RecipeActions from "@/components/RecipeActions";
 import RecipePhotoUploader from "@/components/RecipePhotoUploader";
+import AddToShoppingList from "@/components/AddToShoppingList";
 
 export const dynamic = "force-dynamic";
 
@@ -115,7 +116,10 @@ export default async function RecipePage({
       <div className={styles.columns}>
         {recipe.ingredients && (
           <section className={`card ${styles.section}`}>
-            <h2 className={styles.sectionTitle}>Ingredients</h2>
+            <div className={styles.logHeader}>
+              <h2 className={styles.sectionTitle}>Ingredients</h2>
+              <AddToShoppingList recipeId={recipe.id} />
+            </div>
             <p className={styles.pre}>{recipe.ingredients}</p>
           </section>
         )}
