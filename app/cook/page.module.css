@@ -81,6 +81,8 @@
 }
 
 .searchInput {
+  appearance: none;
+  -webkit-appearance: none;
   flex: 1;
   min-width: 0;
   border: none;
@@ -97,6 +99,13 @@
 .searchInput::placeholder {
   color: var(--marvin-text-muted);
   opacity: 1;
+}
+
+.searchInput::-webkit-search-decoration,
+.searchInput::-webkit-search-cancel-button,
+.searchInput::-webkit-search-results-button,
+.searchInput::-webkit-search-results-decoration {
+  display: none;
 }
 
 .searchSubmit {

@@ -203,6 +203,8 @@ select:focus { border-color: var(--marvin-orange); box-shadow: 0 0 0 4px rgba(23
 }
 
 .input {
+  appearance: none;
+  -webkit-appearance: none;
   width: 100%;
   background: var(--surface);
   border: 1px solid var(--marvin-border);
@@ -210,6 +212,13 @@ select:focus { border-color: var(--marvin-orange); box-shadow: 0 0 0 4px rgba(23
   min-height: 54px;
   padding: 0 16px;
   color: var(--text-primary);
+}
+
+.input::-webkit-search-decoration,
+.input::-webkit-search-cancel-button,
+.input::-webkit-search-results-button,
+.input::-webkit-search-results-decoration {
+  display: none;
 }
 
 @media (max-width: 480px) {
