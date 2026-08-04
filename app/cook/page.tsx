@@ -135,7 +135,6 @@ export default async function Home({
         )}
         <form className={styles.searchForm} action="/cook" method="get">
           <div className={styles.searchBox}>
-            <Icon name="search" className={styles.searchIcon} />
             <input
               className={styles.searchInput}
               type="search"
