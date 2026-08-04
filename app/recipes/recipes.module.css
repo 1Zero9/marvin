@@ -8,7 +8,7 @@
 }
 
 .filters { display: flex; flex-wrap: wrap; gap: 7px; }
-.filter { background: transparent; border: 1px solid var(--marvin-border-strong); border-radius: var(--radius-pill); color: var(--marvin-text-soft); font-size: .8rem; font-weight: 700; padding: 7px 12px; white-space: nowrap; }
+.filter { align-items: center; background: transparent; border: 1px solid var(--marvin-border-strong); border-radius: var(--radius-pill); color: var(--marvin-text-soft); display: inline-flex; font-size: .8rem; font-weight: 700; min-height: 44px; padding: 7px 12px; white-space: nowrap; }
 .filterActive { background: var(--marvin-text); border-color: var(--marvin-text); color: #fff; font-weight: 800; }
 
 @media (max-width: 480px) {
@@ -80,4 +80,4 @@
   color: var(--plum-500);
 }
 
-.addLink { background: linear-gradient(135deg, #e66a32 0%, var(--marvin-orange) 58%, var(--marvin-orange-hover) 100%); border-radius: var(--radius-pill); box-shadow: var(--shadow-orange); color: #fff; font-size: .88rem; font-weight: 800; padding: 10px 14px; white-space: nowrap; }.addLink:hover { background: var(--marvin-orange-hover); }
+.addLink { align-items: center; background: linear-gradient(135deg, #e66a32 0%, var(--marvin-orange) 58%, var(--marvin-orange-hover) 100%); border-radius: var(--radius-pill); box-shadow: var(--shadow-orange); color: #fff; display: inline-flex; font-size: .88rem; font-weight: 800; min-height: 44px; padding: 10px 14px; white-space: nowrap; }.addLink:hover { background: var(--marvin-orange-hover); }

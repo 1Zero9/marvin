@@ -83,8 +83,9 @@
 
 .table {
   width: 100%;
-  min-width: 480px;
+  min-width: 0;
   border-collapse: collapse;
+  table-layout: fixed;
 }
 
 @media (max-width: 480px) {
@@ -107,6 +108,16 @@
     margin-right: -2px;
     padding: 12px 0;
   }
+
+  .table th,
+  .table td {
+    overflow-wrap: anywhere;
+    padding-left: 7px;
+    padding-right: 7px;
+  }
+
+  .ingredient { width: 40%; }
+  .page { width: 50px; }
 }
 
 .table th {

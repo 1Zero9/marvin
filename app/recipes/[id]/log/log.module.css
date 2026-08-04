@@ -11,7 +11,7 @@
 }
 
 .header { display: flex; flex-direction: column; gap: 5px; }
-.back { color: var(--marvin-orange); font-size: .84rem; font-weight: 800; width: fit-content; }
+.back { align-items: center; color: var(--marvin-orange); display: inline-flex; font-size: .84rem; font-weight: 800; min-height: 44px; width: fit-content; }
 .eyebrow { color: var(--plum-500); font-size: .73rem; font-weight: 800; letter-spacing: .11em; margin-top: 5px; text-transform: uppercase; }
 .sub { color: var(--plum-500); font-size: .92rem; line-height: 1.45; max-width: 500px; }
 
@@ -49,13 +49,18 @@
 }
 
 .star {
+  align-items: center;
   background: none;
   border: none;
   font-size: 1.8rem;
   color: var(--marvin-orange);
   cursor: pointer;
-  padding: 0 2px;
+  display: inline-flex;
+  height: 44px;
+  justify-content: center;
+  padding: 0;
   line-height: 1;
+  width: 44px;
 }
 
 .fileInput {

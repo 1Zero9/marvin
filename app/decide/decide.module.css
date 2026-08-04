@@ -14,7 +14,7 @@
 .pickReason { color: var(--plum-500); margin: 4px 0 12px; }
 .sourceFilters, .filters { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
 .sourceFilters { background: var(--marvin-blush); border-radius: var(--radius-pill); padding: 4px; align-self: center; }
-.sourceFilter { border-radius: var(--radius-pill); color: var(--plum-500); font-size: .9rem; font-weight: 800; padding: 8px 14px; }
+.sourceFilter { align-items: center; border-radius: var(--radius-pill); color: var(--plum-500); display: inline-flex; font-size: .9rem; font-weight: 800; min-height: 44px; padding: 8px 14px; }
 .sourceActive { background: #fff; color: var(--marvin-plum); box-shadow: 0 1px 5px rgba(67, 35, 59, .12); }
 .filter { background: var(--marvin-blush); border-radius: var(--radius-pill); color: var(--marvin-plum); font-size: .9rem; font-weight: 700; padding: 8px 14px; }
 .active { background: var(--marvin-orange); color: #fff; }

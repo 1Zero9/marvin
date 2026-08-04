@@ -36,6 +36,7 @@
   font-family: inherit;
   font-size: 0.8rem;
   font-weight: 700;
+  min-height: 44px;
   padding: 4px 12px;
   border-radius: var(--radius-pill);
   border: 2px solid var(--border);
