@@ -1,4 +1,13 @@
 .main { min-height: calc(100vh - 180px); padding-bottom: 64px; padding-top: 32px; }
-.publicMain { align-items: center; display: flex; min-height: 100vh; padding: 24px 16px; }
+.publicMain {
+  align-items: center;
+  background:
+    radial-gradient(circle at 12% -8%, rgba(242, 169, 58, .32), transparent 42%),
+    radial-gradient(circle at 100% 8%, rgba(238, 90, 30, .30), transparent 45%),
+    linear-gradient(165deg, #3a1038 0%, #4a1548 46%, #2c0c2b 100%);
+  display: flex;
+  min-height: 100vh;
+  padding: 24px 16px;
+}
 .publicContent { width: 100%; }
 @media (max-width: 850px) { .main { min-height: calc(100vh - 300px); padding-bottom: calc(136px + env(safe-area-inset-bottom)); padding-top: 20px; } .publicMain { min-height: 100vh; padding: 20px 16px; } }
