@@ -1,7 +1,7 @@
 .wrap { display: flex; flex-direction: column; gap: 18px; }
 .header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .title { font-size: 2rem; }
-.back { color: var(--plum-500); font-weight: 700; font-size: 0.9rem; }
+.back { align-items: center; color: var(--plum-500); display: inline-flex; font-weight: 700; font-size: 0.9rem; min-height: 44px; }
 
 .streakCard { display: flex; align-items: center; gap: 16px; background: var(--marvin-plum); color: #fff; }
 .streakCard h2, .streakCard p { color: #fff; }

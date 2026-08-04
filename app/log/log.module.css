@@ -2,7 +2,7 @@
 .header { align-items: flex-start; display: flex; gap: 16px; justify-content: space-between; padding: 10px 2px 2px; }
 .heading { display: flex; flex-direction: column; gap: 7px; }.eyebrow { color: var(--plum-500); font-size: .73rem; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
 .title { font-size: clamp(2rem, 7vw, 2.7rem); letter-spacing: -.04em; text-transform: none; }.sub { color: var(--plum-500); max-width: 520px; }
-.snapLink { background: var(--marvin-orange); border-radius: var(--radius-pill); color: #fff; font-size: .9rem; font-weight: 800; padding: 10px 14px; white-space: nowrap; }.snapLink:hover { background: var(--orange-700); }
+.snapLink { align-items: center; background: var(--marvin-orange); border-radius: var(--radius-pill); color: #fff; display: inline-flex; font-size: .9rem; font-weight: 800; min-height: 44px; padding: 10px 14px; white-space: nowrap; }.snapLink:hover { background: var(--orange-700); }
 .summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .stat { border: 1px solid var(--border); box-shadow: none; display: flex; flex-direction: column; gap: 4px; color: var(--plum-500); font-size: .9rem; }
 .statValue { color: var(--marvin-plum); font-family: var(--font-heading), Georgia, serif; font-size: 1.2rem; font-weight: 700; line-height: 1.15; }
@@ -21,7 +21,7 @@
 .photoFallback { align-items: center; background: var(--marvin-peach); display: flex; font-size: 1.8rem; justify-content: center; }
 .entryBody { display: flex; flex: 1; flex-direction: column; gap: 8px; min-width: 0; }
 .entryTop { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
-.recipeLink { color: var(--marvin-plum); font-family: var(--font-heading), Georgia, serif; font-size: 1.1rem; font-weight: 700; }
+.recipeLink { align-items: center; color: var(--marvin-plum); display: inline-flex; font-family: var(--font-heading), Georgia, serif; font-size: 1.1rem; font-weight: 700; min-height: 44px; }
 .recipeLink:hover { color: var(--marvin-orange); }
 .meta { color: var(--plum-500); font-size: .9rem; }
 .stars { color: var(--marvin-orange); letter-spacing: 1px; white-space: nowrap; }

@@ -3,7 +3,7 @@
 .hero h1 { font-size: clamp(2rem, 8vw, 2.75rem); }
 .hero > p:not(.eyebrow) { color: var(--plum-500); }
 .eyebrow { color: var(--marvin-orange); font-size: 0.78rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
-.back { color: var(--marvin-orange); font-size: 0.9rem; font-weight: 800; margin-top: 3px; }
+.back { align-items: center; color: var(--marvin-orange); display: inline-flex; font-size: 0.9rem; font-weight: 800; margin-top: 3px; min-height: 44px; }
 .private { color: var(--plum-500); font-size: 0.86rem; text-align: center; }
 .generateCard { align-items: flex-start; background: var(--orange-100); display: flex; gap: 16px; justify-content: space-between; }
 .generateCard h2, .listHeading h2 { font-size: 1.16rem; }

@@ -3,7 +3,7 @@
 .header h1 { font-size: clamp(2rem, 8vw, 2.65rem); margin: 4px 0; }
 .header p { color: var(--plum-500); }
 .eyebrow { color: var(--marvin-orange); font-size: 0.76rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
-.back { color: var(--plum-500); font-size: 0.9rem; font-weight: 700; white-space: nowrap; }
+.back { align-items: center; color: var(--plum-500); display: inline-flex; font-size: 0.9rem; font-weight: 700; min-height: 44px; white-space: nowrap; }
 .metricGrid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
 .metric { display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 15px 12px; }
 .metric strong { color: var(--marvin-orange); font-family: var(--font-heading), Georgia, serif; font-size: 1.7rem; line-height: 1; }
