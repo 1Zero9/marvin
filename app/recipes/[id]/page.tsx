@@ -158,24 +158,32 @@ export default async function RecipePage({
         </section>
       )}
 
-      <RecipeLightener
-        recipeId={recipe.id}
-        initialSuggestions={recipe.swapSuggestions[0]?.suggestions ?? null}
-        initialVariant={recipe.variants.length > 0}
-      />
-
-      <RecipeShare
-        recipeId={recipe.id}
-        initialUrl={recipe.shareEnabled && recipe.shareSlug ? `/share/${recipe.shareSlug}` : null}
-        canShare={canShare}
-      />
-
-      {canManageRecipe && <RecipeActions recipe={recipe} mergeCandidates={mergeCandidates} />}
-
-      <section className={`card ${styles.section}`}>
-        <div className={styles.logHeader}>
-          <h2 className={styles.sectionTitle}>Cooking &amp; food memories</h2>
+      <details className={styles.toolbox}>
+        <summary className={styles.toolboxSummary}>
+          <span><strong>Recipe tools</strong><small>Lighten, share, edit or manage this recipe</small></span>
+          <b aria-hidden="true">+</b>
+        </summary>
+        <div className={styles.toolboxBody}>
+          <RecipeLightener
+            recipeId={recipe.id}
+            initialSuggestions={recipe.swapSuggestions[0]?.suggestions ?? null}
+            initialVariant={recipe.variants.length > 0}
+          />
+          <RecipeShare
+            recipeId={recipe.id}
+            initialUrl={recipe.shareEnabled && recipe.shareSlug ? `/share/${recipe.shareSlug}` : null}
+            canShare={canShare}
+          />
+          {canManageRecipe && <RecipeActions recipe={recipe} mergeCandidates={mergeCandidates} />}
         </div>
+      </details>
+
+      <details className={`card ${styles.section} ${styles.history}`} open={recipe.cookLogs.length <= 2}>
+        <summary className={styles.historySummary}>
+          <span><strong>Cooking &amp; food memories</strong><small>{recipe.cookLogs.length === 0 ? "Nothing logged yet" : `${recipe.cookLogs.length} ${recipe.cookLogs.length === 1 ? "entry" : "entries"}`}</small></span>
+          <b aria-hidden="true">+</b>
+        </summary>
+        <div className={styles.historyBody}>
         {recipe.cookLogs.length === 0 ? (
           <p className={styles.emptyText}>
             {recipe.archived ? "This recipe is archived. Restore it above if you want to cook it again." : "Not cooked yet — log it the next time you make it."}
@@ -220,7 +228,8 @@ export default async function RecipePage({
             ))}
           </ul>
         )}
-      </section>
+        </div>
+      </details>
     </div>
   );
 }

@@ -22,7 +22,7 @@
 .sectionHeader { align-items: flex-start; display: flex; gap: 12px; justify-content: space-between; }
 .doneCount { background: var(--orange-100); border-radius: var(--radius-pill); color: var(--orange-700); font-size: .82rem; font-weight: 800; padding: 5px 9px; }
 .checklist { display: grid; gap: 5px; }
-.checkRow { align-items: center; border-radius: 10px; cursor: pointer; display: flex; font-weight: 700; gap: 11px; min-height: 42px; padding: 2px 4px; }
+.checkRow { align-items: center; border-radius: 10px; cursor: pointer; display: flex; font-weight: 700; gap: 11px; min-height: 44px; padding: 2px 4px; }
 .checkRow:hover { background: var(--marvin-cream); }
 .checkRow input { accent-color: var(--marvin-orange); height: 19px; width: 19px; }
 .done { color: var(--plum-300); text-decoration: line-through; }
@@ -30,7 +30,7 @@
 .ratingSection > span { color: var(--plum-500); font-size: .84rem; font-weight: 700; }
 .ratingHistory { color: var(--marvin-orange); font-size: .8rem; font-weight: 800; }
 .planRatingButtons, .energyButtons { display: flex; flex-wrap: wrap; gap: 8px; }
-.planRatingButton, .energyButton { background: var(--surface); border: 1px solid var(--border); color: var(--plum-500); font-weight: 800; min-height: 40px; }
+.planRatingButton, .energyButton { background: var(--surface); border: 1px solid var(--border); color: var(--plum-500); font-weight: 800; min-height: 44px; }
 .planRatingButton { border-radius: var(--radius-pill); padding: 7px 12px; }
 .energyButton { border-radius: 50%; width: 40px; }
 .planRatingButton:disabled, .energyButton:disabled { cursor: not-allowed; opacity: .55; }

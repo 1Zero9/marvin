@@ -74,7 +74,9 @@ export default function BookActions({
   }
 
   return (
-    <div className={styles.actions}>
+    <details className={styles.options}>
+      <summary>Book options <span aria-hidden="true">+</span></summary>
+      <div className={styles.actions}>
       {editingName ? (
         <form className={styles.renameForm} onSubmit={rename}>
           <label className={styles.srOnly} htmlFor={`book-name-${bookId}`}>Book name</label>
@@ -106,7 +108,8 @@ export default function BookActions({
       <button className={styles.deleteBtn} onClick={remove} disabled={busy}>
         Delete
       </button>
-      {error && <p className={styles.error} role="alert">{error}</p>}
-    </div>
+        {error && <p className={styles.error} role="alert">{error}</p>}
+      </div>
+    </details>
   );
 }

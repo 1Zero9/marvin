@@ -14,11 +14,11 @@
 @media (max-width: 850px) {
   .header { border-bottom: 0; }
   .headerHome { display: block; }
-  .inner { justify-content: center; padding: 12px 16px; }
-  .name { font-size: 1.75rem; }
-  .logo { height: 56px; width: 56px; border-radius: 16px; }
+  .inner { justify-content: center; padding: 8px 16px; }
+  .name { font-size: 1.58rem; }
+  .logo { height: 48px; width: 48px; border-radius: 14px; }
   .nav { display: none; }
-  .dock { -webkit-backdrop-filter: blur(22px) saturate(1.15); backdrop-filter: blur(22px) saturate(1.15); background: linear-gradient(135deg, rgba(58, 16, 56, .96), rgba(44, 12, 43, .94)); border: 1px solid rgba(214, 173, 209, .38); border-radius: 24px; bottom: max(10px, env(safe-area-inset-bottom)); box-shadow: 0 14px 36px rgba(42, 14, 40, .28), inset 0 1px 0 rgba(255, 255, 255, .18); display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 4px; left: 50%; padding: 7px; position: fixed; transform: translateX(-50%); width: min(calc(100% - 24px), 680px); z-index: 80; }
+  .dock { -webkit-backdrop-filter: blur(24px) saturate(1.2); backdrop-filter: blur(24px) saturate(1.2); background: linear-gradient(135deg, rgba(58, 16, 56, .94), rgba(44, 12, 43, .91)); border: 1px solid rgba(255, 255, 255, .16); border-radius: 24px; bottom: max(10px, env(safe-area-inset-bottom)); box-shadow: 0 16px 40px rgba(42, 14, 40, .30), inset 0 1px 0 rgba(255, 255, 255, .20); display: grid; grid-template-columns: repeat(5, minmax(0,1fr)); gap: 4px; left: 50%; padding: 7px; position: fixed; transform: translateX(-50%); width: min(calc(100% - 24px), 680px); z-index: 80; }
   .dockLink { -webkit-tap-highlight-color: transparent; align-items: center; border-radius: 18px; color: rgba(255, 255, 255, .66); display: flex; flex-direction: column; font-size: .74rem; font-weight: 800; gap: 4px; justify-content: center; min-height: 64px; padding: 6px 2px; transition: background-color .12s ease, color .12s ease, transform .12s ease, box-shadow .12s ease; }
   .dockLink:hover, .dockLink:focus-visible { background: rgba(255, 255, 255, .16); color: #fff; }
   .dockLink:active { background: rgba(255, 255, 255, .24); color: #fff; transform: scale(.93); }

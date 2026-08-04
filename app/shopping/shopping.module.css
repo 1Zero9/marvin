@@ -26,4 +26,4 @@
 .remove { background: transparent; border: 0; color: var(--plum-300); font-size: 1.35rem; line-height: 1; padding: 6px; }
 .remove:hover { color: var(--danger); }
 .message { color: var(--plum-500); font-size: 0.88rem; font-weight: 700; text-align: center; }
-@media (max-width: 580px) { .hero { padding-top: 8px; } .generateCard, .addForm { align-items: stretch; grid-template-columns: 1fr; } .generateCard { flex-direction: column; } .generateCard .btn, .addForm .btn { width: 100%; } }
+@media (max-width: 580px) { .hero { padding-top: 8px; } .hero h1 { font-size: 1.9rem; }.generateCard, .addForm { align-items: stretch; grid-template-columns: 1fr; } .generateCard { flex-direction: column; } .generateCard .btn, .addForm .btn { width: 100%; }.checkLabel span { align-items: flex-start; flex-direction: column; gap: 1px; }.checkLabel em { text-align: left; } }

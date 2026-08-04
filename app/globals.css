@@ -88,8 +88,8 @@ h4 {
   font-family: var(--font-heading), Georgia, serif;
   color: var(--marvin-plum);
   line-height: 1.15;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
+  text-transform: none;
+  letter-spacing: -0.025em;
 }
 
 a {
@@ -177,7 +177,9 @@ select:focus { border-color: var(--marvin-orange); box-shadow: 0 0 0 4px rgba(23
 .card {
   position: relative;
   overflow: hidden;
-  background: linear-gradient(145deg, rgba(255, 255, 255, .98), rgba(251, 250, 247, .92));
+  -webkit-backdrop-filter: blur(18px) saturate(1.08);
+  backdrop-filter: blur(18px) saturate(1.08);
+  background: linear-gradient(145deg, rgba(255, 255, 255, .90), rgba(253, 249, 243, .78));
   border: 1px solid rgba(207, 199, 184, .72);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
@@ -228,7 +230,7 @@ select:focus { border-color: var(--marvin-orange); box-shadow: 0 0 0 4px rgba(23
   }
 
   .card {
-    border-radius: 20px;
+    border-radius: 18px;
     padding: 16px;
   }
 
@@ -237,9 +239,16 @@ select:focus { border-color: var(--marvin-orange); box-shadow: 0 0 0 4px rgba(23
   }
 
   .btn {
+    min-height: 48px;
     padding: 10px 18px;
     font-size: 0.95rem;
   }
+}
+
+@media (hover: none) {
+  .card:hover { border-color: rgba(207, 199, 184, .72); box-shadow: var(--shadow-sm); transform: none; }
+  .card:hover::before { opacity: 0; }
+  .btn-primary:hover, .btn-secondary:hover { transform: none; }
 }
 
 .input:focus {
@@ -251,7 +260,7 @@ select:focus { border-color: var(--marvin-orange); box-shadow: 0 0 0 4px rgba(23
 ::selection { background: var(--marvin-orange-soft); color: var(--marvin-text); }
 
 .btn:active { transform: translateY(0) scale(.985); }
-.btn:focus-visible, a:focus-visible { outline: 3px solid rgba(238, 90, 30, .25); outline-offset: 3px; }
+.btn:focus-visible, a:focus-visible, button:focus-visible, summary:focus-visible { outline: 3px solid rgba(238, 90, 30, .25); outline-offset: 3px; }
 button:disabled, .btn:disabled { cursor: not-allowed; opacity: .5; transform: none; box-shadow: none; }
 
 .page-loading {
