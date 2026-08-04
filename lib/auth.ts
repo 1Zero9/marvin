@@ -16,15 +16,6 @@ export function hashPassword(password: string) {
   return `${salt}:${hash}`;
 }
 
-export function hashRecoveryCode(code: string) {
-  return createHash("sha256").update(`marvin-recovery:${code}`).digest("hex");
-}
-
-export function createRecoveryCode() {
-  const value = randomBytes(18).toString("hex").toUpperCase();
-  return `MRVN-${value.slice(0, 6)}-${value.slice(6, 12)}-${value.slice(12, 18)}`;
-}
-
 export function createPasswordResetToken() {
   return randomBytes(32).toString("base64url");
 }

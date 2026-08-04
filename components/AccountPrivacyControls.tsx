@@ -20,19 +20,6 @@ export function AiProcessingControl({ enabled }: { enabled: boolean }) {
   return <div className={styles.control}><div><strong>Optional AI help</strong><p>When enabled, only actions you choose—such as recipe reading or swap suggestions—may send the relevant recipe text or image to Gemini. Health, reflections, and daily tracking are never sent.</p></div><button type="button" className="btn btn-secondary" onClick={toggle} disabled={saving}>{saving ? "Saving…" : value ? "Turn off AI" : "Turn on AI"}</button>{message && <p className={styles.status}>{message}</p>}</div>;
 }
 
-export function RecoveryCodeControl() {
-  const [code, setCode] = useState<string | null>(null);
-  const [error, setError] = useState("");
-  async function create() {
-    setError("");
-    const res = await fetch("/api/account/recovery-codes", { method: "POST" });
-    const body = await res.json().catch(() => null);
-    if (!res.ok) { setError(body?.error ?? "Could not create a recovery code."); return; }
-    setCode(body.code);
-  }
-  return <div className={styles.control}><div><strong>Offline recovery code</strong><p>Create one code to reset your password if you are locked out. It is shown once and replaces any old code—save it somewhere secure.</p></div>{code ? <code className={styles.code}>{code}</code> : <button type="button" className="btn btn-secondary" onClick={create}>Create recovery code</button>}{error && <p className={styles.error}>{error}</p>}</div>;
-}
-
 export function FoodPreferencesControl({ exclusions }: { exclusions: string[] }) {
   const [items, setItems] = useState(exclusions);
   const [newItem, setNewItem] = useState("");

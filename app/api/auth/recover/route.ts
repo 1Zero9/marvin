@@ -1,34 +1,43 @@
 import { NextResponse } from "next/server";
-import { createSession, hashPassword, hashRecoveryCode, sessionCookie } from "@/lib/auth";
+import { createPasswordResetToken, hashPasswordResetToken } from "@/lib/auth";
+import { sendPasswordResetEmail } from "@/lib/email";
 import { prisma } from "@/lib/prisma";
 
+const GENERIC = {
+  ok: true,
+  message: "If that email is registered with Marvin, we've sent a link to reset the password.",
+};
+
 export async function POST(req: Request) {
-  const body = await req.json();
+  const body = await req.json().catch(() => null);
   const email = typeof body?.email === "string" ? body.email.trim().toLowerCase() : "";
-  const code = typeof body?.code === "string" ? body.code.trim().toUpperCase() : "";
-  const password = typeof body?.password === "string" ? body.password : "";
-  if (!/^\S+@\S+\.\S+$/.test(email) || !code || password.length < 10) {
-    return NextResponse.json({ error: "Enter your email, recovery code, and a new password of at least 10 characters." }, { status: 400 });
+  if (!/^\S+@\S+\.\S+$/.test(email)) {
+    return NextResponse.json({ error: "Enter a valid email address." }, { status: 400 });
   }
 
-  const recovery = await prisma.accountRecoveryCode.findFirst({
-    where: { codeHash: hashRecoveryCode(code), usedAt: null, user: { email } },
-    include: { user: true },
-  });
-  if (!recovery) return NextResponse.json({ error: "That email and recovery code do not match." }, { status: 401 });
+  if (!process.env.RESEND_API_KEY) {
+    return NextResponse.json(
+      { error: "Email delivery isn't set up yet. Ask the household owner to send you a reset link from the admin page instead." },
+      { status: 503 }
+    );
+  }
 
-  const recovered = await prisma.$transaction(async (tx) => {
-    const used = await tx.accountRecoveryCode.updateMany({ where: { id: recovery.id, usedAt: null }, data: { usedAt: new Date() } });
-    if (used.count !== 1) return false;
-    await tx.session.deleteMany({ where: { userId: recovery.userId } });
-    await tx.user.update({ where: { id: recovery.userId }, data: { passwordHash: hashPassword(password) } });
-    return true;
-  });
-  if (!recovered) return NextResponse.json({ error: "That recovery code has already been used." }, { status: 401 });
-  const session = await createSession(recovery.userId);
+  const user = await prisma.user.findUnique({ where: { email } });
+  if (user) {
+    const token = createPasswordResetToken();
+    await prisma.$transaction([
+      prisma.passwordResetToken.deleteMany({ where: { userId: user.id, usedAt: null } }),
+      prisma.passwordResetToken.create({
+        data: { userId: user.id, tokenHash: hashPasswordResetToken(token), expiresAt: new Date(Date.now() + 60 * 60 * 1000) },
+      }),
+    ]);
+    const url = new URL(`/reset#token=${token}`, req.url).toString();
+    try {
+      await sendPasswordResetEmail({ to: user.email, displayName: user.displayName, url });
+    } catch (error) {
+      console.error("Failed to send password reset email", error);
+    }
+  }
 
-  const response = NextResponse.json({ ok: true });
-  const cookie = sessionCookie(session.token, session.expiresAt);
-  response.cookies.set(cookie.name, cookie.value, cookie.options);
-  return response;
+  return NextResponse.json(GENERIC);
 }
