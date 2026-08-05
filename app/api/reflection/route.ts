@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { currentMembership } from "@/lib/auth";
 import { fromDateInput, mondayOf } from "@/lib/dates";
 import { prisma } from "@/lib/prisma";
+import { API_LIMITS } from "@/lib/apiLimits";
+import { readJsonObject } from "@/lib/requestSecurity";
 
 function clean(value: unknown, limit: number) {
   return typeof value === "string" && value.trim() ? value.trim().slice(0, limit) : null;
@@ -10,7 +12,7 @@ function clean(value: unknown, limit: number) {
 export async function PUT(req: Request) {
   const identity = await currentMembership();
   if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
-  const body = await req.json();
+  const body = await readJsonObject(req, API_LIMITS.smallJsonBytes).catch(() => null);
   const supplied = body?.weekStart ? fromDateInput(body.weekStart) : new Date();
   if (Number.isNaN(supplied.getTime())) return NextResponse.json({ error: "Invalid week." }, { status: 400 });
 

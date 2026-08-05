@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import mammoth from "mammoth";
 import { currentMembership } from "@/lib/auth";
+import { InvalidRequestBodyError, objectBody, readJsonBody } from "@/lib/requestSecurity";
+import { enforceRateLimit, rateLimitResponse } from "@/lib/rateLimit";
 
 export const maxDuration = 30;
 
@@ -10,8 +12,16 @@ const DOCX_SIGNATURE = Buffer.from([0x50, 0x4b, 0x03, 0x04]); // ZIP local file 
 export async function POST(req: Request) {
   const identity = await currentMembership();
   if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
+  const importLimit = await enforceRateLimit({ namespace: "import:file", identifier: identity.user.id, limit: 20, windowMs: 60 * 60 * 1000 });
+  if (!importLimit.allowed) return rateLimitResponse(importLimit);
 
-  const body = await req.json().catch(() => null);
+  let body: Record<string, unknown> | null;
+  try {
+    body = objectBody(await readJsonBody(req, 11 * 1024 * 1024));
+  } catch (error) {
+    if (error instanceof InvalidRequestBodyError) return NextResponse.json({ error: "That file is missing or too large" }, { status: 413 });
+    throw error;
+  }
   const data = typeof body?.data === "string" ? body.data : "";
   const filename = typeof body?.filename === "string" ? body.filename : "";
   if (!data || !/\.docx$/i.test(filename)) {

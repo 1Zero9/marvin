@@ -8,22 +8,60 @@ import BookCover from "@/components/BookCover";
 import styles from "./book.module.css";
 
 export const dynamic = "force-dynamic";
+const INDEX_PAGE_SIZE = 100;
 
 export default async function BookPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ p?: string; q?: string }>;
 }) {
   const { id } = await params;
+  const suppliedSearch = await searchParams;
+  const indexQuery = typeof suppliedSearch.q === "string" ? suppliedSearch.q.trim().slice(0, 100) : "";
   const identity = await requireHousehold();
   const book = await prisma.book.findUnique({
     where: { id, householdId: identity.membership.householdId, ...visibleTo(identity) },
     include: {
-      indexEntries: { orderBy: [{ ingredient: "asc" }, { page: "asc" }] },
+      _count: { select: { indexEntries: true } },
       recipes: { orderBy: { createdAt: "desc" } },
     },
   });
   if (!book) notFound();
+
+  const entryWhere = {
+    bookId: book.id,
+    ...(indexQuery ? {
+      OR: [
+        { ingredient: { contains: indexQuery, mode: "insensitive" as const } },
+        { dish: { contains: indexQuery, mode: "insensitive" as const } },
+      ],
+    } : {}),
+  };
+  const matchingEntries = indexQuery
+    ? await prisma.indexEntry.count({ where: entryWhere })
+    : book._count.indexEntries;
+  const totalPages = Math.max(1, Math.ceil(matchingEntries / INDEX_PAGE_SIZE));
+  const requestedPage = Number(suppliedSearch.p);
+  const currentPage = Number.isInteger(requestedPage) && requestedPage > 0
+    ? Math.min(requestedPage, totalPages)
+    : 1;
+  const indexEntries = matchingEntries
+    ? await prisma.indexEntry.findMany({
+      where: entryWhere,
+      orderBy: [{ ingredient: "asc" }, { page: "asc" }],
+      skip: (currentPage - 1) * INDEX_PAGE_SIZE,
+      take: INDEX_PAGE_SIZE,
+    })
+    : [];
+  const pageHref = (page: number) => {
+    const query = new URLSearchParams();
+    if (indexQuery) query.set("q", indexQuery);
+    if (page > 1) query.set("p", String(page));
+    const suffix = query.toString();
+    return `/books/${book.id}${suffix ? `?${suffix}` : ""}`;
+  };
 
   const added = book.createdAt.toLocaleDateString("en-GB", {
     day: "numeric",
@@ -50,7 +88,7 @@ export default async function BookPage({
             {book.pageCount ? ` · ${book.pageCount} pages` : ""}
             {book.archived ? " · Archived" : ""}
           </p>
-          <span className="tag">{book.indexEntries.length} index entries</span>
+          <span className="tag">{book._count.indexEntries} index entries</span>
         </div>
       </div>
 
@@ -82,7 +120,7 @@ export default async function BookPage({
         </div>
       )}
 
-      {book.indexEntries.length === 0 ? (
+      {book._count.indexEntries === 0 ? (
         <div className={`card ${styles.empty}`}>
           <p style={{ marginBottom: 16 }}>
             No index entries yet for this book.
@@ -94,6 +132,13 @@ export default async function BookPage({
       ) : (
         <div className={`card ${styles.tableCard}`}>
           <div className={styles.tableActions}>
+            <form className={styles.indexSearch} action={`/books/${book.id}`} method="get">
+              <label className={styles.indexSearchLabel} htmlFor="index-query">Search this index</label>
+              <div className={styles.indexSearchControls}>
+                <input id="index-query" className="input" type="search" name="q" defaultValue={indexQuery} maxLength={100} placeholder="Ingredient or dish" />
+                <button type="submit" className="btn btn-secondary">Search</button>
+              </div>
+            </form>
             <Link
               href={`/books/${book.id}/index`}
               className="btn btn-secondary"
@@ -101,7 +146,13 @@ export default async function BookPage({
               Add index photos
             </Link>
           </div>
-          <table className={styles.table}>
+          {indexQuery && (
+            <p className={styles.resultSummary} aria-live="polite">
+              {matchingEntries} result{matchingEntries === 1 ? "" : "s"} for &ldquo;{indexQuery}&rdquo;
+              {' '}<Link href={`/books/${book.id}`}>Clear search</Link>
+            </p>
+          )}
+          {indexEntries.length ? <table className={styles.table}>
             <thead>
               <tr>
                 <th>Ingredient</th>
@@ -110,7 +161,7 @@ export default async function BookPage({
               </tr>
             </thead>
             <tbody>
-              {book.indexEntries.map((e) => (
+              {indexEntries.map((e) => (
                 <tr key={e.id}>
                   <td className={styles.ingredient}>{e.ingredient}</td>
                   <td>{e.dish}</td>
@@ -118,7 +169,18 @@ export default async function BookPage({
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table> : <p className={styles.noResults}>No index entries match that search.</p>}
+          {totalPages > 1 && (
+            <nav className={styles.pagination} aria-label="Index pages">
+              {currentPage > 1
+                ? <Link className="btn btn-secondary" href={pageHref(currentPage - 1)}>Previous</Link>
+                : <span />}
+              <span>Page {currentPage} of {totalPages}</span>
+              {currentPage < totalPages
+                ? <Link className="btn btn-secondary" href={pageHref(currentPage + 1)}>Next</Link>
+                : <span />}
+            </nav>
+          )}
         </div>
       )}
     </div>

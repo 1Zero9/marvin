@@ -3,6 +3,8 @@ import { currentMembership } from "@/lib/auth";
 import { fromDateInput, startOfDay } from "@/lib/dates";
 import { prisma } from "@/lib/prisma";
 import { visibleTo } from "@/lib/privacy";
+import { API_LIMITS } from "@/lib/apiLimits";
+import { readJsonObject } from "@/lib/requestSecurity";
 
 const mealTypes = ["breakfast", "lunch"] as const;
 
@@ -20,7 +22,7 @@ export async function PUT(req: Request) {
   const identity = await currentMembership();
   if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
 
-  const body = await req.json();
+  const body = await readJsonObject(req, API_LIMITS.smallJsonBytes).catch(() => null);
   const date = planDate(body?.date);
   if (!date || !validMealType(body?.mealType)) {
     return NextResponse.json({ error: "Choose a valid date and meal" }, { status: 400 });
@@ -60,7 +62,7 @@ export async function DELETE(req: Request) {
   const identity = await currentMembership();
   if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
 
-  const body = await req.json();
+  const body = await readJsonObject(req, API_LIMITS.smallJsonBytes).catch(() => null);
   const date = planDate(body?.date);
   if (!date || !validMealType(body?.mealType)) {
     return NextResponse.json({ error: "Choose a valid date and meal" }, { status: 400 });

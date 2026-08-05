@@ -3,6 +3,10 @@ import { prisma } from "@/lib/prisma";
 import { currentMembership } from "@/lib/auth";
 import { aiProcessingAllowed, visibleTo } from "@/lib/privacy";
 import { recipeSource } from "@/lib/recipeSource";
+import { enforceUserAiQuota } from "@/lib/aiQuota";
+import { fetchWithTimeout } from "@/lib/outbound";
+import { API_LIMITS, boundedStringList, boundedText, isHttpUrl, optionalBoundedText } from "@/lib/apiLimits";
+import { InvalidRequestBodyError, objectBody, readJsonBody } from "@/lib/requestSecurity";
 
 export const maxDuration = 30;
 
@@ -31,7 +35,7 @@ async function extractKeywords(
   if (!apiKey) return fallbackKeywords(title, ingredients);
   const model = process.env.GEMINI_MODEL || "gemini-flash-latest";
   try {
-    const res = await fetch(
+    const res = await fetchWithTimeout(
       `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
       {
         method: "POST",
@@ -48,7 +52,8 @@ async function extractKeywords(
           ],
           generationConfig: { response_mime_type: "application/json" },
         }),
-      }
+      },
+      15_000,
     );
     if (!res.ok) return fallbackKeywords(title, ingredients);
     const data = await res.json();
@@ -71,7 +76,13 @@ async function extractKeywords(
 export async function POST(req: Request) {
   const identity = await currentMembership();
   if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
-  const body = await req.json();
+  let body: Record<string, unknown> | null;
+  try {
+    body = objectBody(await readJsonBody(req, API_LIMITS.recipeJsonBytes));
+  } catch (error) {
+    if (error instanceof InvalidRequestBodyError) return NextResponse.json({ error: "Recipe data is missing or too large." }, { status: 413 });
+    throw error;
+  }
   const {
     title,
     source,
@@ -85,8 +96,15 @@ export async function POST(req: Request) {
     visibility,
   } = body ?? {};
 
-  if (!title || typeof title !== "string" || !title.trim()) {
-    return NextResponse.json({ error: "Title is required" }, { status: 400 });
+  const cleanTitle = boundedText(title, API_LIMITS.title);
+  const cleanIngredients = optionalBoundedText(ingredients, API_LIMITS.ingredientText);
+  const cleanInstructions = optionalBoundedText(instructions, API_LIMITS.instructionText);
+  const cleanNotes = optionalBoundedText(notes, API_LIMITS.notes);
+  if (!cleanTitle) {
+    return NextResponse.json({ error: "Recipe names must be between 1 and 160 characters." }, { status: 400 });
+  }
+  if (cleanIngredients === undefined || cleanInstructions === undefined || cleanNotes === undefined) {
+    return NextResponse.json({ error: "One or more recipe text fields are too long." }, { status: 400 });
   }
 
   const normalizedSource = recipeSource(typeof source === "string" ? source : null);
@@ -99,36 +117,32 @@ export async function POST(req: Request) {
     if (!book) return NextResponse.json({ error: "Book not found" }, { status: 404 });
   }
 
-  const cleanLinks = (Array.isArray(links) ? links : [])
-    .filter((l): l is string => typeof l === "string")
-    .map((l) => l.trim())
-    .filter((l) => /^https?:\/\//.test(l))
-    .slice(0, 10);
+  const cleanLinks = boundedStringList(links ?? [], { maximumItems: 10, maximumLength: API_LIMITS.link });
+  const cleanTags = boundedStringList(tags ?? [], { maximumItems: 15, maximumLength: API_LIMITS.tag, lowercase: true });
+  if (!cleanLinks || cleanLinks.some((link) => !isHttpUrl(link))) return NextResponse.json({ error: "Recipe links must be valid HTTP(S) URLs." }, { status: 400 });
+  if (!cleanTags) return NextResponse.json({ error: "Add no more than 15 tags of 40 characters each." }, { status: 400 });
+  if (bookId !== undefined && bookId !== null && (typeof bookId !== "string" || bookId.length > API_LIMITS.identifier)) return NextResponse.json({ error: "Invalid cookbook." }, { status: 400 });
+  if (pageRef !== undefined && pageRef !== null && (typeof pageRef !== "number" || !Number.isInteger(pageRef) || pageRef < 1 || pageRef > API_LIMITS.page)) return NextResponse.json({ error: "Enter a valid page number." }, { status: 400 });
 
-  const cleanTags = (Array.isArray(tags) ? tags : [])
-    .filter((t): t is string => typeof t === "string")
-    .map((t) => t.trim().toLowerCase())
-    .filter(Boolean)
-    .slice(0, 15);
-
+  const aiEnabled = aiProcessingAllowed(identity) && Boolean(process.env.GEMINI_API_KEY);
+  const aiQuota = aiEnabled ? await enforceUserAiQuota(identity.user.id) : null;
   const keywords = await extractKeywords(
-    title.trim(),
-    typeof ingredients === "string" ? ingredients : null,
-    typeof instructions === "string" ? instructions : null,
-    aiProcessingAllowed(identity)
+    cleanTitle,
+    cleanIngredients,
+    cleanInstructions,
+    aiEnabled && Boolean(aiQuota?.allowed)
   );
 
   const recipe = await prisma.recipe.create({
     data: {
-      title: title.trim(),
+      title: cleanTitle,
       source: normalizedSource,
       bookId: recipeBookId,
       pageRef:
         normalizedSource !== "personal" && typeof pageRef === "number" ? pageRef : null,
-      ingredients: typeof ingredients === "string" ? ingredients || null : null,
-      instructions:
-        typeof instructions === "string" ? instructions || null : null,
-      notes: typeof notes === "string" ? notes || null : null,
+      ingredients: cleanIngredients,
+      instructions: cleanInstructions,
+      notes: cleanNotes,
       tags: cleanTags,
       keywords,
       links: cleanLinks,

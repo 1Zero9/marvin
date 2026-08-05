@@ -3,6 +3,8 @@ import { currentMembership } from "@/lib/auth";
 import { decodeImage } from "@/lib/images";
 import { aiProcessingAllowed } from "@/lib/privacy";
 import { extractRecipe } from "@/lib/recipeExtraction";
+import { aiQuotaResponse, enforceUserAiQuota } from "@/lib/aiQuota";
+import { InvalidRequestBodyError, objectBody, readJsonBody } from "@/lib/requestSecurity";
 
 export const maxDuration = 60;
 
@@ -10,7 +12,14 @@ export async function POST(req: Request) {
   const identity = await currentMembership();
   if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
   if (!aiProcessingAllowed(identity)) return NextResponse.json({ error: "AI processing is off in your privacy controls." }, { status: 403 });
-  const body = await req.json();
+  if (!process.env.GEMINI_API_KEY) return NextResponse.json({ error: "Recipe extraction is not configured." }, { status: 503 });
+  let body: Record<string, unknown> | null;
+  try {
+    body = objectBody(await readJsonBody(req, 22 * 1024 * 1024));
+  } catch (error) {
+    if (error instanceof InvalidRequestBodyError) return NextResponse.json({ error: "Recipe content is missing or too large." }, { status: 413 });
+    throw error;
+  }
   const text = typeof body?.text === "string" ? body.text.trim() : "";
   const images: { data?: string; mimeType?: string }[] = Array.isArray(body?.images)
     ? body.images.slice(0, 6)
@@ -34,6 +43,9 @@ export async function POST(req: Request) {
   if (totalBytes > 15 * 1024 * 1024) {
     return NextResponse.json({ error: "Images too large" }, { status: 400 });
   }
+
+  const quota = await enforceUserAiQuota(identity.user.id, Math.max(1, valid.length));
+  if (!quota.allowed) return aiQuotaResponse(quota);
 
   const result = await extractRecipe(
     valid.length > 0 ? { images: valid } : { text }

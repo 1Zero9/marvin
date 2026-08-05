@@ -458,7 +458,6 @@
     gap: 6px 14px;
   }
 
-  .hero { gap: 16px; padding-top: 6px; }
   .quickActions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
   .quickAction { justify-content: center; text-align: center; }
   .quickAction:last-child { grid-column: 1 / -1; }

@@ -21,7 +21,7 @@ export default async function Home({
 }) {
   const { q, f } = await searchParams;
   const identity = await requireHousehold();
-  const query = q?.trim() ?? "";
+  const query = q?.trim().slice(0, 120) ?? "";
   const filter = f === "books" || f === "personal" ? f : "all";
 
   const [bookCount, recipePreferenceRecords, entries, matchedRecipes, featuredRecipes] = await Promise.all([
@@ -136,6 +136,7 @@ export default async function Home({
         <form className={styles.searchForm} action="/cook" method="get">
           <div className={styles.searchBox}>
             <input
+              aria-label="Search recipes, ingredients, and cookbooks"
               className={styles.searchInput}
               type="search"
               name="q"

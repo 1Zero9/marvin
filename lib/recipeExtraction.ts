@@ -1,3 +1,5 @@
+import { fetchWithTimeout } from "@/lib/outbound";
+
 const PROMPT = `You are reading one or more photos of a recipe. It may be handwritten, a cookbook page, a magazine clipping, or a screenshot from a website or social media post.
 
 Rules:
@@ -62,7 +64,7 @@ export async function extractRecipe(
 
   for (const model of models) {
     try {
-      const res = await fetch(
+      const res = await fetchWithTimeout(
         `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
         {
           method: "POST",
@@ -77,7 +79,8 @@ export async function extractRecipe(
               temperature: 0,
             },
           }),
-        }
+        },
+        18_000,
       );
       if (!res.ok) continue;
       const json = await res.json();

@@ -6,6 +6,9 @@ import { currentMembership } from "@/lib/auth";
 import { decodeImage } from "@/lib/images";
 import { privateMediaToken } from "@/lib/media";
 import { visibleTo } from "@/lib/privacy";
+import { API_LIMITS, boundedStringList, isHttpUrl, optionalBoundedText } from "@/lib/apiLimits";
+import { readJsonObject } from "@/lib/requestSecurity";
+import { enforceMediaUploadRateLimit, rateLimitResponse } from "@/lib/rateLimit";
 
 export const maxDuration = 60;
 
@@ -26,49 +29,52 @@ function keywordsFrom(title: string, ingredients: string[]): string[] {
 export async function POST(req: Request) {
   const identity = await currentMembership();
   if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
-  const body = await req.json();
+  const body = await readJsonObject(req, 8 * 1024 * 1024).catch(() => null);
+  if (!body) return NextResponse.json({ error: "Meal details are missing or too large." }, { status: 413 });
 
   const recipeIdInput = typeof body?.recipeId === "string" ? body.recipeId : null;
   const title = typeof body?.title === "string" ? body.title.trim() : "";
+  if (recipeIdInput && recipeIdInput.length > API_LIMITS.identifier) return NextResponse.json({ error: "Invalid recipe." }, { status: 400 });
+  if (title.length > API_LIMITS.title) return NextResponse.json({ error: "Dish names must be 160 characters or fewer." }, { status: 400 });
   const rating =
     typeof body?.rating === "number" && body.rating >= 1 && body.rating <= 5
       ? Math.round(body.rating)
       : null;
   const notes =
     typeof body?.notes === "string" && body.notes.trim() ? body.notes.trim() : null;
+  if (notes && notes.length > 2_000) return NextResponse.json({ error: "Meal notes must be 2,000 characters or fewer." }, { status: 400 });
   const context = body?.context === "out" ? "out" : "home";
   const countsAsCooked = body?.countsAsCooked !== false;
-  const venue = typeof body?.venue === "string" && body.venue.trim()
-    ? body.venue.trim().slice(0, 120)
-    : null;
+  const venue = optionalBoundedText(body?.venue, 120);
+  if (venue === undefined) return NextResponse.json({ error: "Venue names must be 120 characters or fewer." }, { status: 400 });
   const link = typeof body?.link === "string" && body.link.trim()
-    ? body.link.trim().slice(0, 500)
+    ? body.link.trim()
     : null;
-  const tags: string[] = Array.isArray(body?.tags)
-    ? body.tags
-        .filter((tag: unknown): tag is string => typeof tag === "string")
-        .map((tag: string) => tag.trim().toLowerCase().replace(/^#/, ""))
-        .filter(Boolean)
-        .slice(0, 12)
-    : [];
+  if (link && (link.length > 500 || !isHttpUrl(link, 500))) return NextResponse.json({ error: "Meal links must be valid HTTP(S) URLs." }, { status: 400 });
+  const submittedTags = boundedStringList(body?.tags ?? [], { maximumItems: 12, maximumLength: API_LIMITS.tag, lowercase: true });
+  if (!submittedTags) return NextResponse.json({ error: "Add no more than 12 short tags." }, { status: 400 });
+  const tags = submittedTags.map((tag) => tag.replace(/^#/, "")).filter(Boolean);
   const instructions = typeof body?.instructions === "string" && body.instructions.trim()
     ? body.instructions.trim()
     : null;
-  const cookedAt = body?.cookedAt ? new Date(body.cookedAt) : new Date();
+  if (instructions && instructions.length > API_LIMITS.instructionText) return NextResponse.json({ error: "Instructions are too long." }, { status: 400 });
+  const cookedAtValue = typeof body?.cookedAt === "string" || typeof body?.cookedAt === "number" ? body.cookedAt : null;
+  const cookedAt = cookedAtValue !== null ? new Date(cookedAtValue) : new Date();
   if (Number.isNaN(cookedAt.getTime())) {
     return NextResponse.json({ error: "Invalid date" }, { status: 400 });
   }
-  const ingredients: string[] = Array.isArray(body?.ingredients)
-    ? body.ingredients
-        .filter((i: unknown): i is string => typeof i === "string")
-        .map((i: string) => i.trim().toLowerCase())
-        .filter(Boolean)
-        .slice(0, 10)
-    : [];
-  const photo = body?.photo;
+  const ingredients = boundedStringList(body?.ingredients ?? [], { maximumItems: 10, maximumLength: 160, lowercase: true });
+  if (!ingredients) return NextResponse.json({ error: "Add no more than 10 short ingredients." }, { status: 400 });
+  const photo = body?.photo && typeof body.photo === "object" && !Array.isArray(body.photo)
+    ? body.photo as Record<string, unknown>
+    : null;
   const image = decodeImage(photo?.data, photo?.mimeType);
   const token = image ? privateMediaToken() : null;
   if (image && !token) return NextResponse.json({ error: "Private media is not configured" }, { status: 503 });
+  if (image) {
+    const rateLimit = await enforceMediaUploadRateLimit(identity.user.id);
+    if (!rateLimit.allowed) return rateLimitResponse(rateLimit);
+  }
 
   let recipeId: string;
   let isNewRecipe = false;

@@ -2,14 +2,16 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { currentMembership } from "@/lib/auth";
 import { canManage, visibleTo } from "@/lib/privacy";
+import { API_LIMITS } from "@/lib/apiLimits";
+import { readJsonObject } from "@/lib/requestSecurity";
 
 export async function POST(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const identity = await currentMembership();
   if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
   const { id: targetId } = await params;
-  const body = await req.json();
+  const body = await readJsonObject(req, API_LIMITS.smallJsonBytes).catch(() => null);
   const sourceId = typeof body?.sourceId === "string" ? body.sourceId : "";
-  if (!sourceId || sourceId === targetId) return NextResponse.json({ error: "Choose a different recipe to merge." }, { status: 400 });
+  if (!sourceId || sourceId.length > API_LIMITS.identifier || sourceId === targetId) return NextResponse.json({ error: "Choose a different recipe to merge." }, { status: 400 });
   const [target, source] = await Promise.all([
     prisma.recipe.findFirst({ where: { id: targetId, householdId: identity.membership.householdId, ...visibleTo(identity) } }),
     prisma.recipe.findFirst({ where: { id: sourceId, householdId: identity.membership.householdId, ...visibleTo(identity) } }),

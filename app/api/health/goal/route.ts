@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { currentMembership } from "@/lib/auth";
+import { API_LIMITS } from "@/lib/apiLimits";
+import { readJsonObject } from "@/lib/requestSecurity";
 
 export async function PUT(req: Request) {
   const identity = await currentMembership();
   if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
-  const body = await req.json();
+  const body = await readJsonObject(req, API_LIMITS.smallJsonBytes).catch(() => null);
 
   const targetWeightKg = typeof body?.targetWeightKg === "number" ? body.targetWeightKg : Number(body?.targetWeightKg);
   const heightCm = typeof body?.heightCm === "number" ? body.heightCm : Number(body?.heightCm);

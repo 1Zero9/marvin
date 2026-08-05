@@ -4,6 +4,7 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import styles from "./AuthForm.module.css";
 import pkg from "../package.json";
+import AuthBrand from "./AuthBrand";
 
 export default function RecoveryForm() {
   const [error, setError] = useState("");
@@ -32,7 +33,7 @@ export default function RecoveryForm() {
   if (sent) {
     return (
       <div className={`card ${styles.form}`}>
-        <div className={styles.brand}><span>Marvin</span></div>
+        <AuthBrand />
         <h1 className={styles.title}>Check your email</h1>
         <p className={styles.sub}>If that address is registered with Marvin, a reset link is on its way. It works once and expires in an hour.</p>
         <p className={styles.switch}><Link href="/signin">Back to sign in</Link></p>
@@ -43,7 +44,7 @@ export default function RecoveryForm() {
 
   return (
     <form className={`card ${styles.form}`} onSubmit={submit}>
-      <div className={styles.brand}><span>Marvin</span></div>
+      <AuthBrand />
       <h1 className={styles.title}>Forgot your password?</h1>
       <p className={styles.sub}>Enter your email and we&rsquo;ll send you a link to choose a new one.</p>
       {error && <p className={styles.error}>{error}</p>}

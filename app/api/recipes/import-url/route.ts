@@ -4,14 +4,25 @@ import { aiProcessingAllowed } from "@/lib/privacy";
 import { fetchUrlSafely } from "@/lib/safeFetch";
 import { extractJsonLdRecipe, extractPageTitle, stripHtmlToText } from "@/lib/htmlRecipe";
 import { extractRecipe } from "@/lib/recipeExtraction";
+import { aiQuotaResponse, enforceUserAiQuota } from "@/lib/aiQuota";
+import { InvalidRequestBodyError, objectBody, readJsonBody } from "@/lib/requestSecurity";
+import { enforceRateLimit, rateLimitResponse } from "@/lib/rateLimit";
 
 export const maxDuration = 30;
 
 export async function POST(req: Request) {
   const identity = await currentMembership();
   if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
+  const importLimit = await enforceRateLimit({ namespace: "import:url", identifier: identity.user.id, limit: 30, windowMs: 60 * 60 * 1000 });
+  if (!importLimit.allowed) return rateLimitResponse(importLimit);
 
-  const body = await req.json().catch(() => null);
+  let body: Record<string, unknown> | null;
+  try {
+    body = objectBody(await readJsonBody(req, 16 * 1024));
+  } catch (error) {
+    if (error instanceof InvalidRequestBodyError) return NextResponse.json({ error: "Paste a valid recipe link." }, { status: 400 });
+    throw error;
+  }
   const rawUrl = typeof body?.url === "string" ? body.url.trim() : "";
   if (!rawUrl) return NextResponse.json({ error: "Paste a recipe link first" }, { status: 400 });
 
@@ -51,6 +62,12 @@ export async function POST(req: Request) {
       { status: 422 }
     );
   }
+  if (!process.env.GEMINI_API_KEY) {
+    return NextResponse.json({ error: "Marvin couldn't find a structured recipe on that page, and AI extraction is not configured." }, { status: 503 });
+  }
+
+  const quota = await enforceUserAiQuota(identity.user.id);
+  if (!quota.allowed) return aiQuotaResponse(quota);
 
   const text = stripHtmlToText(html).slice(0, 40000);
   if (text.length < 20) {

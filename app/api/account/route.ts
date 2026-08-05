@@ -3,6 +3,9 @@ import { NextResponse } from "next/server";
 import { currentMembership, verifyPassword } from "@/lib/auth";
 import { isPrivateBlobUrl, privateMediaToken } from "@/lib/media";
 import { prisma } from "@/lib/prisma";
+import { API_LIMITS } from "@/lib/apiLimits";
+import { readJsonObject, REQUEST_LIMITS } from "@/lib/requestSecurity";
+import { enforceRateLimit, rateLimitResponse } from "@/lib/rateLimit";
 
 function ownedBlobUrl(url: string | null) {
   return Boolean(url && url.includes(".blob.vercel-storage.com/"));
@@ -11,8 +14,15 @@ function ownedBlobUrl(url: string | null) {
 export async function DELETE(req: Request) {
   const identity = await currentMembership();
   if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
-  const body = await req.json();
-  if (body?.confirmation !== "DELETE MY ACCOUNT" || typeof body?.password !== "string" || !verifyPassword(body.password, identity.user.passwordHash)) {
+  const rateLimit = await enforceRateLimit({
+    namespace: "account:delete",
+    identifier: identity.user.id,
+    limit: 5,
+    windowMs: 15 * 60 * 1000,
+  });
+  if (!rateLimit.allowed) return rateLimitResponse(rateLimit);
+  const body = await readJsonObject(req, API_LIMITS.smallJsonBytes).catch(() => null);
+  if (body?.confirmation !== "DELETE MY ACCOUNT" || typeof body?.password !== "string" || body.password.length > REQUEST_LIMITS.password || !(await verifyPassword(body.password, identity.user.passwordHash))) {
     return NextResponse.json({ error: "Enter your current password and DELETE MY ACCOUNT exactly to continue." }, { status: 400 });
   }
 
@@ -56,6 +66,13 @@ export async function DELETE(req: Request) {
   });
 
   const response = NextResponse.json({ ok: true });
-  response.cookies.set("marvin_session", "", { httpOnly: true, path: "/", maxAge: 0 });
+  response.cookies.set("marvin_session", "", {
+    httpOnly: true,
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    priority: "high",
+    path: "/",
+    maxAge: 0,
+  });
   return response;
 }

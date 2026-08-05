@@ -6,6 +6,8 @@ import { currentMembership } from "@/lib/auth";
 import { decodeImage } from "@/lib/images";
 import { privateMediaToken } from "@/lib/media";
 import { visibleTo } from "@/lib/privacy";
+import { readJsonObject } from "@/lib/requestSecurity";
+import { enforceMediaUploadRateLimit, rateLimitResponse } from "@/lib/rateLimit";
 
 export const maxDuration = 30;
 
@@ -16,7 +18,7 @@ export async function POST(
   const identity = await currentMembership();
   if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
   const { id } = await params;
-  const body = await req.json();
+  const body = await readJsonObject(req, 8 * 1024 * 1024).catch(() => null);
   const image = decodeImage(body?.data, body?.mimeType);
   if (!image) {
     return NextResponse.json({ error: "Image required" }, { status: 400 });
@@ -26,6 +28,8 @@ export async function POST(
   if (!recipe) {
     return NextResponse.json({ error: "Recipe not found" }, { status: 404 });
   }
+  const rateLimit = await enforceMediaUploadRateLimit(identity.user.id);
+  if (!rateLimit.allowed) return rateLimitResponse(rateLimit);
 
   const token = privateMediaToken();
   if (!token) return NextResponse.json({ error: "Private media is not configured" }, { status: 503 });

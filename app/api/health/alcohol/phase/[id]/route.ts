@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { currentMembership } from "@/lib/auth";
+import { API_LIMITS } from "@/lib/apiLimits";
+import { readJsonObject } from "@/lib/requestSecurity";
 
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const identity = await currentMembership();
@@ -11,7 +13,7 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
   if (phase.type !== "moderate") {
     return NextResponse.json({ error: "Only moderate phases have an editable target" }, { status: 400 });
   }
-  const body = await req.json();
+  const body = await readJsonObject(req, API_LIMITS.smallJsonBytes).catch(() => null);
   const weeklyUnitTarget = Math.max(0, Math.min(100, Math.round(Number(body?.weeklyUnitTarget))));
   if (!Number.isFinite(weeklyUnitTarget)) {
     return NextResponse.json({ error: "Enter a valid weekly target" }, { status: 400 });

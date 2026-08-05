@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { currentMembership } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { API_LIMITS } from "@/lib/apiLimits";
+import { readJsonObject } from "@/lib/requestSecurity";
 
 export async function GET() {
   const identity = await currentMembership();
@@ -11,7 +13,7 @@ export async function GET() {
 export async function PATCH(req: Request) {
   const identity = await currentMembership();
   if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
-  const body = await req.json().catch(() => null);
+  const body = await readJsonObject(req, API_LIMITS.smallJsonBytes).catch(() => null);
   if (typeof body?.showDailyCompanion !== "boolean") {
     return NextResponse.json({ error: "Choose whether My Day is shown." }, { status: 400 });
   }

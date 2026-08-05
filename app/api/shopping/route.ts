@@ -2,6 +2,12 @@ import { NextResponse } from "next/server";
 import { currentMembership } from "@/lib/auth";
 import { fromDateInput, mondayOf, startOfDay } from "@/lib/dates";
 import { prisma } from "@/lib/prisma";
+import { API_LIMITS } from "@/lib/apiLimits";
+import { InvalidRequestBodyError, objectBody, readJsonBody } from "@/lib/requestSecurity";
+
+async function shoppingBody(req: Request) {
+  return objectBody(await readJsonBody(req, API_LIMITS.smallJsonBytes));
+}
 
 function weekStart(value: unknown) {
   if (typeof value !== "string") return null;
@@ -12,7 +18,11 @@ function weekStart(value: unknown) {
 export async function POST(req: Request) {
   const identity = await currentMembership();
   if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
-  const body = await req.json();
+  let body: Record<string, unknown> | null;
+  try { body = await shoppingBody(req); } catch (error) {
+    if (error instanceof InvalidRequestBodyError) return NextResponse.json({ error: "Invalid shopping item" }, { status: 400 });
+    throw error;
+  }
   const startDate = weekStart(body?.weekStart);
   const ingredient = typeof body?.ingredient === "string" ? body.ingredient.trim() : "";
   const quantity = typeof body?.quantity === "string" ? body.quantity.trim() : "";
@@ -28,8 +38,12 @@ export async function POST(req: Request) {
 export async function PATCH(req: Request) {
   const identity = await currentMembership();
   if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
-  const body = await req.json();
-  if (typeof body?.id !== "string" || typeof body?.checked !== "boolean") {
+  let body: Record<string, unknown> | null;
+  try { body = await shoppingBody(req); } catch (error) {
+    if (error instanceof InvalidRequestBodyError) return NextResponse.json({ error: "Invalid shopping item" }, { status: 400 });
+    throw error;
+  }
+  if (typeof body?.id !== "string" || body.id.length > API_LIMITS.identifier || typeof body?.checked !== "boolean") {
     return NextResponse.json({ error: "Invalid shopping item" }, { status: 400 });
   }
   const item = await prisma.shoppingListItem.findFirst({ where: { id: body.id, userId: identity.user.id }, select: { id: true } });
@@ -41,8 +55,12 @@ export async function PATCH(req: Request) {
 export async function DELETE(req: Request) {
   const identity = await currentMembership();
   if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
-  const body = await req.json();
-  if (typeof body?.id !== "string") return NextResponse.json({ error: "Invalid shopping item" }, { status: 400 });
+  let body: Record<string, unknown> | null;
+  try { body = await shoppingBody(req); } catch (error) {
+    if (error instanceof InvalidRequestBodyError) return NextResponse.json({ error: "Invalid shopping item" }, { status: 400 });
+    throw error;
+  }
+  if (typeof body?.id !== "string" || body.id.length > API_LIMITS.identifier) return NextResponse.json({ error: "Invalid shopping item" }, { status: 400 });
   const deleted = await prisma.shoppingListItem.deleteMany({ where: { id: body.id, userId: identity.user.id } });
   if (deleted.count === 0) return NextResponse.json({ error: "Shopping item not found" }, { status: 404 });
   return new NextResponse(null, { status: 204 });

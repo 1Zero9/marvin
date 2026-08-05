@@ -81,3 +81,7 @@
 }
 
 .addLink { align-items: center; background: linear-gradient(135deg, #e66a32 0%, var(--marvin-orange) 58%, var(--marvin-orange-hover) 100%); border-radius: var(--radius-pill); box-shadow: var(--shadow-orange); color: #fff; display: inline-flex; font-size: .88rem; font-weight: 800; min-height: 44px; padding: 10px 14px; white-space: nowrap; }.addLink:hover { background: var(--marvin-orange-hover); }
+.pagination { align-items: center; display: grid; grid-template-columns: 1fr auto 1fr; gap: 12px; }
+.pagination > :first-child { justify-self: start; }
+.pagination > :last-child { justify-self: end; }
+.pagination > span { color: var(--marvin-text-soft); font-size: .88rem; font-weight: 700; }

@@ -2,10 +2,18 @@
 
 import { useCallback, useState } from "react";
 import { useRouter } from "next/navigation";
-import BarcodeScanner from "@/components/BarcodeScanner";
-import IndexExtractor from "@/components/IndexExtractor";
+import dynamic from "next/dynamic";
 import ScanningDisclosure from "@/components/ScanningDisclosure";
 import styles from "./add.module.css";
+
+const BarcodeScanner = dynamic(() => import("@/components/BarcodeScanner"), {
+  ssr: false,
+  loading: () => <p aria-live="polite">Loading the barcode scanner…</p>,
+});
+const IndexExtractor = dynamic(() => import("@/components/IndexExtractor"), {
+  ssr: false,
+  loading: () => <p aria-live="polite">Loading the index tools…</p>,
+});
 
 type Meta = {
   isbn: string;

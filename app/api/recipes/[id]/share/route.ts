@@ -2,6 +2,8 @@ import { randomBytes } from "crypto";
 import { NextResponse } from "next/server";
 import { currentMembership } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { enforceRateLimit, rateLimitResponse } from "@/lib/rateLimit";
+import { canManage } from "@/lib/privacy";
 
 export async function POST(
   req: Request,
@@ -15,9 +17,11 @@ export async function POST(
     select: { id: true, createdById: true },
   });
   if (!recipe) return NextResponse.json({ error: "Recipe not found" }, { status: 404 });
-  if (recipe.createdById && recipe.createdById !== identity.user.id) {
-    return NextResponse.json({ error: "Only the person who added this recipe can share it." }, { status: 403 });
+  if (!canManage(identity, recipe.createdById)) {
+    return NextResponse.json({ error: "Only the household owner or person who added this recipe can share it." }, { status: 403 });
   }
+  const rateLimit = await enforceRateLimit({ namespace: "recipe:share", identifier: identity.user.id, limit: 30, windowMs: 60 * 60 * 1000 });
+  if (!rateLimit.allowed) return rateLimitResponse(rateLimit);
 
   const shareSlug = randomBytes(20).toString("base64url");
   const shared = await prisma.recipe.update({
@@ -40,8 +44,8 @@ export async function DELETE(
     select: { id: true, createdById: true },
   });
   if (!recipe) return NextResponse.json({ error: "Recipe not found" }, { status: 404 });
-  if (recipe.createdById && recipe.createdById !== identity.user.id) {
-    return NextResponse.json({ error: "Only the person who added this recipe can stop sharing it." }, { status: 403 });
+  if (!canManage(identity, recipe.createdById)) {
+    return NextResponse.json({ error: "Only the household owner or person who added this recipe can stop sharing it." }, { status: 403 });
   }
 
   await prisma.recipe.update({ where: { id }, data: { shareEnabled: false, shareSlug: null } });

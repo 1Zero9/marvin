@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { currentMembership } from "@/lib/auth";
 import { canManage } from "@/lib/privacy";
+import { API_LIMITS } from "@/lib/apiLimits";
+import { InvalidRequestBodyError, objectBody, readJsonBody } from "@/lib/requestSecurity";
 
 export async function POST(
   req: Request,
@@ -16,28 +18,36 @@ export async function POST(
   }
   if (!canManage(identity, book.createdById)) return NextResponse.json({ error: "Only the owner or creator can change this private book." }, { status: 403 });
 
-  const body = await req.json();
-  const entries: { ingredient: string; dish: string; page: number }[] = (
-    Array.isArray(body?.entries) ? body.entries : []
-  ).filter(
-    (e: { ingredient?: unknown; dish?: unknown; page?: unknown }) =>
-      typeof e.ingredient === "string" &&
-      e.ingredient.trim() &&
-      typeof e.dish === "string" &&
-      e.dish.trim() &&
-      Number.isFinite(Number(e.page))
-  );
+  let body: Record<string, unknown> | null;
+  try {
+    body = objectBody(await readJsonBody(req, 3 * 1024 * 1024));
+  } catch (error) {
+    if (error instanceof InvalidRequestBodyError) return NextResponse.json({ error: "Index entries are missing or too large." }, { status: 413 });
+    throw error;
+  }
+  if (!Array.isArray(body?.entries) || body.entries.length === 0 || body.entries.length > 5_000) {
+    return NextResponse.json({ error: "Add between 1 and 5,000 valid entries at a time." }, { status: 400 });
+  }
+  const entries = body.entries.flatMap((value) => {
+    if (!value || typeof value !== "object" || Array.isArray(value)) return [];
+    const entry = value as Record<string, unknown>;
+    const ingredient = typeof entry.ingredient === "string" ? entry.ingredient.trim().toLowerCase() : "";
+    const dish = typeof entry.dish === "string" ? entry.dish.trim() : "";
+    const page = typeof entry.page === "number" ? entry.page : Number(entry.page);
+    if (!ingredient || ingredient.length > 160 || !dish || dish.length > 300 || !Number.isInteger(page) || page < 1 || page > API_LIMITS.page) return [];
+    return [{ ingredient, dish, page }];
+  });
 
-  if (entries.length === 0) {
-    return NextResponse.json({ error: "No valid entries" }, { status: 400 });
+  if (entries.length !== body.entries.length) {
+    return NextResponse.json({ error: "Every index entry needs a short ingredient, dish, and valid page number." }, { status: 400 });
   }
 
   const result = await prisma.indexEntry.createMany({
     data: entries.map((e) => ({
       bookId: id,
-      ingredient: e.ingredient.trim().toLowerCase(),
-      dish: e.dish.trim(),
-      page: Math.round(Number(e.page)),
+      ingredient: e.ingredient,
+      dish: e.dish,
+      page: e.page,
     })),
   });
 

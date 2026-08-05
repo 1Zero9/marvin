@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { currentMembership } from "@/lib/auth";
 import { decodeImage } from "@/lib/images";
 import { aiProcessingAllowed } from "@/lib/privacy";
+import { aiQuotaResponse, enforceUserAiQuota } from "@/lib/aiQuota";
+import { fetchWithTimeout } from "@/lib/outbound";
+import { API_LIMITS, optionalBoundedText } from "@/lib/apiLimits";
+import { InvalidRequestBodyError, objectBody, readJsonBody } from "@/lib/requestSecurity";
 
 export const maxDuration = 60;
 
@@ -45,7 +49,7 @@ async function createDraft(
 
   for (const model of models) {
     try {
-      const res = await fetch(
+      const res = await fetchWithTimeout(
         `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
         {
           method: "POST",
@@ -59,7 +63,8 @@ async function createDraft(
             }],
             generationConfig: { response_mime_type: "application/json", temperature: 0.35 },
           }),
-        }
+        },
+        18_000,
       );
       if (res.status === 429 || res.status === 404) continue;
       if (!res.ok) continue;
@@ -92,8 +97,15 @@ export async function POST(req: Request) {
   const identity = await currentMembership();
   if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
   if (!aiProcessingAllowed(identity)) return NextResponse.json({ error: "AI processing is off in your privacy controls." }, { status: 403 });
+  if (!process.env.GEMINI_API_KEY) return NextResponse.json({ error: "Photo recipe drafts are not configured." }, { status: 503 });
 
-  const body = await req.json();
+  let body: Record<string, unknown> | null;
+  try {
+    body = objectBody(await readJsonBody(req, 8 * 1024 * 1024));
+  } catch (error) {
+    if (error instanceof InvalidRequestBodyError) return NextResponse.json({ error: "A photo is required" }, { status: 400 });
+    throw error;
+  }
   const image = decodeImage(body?.data, body?.mimeType);
   if (!image || typeof body?.data !== "string") {
     return NextResponse.json({ error: "A photo is required" }, { status: 400 });
@@ -101,8 +113,11 @@ export async function POST(req: Request) {
   if (image.buffer.length > 10 * 1024 * 1024) {
     return NextResponse.json({ error: "That photo is too large" }, { status: 413 });
   }
-  const titleHint = typeof body?.titleHint === "string" ? body.titleHint.trim().slice(0, 160) : "";
-  const draft = await createDraft(body.data, image.mimeType, titleHint);
+  const quota = await enforceUserAiQuota(identity.user.id, 2);
+  if (!quota.allowed) return aiQuotaResponse(quota);
+  const titleHint = optionalBoundedText(body?.titleHint, API_LIMITS.title);
+  if (titleHint === undefined) return NextResponse.json({ error: "Dish names must be 160 characters or fewer." }, { status: 400 });
+  const draft = await createDraft(body?.data as string, image.mimeType, titleHint ?? "");
   if (!draft) return NextResponse.json({ error: "Couldn't make a recipe draft from that photo" }, { status: 502 });
   if (!draft.isFood) return NextResponse.json({ error: "That doesn’t look like a finished dish Marvin can turn into a recipe." }, { status: 422 });
   return NextResponse.json(draft);

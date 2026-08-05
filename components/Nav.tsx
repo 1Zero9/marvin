@@ -63,12 +63,12 @@ export default function Nav() {
           <Image src="/icons/icon-192.png" alt="" width={42} height={42} className={styles.logo} />
           <span className={styles.name}>Marvin</span>
         </Link>
-        <nav className={styles.nav} aria-label="Main navigation">
+        <nav className={styles.nav} aria-label="Desktop navigation">
           <NavLinks linkClass={styles.link} activeClass={styles.active} showMyDay={showMyDay} />
         </nav>
       </div>
     </header>
-    <nav className={`${styles.dock} ${showMyDay ? "" : styles.dockWithoutDay}`} aria-label="Main navigation">
+    <nav className={`${styles.dock} ${showMyDay ? "" : styles.dockWithoutDay}`} aria-label="Mobile navigation">
       <NavLinks linkClass={styles.dockLink} activeClass={styles.dockActive} showMyDay={showMyDay} />
     </nav>
   </>;

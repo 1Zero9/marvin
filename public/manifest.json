@@ -2,10 +2,12 @@
   "name": "Marvin",
   "short_name": "Marvin",
   "description": "A private daily companion and shared household cookbook.",
+  "id": "/",
+  "scope": "/",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#F6F6F1",
-  "theme_color": "#35665B",
+  "background_color": "#f8f3ea",
+  "theme_color": "#f7f4ee",
   "icons": [
     {
       "src": "/icons/icon-192.png",

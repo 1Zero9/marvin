@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { currentMembership } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { aiProcessingAllowed, visibleTo } from "@/lib/privacy";
+import { aiQuotaResponse, enforceUserAiQuota } from "@/lib/aiQuota";
+import { fetchWithTimeout } from "@/lib/outbound";
 
 type Swap = { original: string; swap: string; reason: string; impactLevel: "low" | "medium" | "high" };
 
@@ -43,9 +45,11 @@ export async function POST(
 
   const apiKey = process.env.GEMINI_API_KEY;
   if (!apiKey) return NextResponse.json({ error: "Recipe lightening is not configured." }, { status: 503 });
+  const quota = await enforceUserAiQuota(identity.user.id);
+  if (!quota.allowed) return aiQuotaResponse(quota);
   const model = process.env.GEMINI_MODEL || "gemini-flash-latest";
   try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
+    const response = await fetchWithTimeout(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
       cache: "no-store",
@@ -53,7 +57,7 @@ export async function POST(
         contents: [{ parts: [{ text: `Suggest up to six practical, optional ways to make this recipe lighter while keeping it recognisably the same meal. Consider ingredients and cooking methods. Do not give medical advice, make health claims, or mention calories. If there are no credible changes, return an empty list. Return ONLY a JSON array. Each object must have original, swap, reason, and impactLevel (low, medium, or high).\n\nRecipe: ${recipe.title}\nIngredients:\n${(recipe.ingredients ?? "Not provided").slice(0, 5000)}\n\nMethod:\n${(recipe.instructions ?? "Not provided").slice(0, 5000)}` }] }],
         generationConfig: { response_mime_type: "application/json", temperature: 0.35 },
       }),
-    });
+    }, 25_000);
     if (!response.ok) return NextResponse.json({ error: "Couldn’t get lighter options just now." }, { status: 502 });
     const data = await response.json();
     const text = data?.candidates?.[0]?.content?.parts?.map((part: { text?: string }) => part.text ?? "").join("") ?? "";
