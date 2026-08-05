@@ -18,8 +18,8 @@
 
 .sourceBadge { border-radius: var(--radius-pill); display: inline-block; font-size: .72rem; font-weight: 800; letter-spacing: .01em; margin-right: 8px; padding: 4px 8px; vertical-align: 1px; }
 .sourcePersonal { background: var(--marvin-blush); color: var(--marvin-plum); }
-.sourceBook { background: var(--marvin-cream); color: var(--orange-700); }
-.sourceHybrid { background: var(--marvin-orange); color: #fff; }
+.sourceBook { background: var(--marvin-cream); color: var(--marvin-orange-ink); }
+.sourceHybrid { background: var(--marvin-orange-ink); color: #fff; }
 .sourceBookLink { margin-right: 0; }
 
 .cookSummary {

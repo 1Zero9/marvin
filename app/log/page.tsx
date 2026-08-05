@@ -125,7 +125,7 @@ export default async function LogPage({
       </div>
 
       {logs.length > 0 && (
-        <section className={styles.summary} aria-label="Cooking summary">
+        <section className={styles.summary} aria-label="Cooking summary" tabIndex={0}>
           <div className={`card ${styles.stat}`}>
             <span className={styles.statValue}>{cookedThisMonth}</span>
             <span>cooked this month</span>
