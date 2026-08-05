@@ -3,11 +3,13 @@ import { prisma } from "@/lib/prisma";
 import { requireHousehold } from "@/lib/auth";
 import { visibleTo } from "@/lib/privacy";
 import { photoMediaUrl } from "@/lib/media";
+import type { Prisma } from "@prisma/client";
 import styles from "./log.module.css";
 
 export const dynamic = "force-dynamic";
 
-type SearchParams = { q?: string; rating?: string; book?: string };
+type SearchParams = { q?: string; rating?: string; book?: string; p?: string };
+const PAGE_SIZE = 50;
 
 function formatDate(date: Date) {
   return date.toLocaleDateString("en-GB", {
@@ -22,27 +24,32 @@ export default async function LogPage({
 }: {
   searchParams: Promise<SearchParams>;
 }) {
-  const { q, rating, book } = await searchParams;
+  const { q, rating, book, p } = await searchParams;
   const identity = await requireHousehold();
-  const query = q?.trim() ?? "";
+  const query = q?.trim().slice(0, 120) ?? "";
+  const selectedBook = typeof book === "string" && book.length <= 128 ? book : undefined;
   const ratingFilter = Number(rating);
   const selectedRating = Number.isInteger(ratingFilter) && ratingFilter >= 1 && ratingFilter <= 5
     ? ratingFilter
     : undefined;
+  const parsedPage = Number(p);
+  const page = Number.isInteger(parsedPage) && parsedPage > 0 ? parsedPage : 1;
+  const logWhere: Prisma.CookLogWhereInput = {
+    ...(selectedRating ? { rating: selectedRating } : {}),
+    recipe: {
+      householdId: identity.membership.householdId,
+      ...visibleTo(identity),
+      ...(query ? { title: { contains: query, mode: "insensitive" as const } } : {}),
+      ...(selectedBook === "personal" ? { bookId: null } : selectedBook ? { bookId: selectedBook } : {}),
+    },
+  };
+  const cookedWhere: Prisma.CookLogWhereInput = { ...logWhere, countsAsCooked: true };
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
 
-  const [logs, books] = await Promise.all([
+  const [logRows, books, cookedThisMonth, mostCookedGroups, ratingGroups] = await Promise.all([
     prisma.cookLog.findMany({
-      where: {
-        ...(selectedRating ? { rating: selectedRating } : {}),
-        recipe: {
-          householdId: identity.membership.householdId,
-          ...visibleTo(identity),
-          ...(query
-            ? { title: { contains: query, mode: "insensitive" } }
-            : {}),
-          ...(book === "personal" ? { bookId: null } : book ? { bookId: book } : {}),
-        },
-      },
+      where: logWhere,
       include: {
         recipe: {
           include: {
@@ -53,41 +60,58 @@ export default async function LogPage({
         photos: { take: 1, orderBy: { createdAt: "asc" } },
       },
       orderBy: { cookedAt: "desc" },
+      skip: (page - 1) * PAGE_SIZE,
+      take: PAGE_SIZE + 1,
     }),
     prisma.book.findMany({
       where: { archived: false, householdId: identity.membership.householdId, ...visibleTo(identity) },
       select: { id: true, title: true },
       orderBy: { title: "asc" },
     }),
+    prisma.cookLog.count({ where: { ...cookedWhere, cookedAt: { gte: monthStart } } }),
+    prisma.cookLog.groupBy({
+      by: ["recipeId"],
+      where: cookedWhere,
+      _count: { recipeId: true },
+      orderBy: { _count: { recipeId: "desc" } },
+      take: 1,
+    }),
+    prisma.cookLog.groupBy({
+      by: ["recipeId"],
+      where: { ...cookedWhere, rating: { not: null } },
+      _avg: { rating: true },
+      _count: { rating: true },
+      orderBy: { _avg: { rating: "desc" } },
+      take: 20,
+    }),
   ]);
 
-  const now = new Date();
-  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  const cookingLogs = logs.filter((log) => log.countsAsCooked);
-  const cookedThisMonth = cookingLogs.filter((log) => log.cookedAt >= monthStart).length;
-  const recipeCounts = new Map<string, { title: string; count: number }>();
-  const ratings = new Map<string, { total: number; count: number; title: string }>();
-
-  for (const log of cookingLogs) {
-    const existing = recipeCounts.get(log.recipeId);
-    recipeCounts.set(log.recipeId, {
-      title: log.recipe.title,
-      count: (existing?.count ?? 0) + 1,
-    });
-    if (log.rating != null) {
-      const current = ratings.get(log.recipeId);
-      ratings.set(log.recipeId, {
-        title: log.recipe.title,
-        total: (current?.total ?? 0) + log.rating,
-        count: (current?.count ?? 0) + 1,
-      });
-    }
-  }
-
-  const mostCooked = [...recipeCounts.values()].sort((a, b) => b.count - a.count)[0];
-  const highestRated = [...ratings.values()]
-    .filter((item) => item.count >= 2)
-    .sort((a, b) => b.total / b.count - a.total / a.count)[0];
+  const logs = logRows.slice(0, PAGE_SIZE);
+  const hasNextPage = logRows.length > PAGE_SIZE;
+  const highestRatedGroup = ratingGroups.find((group) => group._count.rating >= 2);
+  const summaryRecipeIds = [...new Set([
+    mostCookedGroups[0]?.recipeId,
+    highestRatedGroup?.recipeId,
+  ].filter((id): id is string => Boolean(id)))];
+  const summaryRecipes = summaryRecipeIds.length
+    ? await prisma.recipe.findMany({ where: { id: { in: summaryRecipeIds } }, select: { id: true, title: true } })
+    : [];
+  const titleFor = (recipeId: string | undefined) => summaryRecipes.find((recipe) => recipe.id === recipeId)?.title;
+  const mostCooked = mostCookedGroups[0]
+    ? { title: titleFor(mostCookedGroups[0].recipeId) ?? "—", count: mostCookedGroups[0]._count.recipeId }
+    : undefined;
+  const highestRated = highestRatedGroup
+    ? { title: titleFor(highestRatedGroup.recipeId) ?? "—", average: highestRatedGroup._avg.rating ?? 0 }
+    : undefined;
+  const pageHref = (targetPage: number) => {
+    const params = new URLSearchParams();
+    if (query) params.set("q", query);
+    if (selectedRating) params.set("rating", String(selectedRating));
+    if (selectedBook) params.set("book", selectedBook);
+    if (targetPage > 1) params.set("p", String(targetPage));
+    const search = params.toString();
+    return search ? `/log?${search}` : "/log";
+  };
 
   return (
     <div className={styles.wrap}>
@@ -101,7 +125,7 @@ export default async function LogPage({
       </div>
 
       {logs.length > 0 && (
-        <section className={styles.summary} aria-label="Cooking summary">
+        <section className={styles.summary} aria-label="Cooking summary" tabIndex={0}>
           <div className={`card ${styles.stat}`}>
             <span className={styles.statValue}>{cookedThisMonth}</span>
             <span>cooked this month</span>
@@ -114,14 +138,14 @@ export default async function LogPage({
             <span className={styles.statValue}>{highestRated?.title ?? "—"}</span>
             <span>
               {highestRated
-                ? `${(highestRated.total / highestRated.count).toFixed(1)} average rating`
+                ? `${highestRated.average.toFixed(1)} average rating`
                 : "rate a meal twice to see a favourite"}
             </span>
           </div>
         </section>
       )}
 
-      {(logs.length > 0 || query || selectedRating || book) && (
+      {(logs.length > 0 || query || selectedRating || selectedBook) && (
         <form className={styles.filters} action="/log" method="get">
           <input
             className={`input ${styles.search}`}
@@ -131,14 +155,14 @@ export default async function LogPage({
             placeholder="Find a meal…"
             aria-label="Find a recipe in your cooking log"
           />
-          <details className={styles.moreFilters} open={Boolean(selectedRating || book)}>
+          <details className={styles.moreFilters} open={Boolean(selectedRating || selectedBook)}>
             <summary className={styles.moreSummary}>Filters</summary>
             <div className={styles.moreRow}>
               <select className="input" name="rating" defaultValue={selectedRating?.toString() ?? ""} aria-label="Filter by rating">
                 <option value="">Any rating</option>
                 {[5, 4, 3, 2, 1].map((value) => <option key={value} value={value}>{value} stars</option>)}
               </select>
-              <select className="input" name="book" defaultValue={book ?? ""} aria-label="Filter by book">
+              <select className="input" name="book" defaultValue={selectedBook ?? ""} aria-label="Filter by book">
                 <option value="">All recipes</option>
                 <option value="personal">My own recipes</option>
                 {books.map((item) => <option key={item.id} value={item.id}>{item.title}</option>)}
@@ -151,13 +175,13 @@ export default async function LogPage({
 
       {logs.length === 0 ? (
         <section className={`card ${styles.empty}`}>
-          <h2>{query || selectedRating || book ? "No cooks match those filters" : "Nothing cooked yet"}</h2>
+          <h2>{query || selectedRating || selectedBook ? "No cooks match those filters" : "Nothing cooked yet"}</h2>
           <p>
-            {query || selectedRating || book
+            {query || selectedRating || selectedBook
               ? "Try widening your search, or clear the filters."
               : "Add a meal from a photo, a pasted recipe, or a few quick details."}
           </p>
-          {!query && !selectedRating && !book && <Link href="/log/add" className="btn btn-primary">Add a meal</Link>}
+          {!query && !selectedRating && !selectedBook && <Link href="/log/add" className="btn btn-primary">Add a meal</Link>}
         </section>
       ) : (
         <ol className={styles.timeline}>
@@ -183,6 +207,13 @@ export default async function LogPage({
             );
           })}
         </ol>
+      )}
+      {(page > 1 || hasNextPage) && (
+        <nav className={styles.pagination} aria-label="Cooking history pages">
+          {page > 1 ? <Link className="btn btn-secondary" href={pageHref(page - 1)}>Previous</Link> : <span />}
+          <span>Page {page}</span>
+          {hasNextPage ? <Link className="btn btn-secondary" href={pageHref(page + 1)}>Next</Link> : <span />}
+        </nav>
       )}
     </div>
   );

@@ -1,0 +1,53 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: marvin
+          POSTGRES_PASSWORD: marvin
+          POSTGRES_DB: marvin_test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U marvin -d marvin_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://marvin:marvin@127.0.0.1:5432/marvin_test
+      APP_URL: https://marvin.test
+      PRIVATE_BLOB_READ_WRITE_TOKEN: ci-placeholder
+      E2E_DATABASE_CONFIRMED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run audit:prod
+      - run: npm run check
+      - run: npm run validate:env
+      - run: npx prisma migrate deploy
+      - run: npx prisma migrate status
+      - run: npx next build
+      - run: npm run check:bundle
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e

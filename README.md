@@ -1,8 +1,11 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Marvin is a private household cooking, cookbook, meal-planning, and health companion built with Next.js and PostgreSQL.
+
+Production work is tracked in [docs/production-readiness.md](docs/production-readiness.md). Start there before deploying or changing release infrastructure.
+Operational releases and incidents follow [docs/operations-runbook.md](docs/operations-runbook.md).
 
 ## Getting Started
 
-First, run the development server:
+Copy `.env.example` to `.env.local`, supply the required values, then run the development server:
 
 ```bash
 npm run dev
@@ -15,6 +18,15 @@ bun dev
 ```
 
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+Before opening a pull request, run:
+
+```bash
+npm run check
+npx next build
+```
+
+Deployment health probes are available at `/api/health/live` and `/api/health/ready`; see the production-readiness document for their intended use.
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 

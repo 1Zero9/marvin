@@ -2,11 +2,13 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { currentMembership } from "@/lib/auth";
 import { addDays, fromDateInput, startOfDay } from "@/lib/dates";
+import { API_LIMITS } from "@/lib/apiLimits";
+import { readJsonObject } from "@/lib/requestSecurity";
 
 export async function POST(req: Request) {
   const identity = await currentMembership();
   if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
-  const body = await req.json();
+  const body = await readJsonObject(req, API_LIMITS.smallJsonBytes).catch(() => null);
 
   const type = body?.type === "zero" || body?.type === "moderate" ? body.type : null;
   if (!type) return NextResponse.json({ error: "Invalid phase type" }, { status: 400 });

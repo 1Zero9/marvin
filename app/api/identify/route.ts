@@ -3,6 +3,9 @@ import { prisma } from "@/lib/prisma";
 import { currentMembership } from "@/lib/auth";
 import { decodeImage } from "@/lib/images";
 import { aiProcessingAllowed, visibleTo } from "@/lib/privacy";
+import { aiQuotaResponse, enforceUserAiQuota } from "@/lib/aiQuota";
+import { fetchWithTimeout } from "@/lib/outbound";
+import { InvalidRequestBodyError, objectBody, readJsonBody } from "@/lib/requestSecurity";
 
 export const maxDuration = 60;
 
@@ -33,7 +36,7 @@ async function identify(
 
   for (const model of models) {
     try {
-      const res = await fetch(
+      const res = await fetchWithTimeout(
         `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
         {
           method: "POST",
@@ -55,7 +58,8 @@ async function identify(
               temperature: 0,
             },
           }),
-        }
+        },
+        18_000,
       );
       if (res.status === 429 || res.status === 404) continue;
       if (!res.ok) continue;
@@ -87,13 +91,23 @@ export async function POST(req: Request) {
   const identity = await currentMembership();
   if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
   if (!aiProcessingAllowed(identity)) return NextResponse.json({ error: "AI processing is off in your privacy controls." }, { status: 403 });
-  const body = await req.json();
+  if (!process.env.GEMINI_API_KEY) return NextResponse.json({ error: "Photo identification is not configured." }, { status: 503 });
+  let body: Record<string, unknown> | null;
+  try {
+    body = objectBody(await readJsonBody(req, 8 * 1024 * 1024));
+  } catch (error) {
+    if (error instanceof InvalidRequestBodyError) return NextResponse.json({ error: "Image required" }, { status: 400 });
+    throw error;
+  }
   const image = decodeImage(body?.data, body?.mimeType);
   if (!image) {
     return NextResponse.json({ error: "Image required" }, { status: 400 });
   }
 
-  const result = await identify(body.data, image.mimeType);
+  const quota = await enforceUserAiQuota(identity.user.id);
+  if (!quota.allowed) return aiQuotaResponse(quota);
+
+  const result = await identify(body?.data as string, image.mimeType);
   if (!result) {
     return NextResponse.json(
       { error: "Couldn't identify the dish" },

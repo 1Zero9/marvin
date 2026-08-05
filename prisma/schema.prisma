@@ -27,6 +27,7 @@ model Book {
 
   @@index([householdId])
   @@index([householdId, visibility])
+  @@index([householdId, archived, createdAt])
   @@unique([householdId, isbn])
 }
 
@@ -40,6 +41,7 @@ model IndexEntry {
 
   @@index([ingredient])
   @@index([dish])
+  @@index([bookId, page])
 }
 
 model Recipe {
@@ -74,6 +76,8 @@ model Recipe {
 
   @@index([householdId])
   @@index([householdId, visibility])
+  @@index([householdId, archived, createdAt])
+  @@index([bookId, pageRef])
 }
 
 model CookLog {
@@ -94,6 +98,9 @@ model CookLog {
   ratings    MealRating[]
 
   @@index([context])
+  @@index([recipeId, cookedAt])
+  @@index([cookedById, cookedAt])
+  @@index([countsAsCooked, cookedAt])
 }
 
 model Photo {
@@ -104,6 +111,9 @@ model Photo {
   cookLogId String?
   cookLog   CookLog? @relation(fields: [cookLogId], references: [id])
   createdAt DateTime @default(now())
+
+  @@index([recipeId, createdAt])
+  @@index([cookLogId, createdAt])
 }
 
 model User {
@@ -199,6 +209,16 @@ model Session {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([expiresAt])
+}
+
+// Fixed-window counters used to protect public and expensive endpoints. Keys
+// are one-way hashes, so raw IP addresses and account identifiers are not kept.
+model RateLimitBucket {
+  key       String   @id
+  count     Int      @default(1)
+  expiresAt DateTime
+
   @@index([expiresAt])
 }
 

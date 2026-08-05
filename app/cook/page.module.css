@@ -173,7 +173,7 @@
 .quickAction:hover {
   background: var(--marvin-orange-soft);
   border-color: rgba(238, 90, 30, .32);
-  color: var(--marvin-orange);
+  color: var(--marvin-orange-ink);
 }
 
 .quickActionIcon {
@@ -185,11 +185,11 @@
 .quickActionPrimary {
   background: var(--marvin-orange-soft);
   border-color: rgba(238, 90, 30, .32);
-  color: var(--marvin-orange);
+  color: var(--marvin-orange-ink);
 }
 
 .quickActionPrimary:hover {
-  color: var(--marvin-orange-hover);
+  color: var(--marvin-orange-ink);
 }
 
 .featured {
@@ -368,7 +368,7 @@
 }
 
 .filterActive {
-  background: var(--marvin-orange);
+  background: var(--marvin-orange-ink);
   color: #fff;
 }
 
@@ -458,7 +458,6 @@
     gap: 6px 14px;
   }
 
-  .hero { gap: 16px; padding-top: 6px; }
   .quickActions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
   .quickAction { justify-content: center; text-align: center; }
   .quickAction:last-child { grid-column: 1 / -1; }

@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { currentMembership } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { API_LIMITS } from "@/lib/apiLimits";
+import { readJsonObject } from "@/lib/requestSecurity";
 
 export async function PATCH(req: Request) {
   const identity = await currentMembership();
   if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
-  const body = await req.json();
+  const body = await readJsonObject(req, API_LIMITS.smallJsonBytes).catch(() => null);
   if (typeof body?.aiProcessingEnabled !== "boolean") {
     return NextResponse.json({ error: "Choose whether AI processing is enabled." }, { status: 400 });
   }

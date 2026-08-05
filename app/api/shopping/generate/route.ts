@@ -4,6 +4,8 @@ import { addDays, fromDateInput, mondayOf, startOfDay } from "@/lib/dates";
 import { prisma } from "@/lib/prisma";
 import { visibleTo } from "@/lib/privacy";
 import { shoppingItemsFromIngredients } from "@/lib/shopping";
+import { API_LIMITS } from "@/lib/apiLimits";
+import { readJsonObject } from "@/lib/requestSecurity";
 
 function weekStart(value: unknown) {
   if (typeof value !== "string") return null;
@@ -14,7 +16,7 @@ function weekStart(value: unknown) {
 export async function POST(req: Request) {
   const identity = await currentMembership();
   if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
-  const body = await req.json();
+  const body = await readJsonObject(req, API_LIMITS.smallJsonBytes).catch(() => null);
   const startDate = weekStart(body?.weekStart);
   if (!startDate) return NextResponse.json({ error: "Choose a valid week" }, { status: 400 });
 

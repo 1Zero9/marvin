@@ -1,0 +1,24 @@
+.state {
+  align-items: flex-start;
+  background: var(--marvin-surface);
+  border: 1px solid var(--marvin-border);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  margin: 32px auto;
+  max-width: 560px;
+  padding: clamp(24px, 7vw, 42px);
+}
+
+.state h1 { font-size: clamp(1.9rem, 8vw, 2.6rem); }
+.state > p:not(.eyebrow, .reference) { color: var(--marvin-text-soft); }
+.eyebrow { color: var(--marvin-orange-active); font-size: .78rem; font-weight: 800; letter-spacing: .09em; text-transform: uppercase; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.reference { color: var(--marvin-text-muted); font-size: .75rem; overflow-wrap: anywhere; }
+
+@media (max-width: 480px) {
+  .state { margin-top: 16px; }
+  .actions, .actions > * { width: 100%; }
+}

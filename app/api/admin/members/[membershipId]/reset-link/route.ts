@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { createPasswordResetToken, currentMembership, hashPasswordResetToken } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { publicAppUrl } from "@/lib/requestSecurity";
+import { logServerError, requestIdFrom } from "@/lib/serverLog";
+import { enforceRateLimit, rateLimitResponse } from "@/lib/rateLimit";
 
 export async function POST(req: Request, { params }: { params: Promise<{ membershipId: string }> }) {
   const identity = await currentMembership();
@@ -13,6 +16,16 @@ export async function POST(req: Request, { params }: { params: Promise<{ members
     include: { user: { select: { id: true, displayName: true } } },
   });
   if (!membership) return NextResponse.json({ error: "That person is not in your kitchen." }, { status: 404 });
+  const rateLimit = await enforceRateLimit({ namespace: "admin:reset-link", identifier: identity.user.id, limit: 20, windowMs: 60 * 60 * 1000 });
+  if (!rateLimit.allowed) return rateLimitResponse(rateLimit);
+
+  let url: string;
+  try {
+    url = publicAppUrl("/reset", req.url);
+  } catch (error) {
+    logServerError("admin_reset.public_url_failed", error, { requestId: requestIdFrom(req) });
+    return NextResponse.json({ error: "Reset links are temporarily unavailable." }, { status: 503 });
+  }
 
   const token = createPasswordResetToken();
   await prisma.$transaction([
@@ -22,6 +35,6 @@ export async function POST(req: Request, { params }: { params: Promise<{ members
     }),
   ]);
 
-  const url = new URL(`/reset#token=${token}`, req.url).toString();
+  url = `${url}#token=${token}`;
   return NextResponse.json({ url, displayName: membership.user.displayName });
 }

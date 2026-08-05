@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { currentMembership } from "@/lib/auth";
 import { aiProcessingAllowed } from "@/lib/privacy";
+import { aiQuotaResponse, enforceUserAiQuota } from "@/lib/aiQuota";
+import { fetchWithTimeout } from "@/lib/outbound";
+import { enforceRateLimit, rateLimitResponse } from "@/lib/rateLimit";
 
 export const maxDuration = 30;
 
@@ -35,9 +38,10 @@ function candidatesFor(isbn: string): string[] {
 }
 
 async function fromGoogleBooks(isbn: string, query?: string): Promise<BookMeta | null> {
-  const res = await fetch(
+  const res = await fetchWithTimeout(
     `https://www.googleapis.com/books/v1/volumes?q=${encodeURIComponent(query ?? `isbn:${isbn}`)}&maxResults=5`,
-    { next: { revalidate: 0 } }
+    { next: { revalidate: 0 } },
+    6_000,
   );
   if (!res.ok) return null;
   const data = await res.json();
@@ -55,7 +59,7 @@ async function fromGoogleBooks(isbn: string, query?: string): Promise<BookMeta |
 
 async function coverExists(url: string): Promise<boolean> {
   try {
-    const res = await fetch(url, { method: "HEAD" });
+    const res = await fetchWithTimeout(url, { method: "HEAD" }, 4_000);
     return res.ok;
   } catch {
     return false;
@@ -63,9 +67,10 @@ async function coverExists(url: string): Promise<boolean> {
 }
 
 async function fromOpenLibrary(isbn: string): Promise<BookMeta | null> {
-  const res = await fetch(
+  const res = await fetchWithTimeout(
     `https://openlibrary.org/api/books?bibkeys=ISBN:${encodeURIComponent(isbn)}&jscmd=data&format=json`,
-    { next: { revalidate: 0 } }
+    { next: { revalidate: 0 } },
+    6_000,
   );
   if (!res.ok) return null;
   const data = await res.json();
@@ -98,7 +103,7 @@ async function fromGemini(isbn: string): Promise<BookMeta | null> {
   try {
     let data: unknown = null;
     for (const model of models) {
-      const res = await fetch(
+      const res = await fetchWithTimeout(
         `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
         {
           method: "POST",
@@ -115,7 +120,8 @@ async function fromGemini(isbn: string): Promise<BookMeta | null> {
             ],
             tools: [{ google_search: {} }],
           }),
-        }
+        },
+        10_000,
       );
       if (res.ok) {
         data = await res.json();
@@ -156,16 +162,23 @@ export async function GET(
   if (clean.length !== 10 && clean.length !== 13) {
     return NextResponse.json({ error: "Invalid ISBN" }, { status: 400 });
   }
+  const lookupLimit = await enforceRateLimit({ namespace: "lookup:isbn", identifier: identity.user.id, limit: 60, windowMs: 60 * 60 * 1000 });
+  if (!lookupLimit.allowed) return rateLimitResponse(lookupLimit);
 
   let meta: BookMeta | null = null;
   for (const candidate of candidatesFor(clean)) {
-    meta =
-      (await fromGoogleBooks(candidate)) ??
-      (await fromOpenLibrary(candidate)) ??
-      (await fromGoogleBooks(candidate, candidate));
+    const [google, openLibrary] = await Promise.all([
+      fromGoogleBooks(candidate),
+      fromOpenLibrary(candidate),
+    ]);
+    meta = google ?? openLibrary ?? (await fromGoogleBooks(candidate, candidate));
     if (meta) break;
   }
-  if (aiProcessingAllowed(identity)) meta ??= await fromGemini(clean);
+  if (!meta && aiProcessingAllowed(identity) && process.env.GEMINI_API_KEY) {
+    const quota = await enforceUserAiQuota(identity.user.id);
+    if (!quota.allowed) return aiQuotaResponse(quota);
+    meta = await fromGemini(clean);
+  }
   if (!meta) {
     return NextResponse.json({ error: "Book not found" }, { status: 404 });
   }

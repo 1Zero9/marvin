@@ -1,9 +1,12 @@
 import { currentMembership } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
+import { enforceRateLimit, rateLimitResponse } from "@/lib/rateLimit";
 
 export async function GET() {
   const identity = await currentMembership();
   if (!identity) return new Response(JSON.stringify({ error: "Sign in required" }), { status: 401 });
+  const rateLimit = await enforceRateLimit({ namespace: "account:export", identifier: identity.user.id, limit: 5, windowMs: 60 * 60 * 1000 });
+  if (!rateLimit.allowed) return rateLimitResponse(rateLimit);
 
   const userId = identity.user.id;
   const [user, weightLogs, goal, alcoholLogs, alcoholPhases, workoutSessions, checklists, checklistSettings, ratings, dailyCompanions, weeklyReflections, mealPlanEntries, shoppingListItems, swapSuggestions, recipeVariants, cookLogs] = await Promise.all([

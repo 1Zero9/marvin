@@ -4,13 +4,21 @@ import { mondayOf, startOfDay } from "@/lib/dates";
 import { prisma } from "@/lib/prisma";
 import { visibleTo } from "@/lib/privacy";
 import { shoppingItemsFromIngredients } from "@/lib/shopping";
+import { API_LIMITS } from "@/lib/apiLimits";
+import { InvalidRequestBodyError, objectBody, readJsonBody } from "@/lib/requestSecurity";
 
 export async function POST(req: Request) {
   const identity = await currentMembership();
   if (!identity) return NextResponse.json({ error: "Sign in required" }, { status: 401 });
-  const body = await req.json().catch(() => null);
+  let body: Record<string, unknown> | null;
+  try {
+    body = objectBody(await readJsonBody(req, API_LIMITS.smallJsonBytes));
+  } catch (error) {
+    if (error instanceof InvalidRequestBodyError) return NextResponse.json({ error: "Choose a recipe" }, { status: 400 });
+    throw error;
+  }
   const recipeId = typeof body?.recipeId === "string" ? body.recipeId : "";
-  if (!recipeId) return NextResponse.json({ error: "Choose a recipe" }, { status: 400 });
+  if (!recipeId || recipeId.length > API_LIMITS.identifier) return NextResponse.json({ error: "Choose a recipe" }, { status: 400 });
 
   const recipe = await prisma.recipe.findFirst({
     where: { id: recipeId, householdId: identity.membership.householdId, ...visibleTo(identity) },
