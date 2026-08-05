@@ -45,9 +45,9 @@ jobs:
       - run: npm run audit:prod
       - run: npm run check
       - run: npm run validate:env
-      - run: npx next build
-      - run: npm run check:bundle
       - run: npx prisma migrate deploy
       - run: npx prisma migrate status
+      - run: npx next build
+      - run: npm run check:bundle
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
