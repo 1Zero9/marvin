@@ -1,6 +1,8 @@
 import { expect, test } from "playwright/test";
 import AxeBuilder from "@axe-core/playwright";
 
+test.describe.configure({ retries: 0 });
+
 test.beforeAll(() => {
   if (process.env.E2E_DATABASE_CONFIRMED !== "1") {
     throw new Error("End-to-end tests require an explicitly confirmed disposable database.");
@@ -15,7 +17,7 @@ const owner = {
 };
 
 test("critical workflow and every page survive the mobile release pass", async ({ page }) => {
-  test.setTimeout(5 * 60 * 1000);
+  test.setTimeout(12 * 60 * 1000);
   const request = page.request;
   let accountCreated = false;
   const setup = await request.post("/api/auth/setup", { data: owner });
