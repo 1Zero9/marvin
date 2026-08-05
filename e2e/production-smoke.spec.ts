@@ -76,6 +76,7 @@ test("critical workflow and every page survive the mobile release pass", async (
     ];
 
     await page.setViewportSize({ width: 390, height: 844 });
+    const accessibilityFailures: Array<{ route: string; violations: unknown[] }> = [];
     for (const route of mobileRoutes) {
       await test.step(`mobile route ${route}`, async () => {
         const response = await page.goto(route, { waitUntil: "domcontentloaded" });
@@ -91,9 +92,12 @@ test("critical workflow and every page survive the mobile release pass", async (
         const accessibility = await new AxeBuilder({ page })
           .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa", "wcag22aa"])
           .analyze();
-        expect(accessibility.violations, `${route}: ${JSON.stringify(accessibility.violations, null, 2)}`).toEqual([]);
+        if (accessibility.violations.length > 0) {
+          accessibilityFailures.push({ route, violations: accessibility.violations });
+        }
       });
     }
+    expect(accessibilityFailures, JSON.stringify(accessibilityFailures, null, 2)).toEqual([]);
 
     await page.goto("/cook");
     await expect(page.getByRole("heading", { name: /What are we making/ })).toBeVisible();
