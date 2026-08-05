@@ -3,7 +3,7 @@
 .heroTop { align-items: center; display: flex; justify-content: space-between; }
 .hero h1 { font-size: clamp(2.25rem, 8vw, 3.15rem); letter-spacing: -0.045em; text-transform: none; }
 .date, .eyebrow { color: var(--plum-500); font-size: .73rem; font-weight: 800; letter-spacing: .11em; text-transform: uppercase; }
-.privatePill { background: var(--marvin-peach); border-radius: var(--radius-pill); color: var(--orange-700); font-size: .72rem; font-weight: 800; padding: 5px 10px; }
+.privatePill { background: var(--marvin-peach); border-radius: var(--radius-pill); color: var(--marvin-green); font-size: .72rem; font-weight: 800; padding: 5px 10px; }
 .intro { color: var(--plum-500); font-size: 1.02rem; max-width: 510px; }
 
 .actionStack { display: grid; gap: 12px; }
