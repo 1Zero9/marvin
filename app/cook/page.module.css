@@ -173,7 +173,7 @@
 .quickAction:hover {
   background: var(--marvin-orange-soft);
   border-color: rgba(238, 90, 30, .32);
-  color: var(--marvin-orange);
+  color: var(--marvin-orange-ink);
 }
 
 .quickActionIcon {
@@ -185,11 +185,11 @@
 .quickActionPrimary {
   background: var(--marvin-orange-soft);
   border-color: rgba(238, 90, 30, .32);
-  color: var(--marvin-orange);
+  color: var(--marvin-orange-ink);
 }
 
 .quickActionPrimary:hover {
-  color: var(--marvin-orange-hover);
+  color: var(--marvin-orange-ink);
 }
 
 .featured {
