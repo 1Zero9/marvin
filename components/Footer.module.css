@@ -28,6 +28,8 @@
 .logo {
   border-radius: 50%;
   opacity: 0.8;
+  width: 28px;
+  height: 28px;
 }
 
 @media (max-width: 850px) {
